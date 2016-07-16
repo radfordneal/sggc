@@ -15,16 +15,18 @@
 
    You should have received a copy of the GNU General Public License along
    with this program; if not, write to the Free Software Foundation, Inc.,
-   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-*/
+   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
-/* Must be included from the application source (eg, in a set-app.h
-  file) after definitions of SET_OFFSET_BITS and SET_NODE_PTR.  Will
-  define struct set_node, which can be used before set.h is included
-  only when declaring a pointer to a node. */
+
+/* This header file must be included from the source for the
+   application using the set facilitye (eg, in a set-app.h file),
+   after definitions of SET_OFFSET_BITS and SET_NODE_PTR.  It will
+   define struct set_set and struct set_node, which can be used
+   before set.h is included only when declaring a pointer. */
+
 
 typedef int set_offset_t;
-typedef uint32_t set_index_t;
+typedef int set_index_t;
 typedef uint32_t set_pos_t;
 
 #define SET_POS(index,offset) \
@@ -44,7 +46,6 @@ typedef uint32_t set_pos_t;
   typedef uint64_t set_bits_t;
 #endif
 
-#define SET_HEAD 0
 
 struct set_node 
 { set_index_t next;
@@ -52,29 +53,66 @@ struct set_node
   set_bits_t bits;
 };
 
-static inline int set_member (int set, set_pos_t pos)
+struct set
+{ int chain;
+  set_index_t first;  /* -1 if empty */
+}
+
+
+static inline void set_init (struct set *set, int chain)
+{
+  set->chain = chain;
+  set->first = -1;
+}
+
+
+static inline int set_empty (struct set *set)
+{
+  return set->first == -1;
+}
+
+
+static inline set_pos_t set_first (struct set *set)
+{ 
+  if (set_empty(set)) abort();
+
+  struct set_node *ptr = SET_NODE_PTR(set->chain,set->first);
+  set_pos_t pos = SET_POS (set->first, 0);
+  return ptr->bits & 1 ? pos : set_next (set, pos);
+}
+
+
+static inline int set_member (struct set *set, set_pos_t pos)
 {
   set_index_t index = SET_POS_INDEX(pos);
   set_offset_t offset = SET_POS_OFFSET(pos);
-  return (SET_NODE_PTR(set,index)->bits >> offset) & 1;
+  return (SET_NODE_PTR(set->chain,index)->bits >> offset) & 1;
 }
+
 
 static inline int set_add (int set, set_pos_t pos)
 {
   set_index_t index = SET_POS_INDEX(pos);
   set_offset_t offset = SET_POS_OFFSET(pos);
-  struct set_node *ptr = SET_NODE_PTR(set,index);
+  struct set_node *ptr = SET_NODE_PTR(set->chain,index);
   set_bits_t b = ptr->bits;
   set_bits_t t = (set_pos_t)1 << offset;
 
   if (b & t) return 1;
 
   if (b == 0)
-  { struct set_node *head = SET_NODE_PTR(set,SET_HEAD);
-    ptr->next = head->next;
-    ptr->prev = head;
-    ptr->next->prev = ptr;
-    head->next = ptr;
+  { if (set->first == -1)
+    { set->first = index;
+      ptr->next = index;
+      ptr->prev = index;
+    }
+    else
+    { struct set_node *head = SET_NODE_PTR(set,set->first);
+      ptr->next = head->next;
+      ptr->prev = first;
+      ptr->next->prev = index;
+      head->next = index;
+    }
   }
 
   ptr->bits |= t;
@@ -82,11 +120,12 @@ static inline int set_add (int set, set_pos_t pos)
   return 0;
 }
 
+
 static inline int set_remove (int set, set_pos_t pos)
 {
   set_index_t index = SET_POS_INDEX(pos);
   set_offset_t offset = SET_POS_OFFSET(pos);
-  struct set_node *ptr = SET_NODE_PTR(set,index);
+  struct set_node *ptr = SET_NODE_PTR(set->chain,index);
   set_bits_t b = ptr->bits;
   set_bits_t t = (set_pos_t)1 << offset;
 
@@ -95,8 +134,16 @@ static inline int set_remove (int set, set_pos_t pos)
   ptr->bits &= ~t;
 
   if (ptr->bits == 0)
-  { ptr->next->prev = ptr->prev;
-    ptr->prev->next = ptr->next;
+  { if (ptr->next = index) 
+    { set->first = -1;
+    }
+    else
+    { if (set->first == index) 
+      { set->first = ptr->next;
+      }
+      ptr->next->prev = ptr->prev;
+      ptr->prev->next = ptr->next;
+    }
   }
 
   return 1;
@@ -107,19 +154,22 @@ static inline set_pos_t set_next (int set, set_pos_t pos)
 {
   set_index_t index = SET_POS_INDEX(pos);
   set_offset_t offset = SET_POS_OFFSET(pos);
-  struct set_node *ptr = SET_NODE_PTR(set,index);
-  set_bits_t b = ptr->bits >> offset;
+  struct set_node *ptr = SET_NODE_PTR(set->chain,index);
+  set_bits_t b = (ptr->bits >> offset) >> 1;
 
-  if (b <= 1)
+  while (b == 0)
   { index = ptr->next;
-    if (index == 0) return 0;
+    if (index == set->first) return 0;
+    ptr = SET_NODE_PTR(set->chain,index);
+    b = ptr->bits;
     offset = -1;
   }
 
-  do
+  for (;;)
   { offset += 1;
+    if (b & 1) break;
     b >>= 1;
-  } while ((b & 1) == 0);
+  } 
 
   return SET_POS(index,offset);
 }
