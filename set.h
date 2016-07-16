@@ -1,6 +1,27 @@
-/* Must be included from set-app.h after definitions of SET_OFFSET_BITS
-   and SET_NODE_PTR.  Will define struct set_node, which can be used
-   before set.h is included only when declaring a pointer to a node. */
+/* SGGC - A LIBRARY SUPPORTING SEGMENTED GENERATIONAL GARBAGE COLLECTION.
+          Facilities for maintaining sets of objects
+
+   Copyright (c) 2016 Radford M. Neal.
+
+   The SGGC library is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License along
+   with this program; if not, write to the Free Software Foundation, Inc.,
+   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+*/
+
+/* Must be included from the application source (eg, in a set-app.h
+  file) after definitions of SET_OFFSET_BITS and SET_NODE_PTR.  Will
+  define struct set_node, which can be used before set.h is included
+  only when declaring a pointer to a node. */
 
 typedef int set_offset_t;
 typedef uint32_t set_index_t;
