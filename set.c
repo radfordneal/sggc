@@ -24,7 +24,8 @@
 
 /* INITIALIZE A SET, AS EMPTY.  Initializes the set pointed to by 'set' to
    be an empty set, which will use 'chain' to link elements.  Note that the
-   set must always be disjoint from any other set using 'chain'. */
+   set must never contain elements with the same index as elements of any
+   other set using the same chain. */
 
 void set_init (struct set *set, int chain)
 {
@@ -33,55 +34,37 @@ void set_init (struct set *set, int chain)
 }
 
 
-/* CHECK WHETHER A SET IS EMPTY.  Returns 1 if 'set' is empty, 0 if not. */
-
-int set_is_empty (struct set *set)
-{
-  return set->first == -1;
-}
-
-
 /* CHECK WHETHER A SET CONTAINS A SPECIFIED VALUE.  Returns 1 if 'val' is
    an element of 'set', 0 if not. */
 
-int set_contains_value (struct set *set, set_value_t val)
+int set_contains (struct set *set, set_value_t val)
 {
   set_index_t index = SET_VAL_INDEX(val);
-
   set_offset_t offset = SET_VAL_OFFSET(val);
-  return (SET_NODE_PTR(set->chain,index)->bits >> offset) & 1;
+
+  return (SET_SEGMENT(index)->bits[set->chain] >> offset) & 1;
 }
 
 
 /* ADD A VALUE TO A SET.  Changes 'set' so that it contains 'val' as
    an element.  Returns 1 if 'set' had already contained 'val', 0 if not. */
 
-int set_add_value (struct set *set, set_value_t val)
+int set_add (struct set *set, set_value_t val)
 {
   set_index_t index = SET_VAL_INDEX(val);
   set_offset_t offset = SET_VAL_OFFSET(val);
-  struct set_node *ptr = SET_NODE_PTR(set->chain,index);
-  set_bits_t b = ptr->bits;
+  struct set_segment *ptr = SET_SEGMENT(index);
+  set_bits_t b = ptr->bits[set->chain];
   set_bits_t t = (set_value_t)1 << offset;
 
   if (b & t) return 1;
 
-  if (b == 0)
-  { if (set->first == -1)
-    { set->first = index;
-      ptr->next = index;
-      ptr->prev = index;
-    }
-    else
-    { struct set_node *head = SET_NODE_PTR(set->chain,set->first);
-      ptr->next = head->next;
-      ptr->prev = set->first;
-      SET_NODE_PTR(set->chain,ptr->next)->prev = index;
-      head->next = index;
-    }
+  if (ptr->next[set->chain] == -1)
+  { ptr->next[set->chain] = set->first;
+    set->first = index;
   }
 
-  ptr->bits |= t;
+  ptr->bits[set->chain] |= t;
 
   return 0;
 }
@@ -91,65 +74,65 @@ int set_add_value (struct set *set, set_value_t val)
    'val' as an element.  Returns 1 if 'set' had previously contained 'val',
    0 if not. */
 
-int set_remove_value (struct set *set, set_value_t val)
+int set_remove (struct set *set, set_value_t val)
 {
   set_index_t index = SET_VAL_INDEX(val);
   set_offset_t offset = SET_VAL_OFFSET(val);
-  struct set_node *ptr = SET_NODE_PTR(set->chain,index);
-  set_bits_t b = ptr->bits;
+  struct set_segment *ptr = SET_SEGMENT(index);
+  set_bits_t b = ptr->bits[set->chain];
   set_bits_t t = (set_value_t)1 << offset;
 
   if ((b & t) == 0) return 0;
 
-  ptr->bits &= ~t;
-
-  if (ptr->bits == 0)
-  { if (ptr->next == index) 
-    { set->first = -1;
-    }
-    else
-    { if (set->first == index) 
-      { set->first = ptr->next;
-      }
-      SET_NODE_PTR(set->chain,ptr->next)->prev = ptr->prev;
-      SET_NODE_PTR(set->chain,ptr->prev)->next = ptr->next;
-    }
-  }
+  ptr->bits[set->chain] &= ~t;
 
   return 1;
 }
 
 
 /* FIND THE FIRST ELEMENT IN A SET.  Finds an element of 'set', the first
-   in an arbitrary ordering (which will, however, remain consistent). 
-   Returns SET_NO_VALUE if the set is empty. */
+   in an arbitrary ordering,  Returns SET_NO_VALUE if the set is empty. */
 
-set_value_t set_first_element (struct set *set)
+set_value_t set_first (struct set *set)
 { 
-  if (set_is_empty(set)) return SET_NO_VALUE;
+  struct set_segment *ptr;
 
-  struct set_node *ptr = SET_NODE_PTR(set->chain,set->first);
-  set_value_t val = SET_VAL (set->first, 0);
-  return ptr->bits & 1 ? val : set_next_element (set, val);
+  for (;;)
+  { 
+    if (set->first == -1) return SET_NO_VALUE;
+    ptr = SET_SEGMENT(set->first);
+    if (ptr->bits[set->chain] != 0) break;
+    set->first = ptr->next[set->chain];
+    ptr->next[set->chain] = -1;
+  }
+
+  set_value_t val = SET_VAL(set->first,0);
+  return (ptr->bits[set->chain] & 1) ? val : set_next (set, val);
 }
 
 
-/* FIND THE NEXT ELEMENT IN A SET.  Retuerns the next element of 'set'
-   after 'val' (in the arbitrary ordering used), or SET_NO_VALUE if
-   'val' was the last value. */
+/* FIND THE NEXT ELEMENT IN A SET.  Returns the next element of 'set'
+   after 'val', or SET_NO_VALUE if 'val' was the last value. */
 
-set_value_t set_next_element (struct set *set, set_value_t val)
+set_value_t set_next (struct set *set, set_value_t val)
 {
   set_index_t index = SET_VAL_INDEX(val);
   set_offset_t offset = SET_VAL_OFFSET(val);
-  struct set_node *ptr = SET_NODE_PTR(set->chain,index);
-  set_bits_t b = (ptr->bits >> offset) >> 1;
+  struct set_segment *ptr = SET_SEGMENT(index);
+  set_bits_t b = (ptr->bits[set->chain] >> offset) >> 1;
 
-  while (b == 0)
-  { index = ptr->next;
-    if (index == set->first) return SET_NO_VALUE;
-    ptr = SET_NODE_PTR(set->chain,index);
-    b = ptr->bits;
+  if (b == 0)
+  { set_index_t nindex;
+    struct set_segment *nptr;
+    for (;;)
+    { nindex = ptr->next[set->chain];
+      if (nindex == -1) return SET_NO_VALUE;
+      nptr = SET_SEGMENT(nindex);
+      b = nptr->bits[set->chain];
+      if (b != 0) break;
+      ptr->next[set->chain] = nptr->next[set->chain];
+    }
+    index = nindex;
     offset = -1;
   }
 
@@ -161,4 +144,5 @@ set_value_t set_next_element (struct set *set, set_value_t val)
 
   return SET_VAL(index,offset);
 }
+
 

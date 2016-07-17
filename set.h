@@ -21,9 +21,11 @@
 /* This header file must be included from the set-app.h file provided
    by the application using the set facility, after the definition of
    SET_OFFSET_BITS and SET_CHAINS.  It will define struct set and
-   struct set_node, which may be used in set-app.h after inclusion of
+   struct set_segment, which may be used in set-app.h after inclusion of
    set.h. */
 
+
+#include <stdint.h>
 
 typedef int set_offset_t;
 typedef int set_index_t;
@@ -50,21 +52,19 @@ typedef uint32_t set_value_t;
 #define SET_NO_VALUE SET_VAL(~0,0)
 
 
-struct set_node 
-{ set_index_t next;
-  set_index_t prev;
-  set_bits_t bits;
+struct set_segment
+{ set_bits_t bits[SET_CHAINS];   /* Bits indicating membership in sets */
+  set_index_t next[SET_CHAINS];  /* Next segment, or -1 if not in chain */
 };
 
 struct set
-{ int chain;
-  set_index_t first;  /* -1 if empty */
+{ int chain;                     /* Chain used for this set */
+  set_index_t first;             /* First segment, -1 if no segments in chain */
 };
 
 void set_init (struct set *set, int chain);
-int set_is_empty (struct set *set);
-int set_contains_value (struct set *set, set_value_t val);
-int set_add_value (struct set *set, set_value_t val);
-int set_remove_value (struct set *set, set_value_t val);
-set_value_t set_first_element (struct set *set);
-set_value_t set_next_element (struct set *set, set_value_t val);
+int set_contains (struct set *set, set_value_t val);
+int set_add (struct set *set, set_value_t val);
+int set_remove (struct set *set, set_value_t val);
+set_value_t set_first (struct set *set);
+set_value_t set_next (struct set *set, set_value_t val);

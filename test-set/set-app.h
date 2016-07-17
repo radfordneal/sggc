@@ -5,8 +5,8 @@
 
 #include "set.h"
 
-struct 
-{ struct set_node set_node[SET_CHAINS];
-} segments[10];
+#define N_SEG 10
 
-#define SET_NODE_PTR(chain,index) (&segments[index].set_node[chain])
+struct set_segment segment[N_SEG];
+
+#define SET_SEGMENT(index) (&segment[index])
