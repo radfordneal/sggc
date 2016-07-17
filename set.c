@@ -30,7 +30,19 @@
 void set_init (struct set *set, int chain)
 {
   set->chain = chain;
-  set->first = -1;
+  set->first = -2;
+}
+
+
+/* INITIALIZE A SEGMENT, WITH ALL CHAINS BEING EMPTY. */
+
+void set_segment_init (struct set_segment *seg)
+{
+  int j;
+  for (j = 0; j<SET_CHAINS; j++)
+  { seg->bits[j] = 0;
+    seg->next[j] = -1;
+  }
 }
 
 
@@ -55,7 +67,7 @@ int set_add (struct set *set, set_value_t val)
   set_offset_t offset = SET_VAL_OFFSET(val);
   struct set_segment *ptr = SET_SEGMENT(index);
   set_bits_t b = ptr->bits[set->chain];
-  set_bits_t t = (set_value_t)1 << offset;
+  set_bits_t t = (set_bits_t)1 << offset;
 
   if (b & t) return 1;
 
@@ -80,7 +92,7 @@ int set_remove (struct set *set, set_value_t val)
   set_offset_t offset = SET_VAL_OFFSET(val);
   struct set_segment *ptr = SET_SEGMENT(index);
   set_bits_t b = ptr->bits[set->chain];
-  set_bits_t t = (set_value_t)1 << offset;
+  set_bits_t t = (set_bits_t)1 << offset;
 
   if ((b & t) == 0) return 0;
 
@@ -99,7 +111,7 @@ set_value_t set_first (struct set *set)
 
   for (;;)
   { 
-    if (set->first == -1) return SET_NO_VALUE;
+    if (set->first == -2) return SET_NO_VALUE;
     ptr = SET_SEGMENT(set->first);
     if (ptr->bits[set->chain] != 0) break;
     set->first = ptr->next[set->chain];
@@ -126,7 +138,8 @@ set_value_t set_next (struct set *set, set_value_t val)
     struct set_segment *nptr;
     for (;;)
     { nindex = ptr->next[set->chain];
-      if (nindex == -1) return SET_NO_VALUE;
+      if (nindex == -2) return SET_NO_VALUE;
+      if (nindex == -1) abort();
       nptr = SET_SEGMENT(nindex);
       b = nptr->bits[set->chain];
       if (b != 0) break;
@@ -144,5 +157,3 @@ set_value_t set_next (struct set *set, set_value_t val)
 
   return SET_VAL(index,offset);
 }
-
-

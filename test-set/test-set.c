@@ -6,8 +6,11 @@ struct set set[N_SET];
 
 int main (void)
 { set_value_t v;
-  int i, x, o, r;
+  int i, j, x, o, r;
   char c; 
+  for (j = 0; j<N_SEG; j++)
+  { set_segment_init (&segment[j]);
+  }
   for (i = 0; i<N_SET; i++) 
   { set_init (&set[i], i<SET_CHAINS ? i : SET_CHAINS-1);
   }
@@ -55,7 +58,7 @@ int main (void)
     { printf("Set %d:",i);
       v = set_first (&set[i]);
       while (v != SET_NO_VALUE)
-      { printf(" %d:%d",SET_VAL_INDEX(v),SET_VAL_OFFSET(v));
+      { printf(" %d.%d",SET_VAL_INDEX(v),SET_VAL_OFFSET(v));
         v = set_next (&set[i], v);
       }
       printf("\n");
