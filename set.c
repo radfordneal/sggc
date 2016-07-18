@@ -34,15 +34,19 @@
 
 #define CHK_SET(set) \
   do { \
-    CHK_CHAIN(set->chain); \
-    if (DEBUG && (set->first < 0 && set->first != -2)) abort(); \
+    CHK_CHAIN((set)->chain); \
+    if (DEBUG && (set)->first < 0 \
+              && (set)->first != SET_END_OF_CHAIN) abort(); \
   } while (0)
 
 #define CHK_SEGMENT(seg,chain) \
   do { \
     CHK_CHAIN(chain); \
-    if (DEBUG && (seg->next[chain] < -2)) abort(); \
-    if (DEBUG && (seg->next[chain] == -1 && seg->bits[chain] != 0)) abort(); \
+    if (DEBUG && (seg)->next[chain] < 0 \
+              && (seg)->next[chain] != SET_NOT_IN_CHAIN \
+              && (seg)->next[chain] != SET_END_OF_CHAIN) abort(); \
+    if (DEBUG && (seg)->next[chain] == SET_NOT_IN_CHAIN \
+              && (seg)->bits[chain] != 0) abort(); \
   } while (0)
 
 
@@ -55,11 +59,11 @@ void set_init (struct set *set, int chain)
 {
   CHK_CHAIN(chain);
   set->chain = chain;
-  set->first = -2;
+  set->first = SET_END_OF_CHAIN;
 }
 
 
-/* INITIALIZE A SEGMENT, IN WHICH ALL CHAINS ARE EMPTY.  Must be called
+/* INITIALIZE A SEGMENT, NOT CONTAINING ELEMENTS IN ANY CHAIN.  Must be called
    before a segment is used in a set. */
 
 void set_segment_init (struct set_segment *seg)
@@ -67,7 +71,7 @@ void set_segment_init (struct set_segment *seg)
   int j;
   for (j = 0; j < SET_CHAINS; j++)
   { seg->bits[j] = 0;
-    seg->next[j] = -1;
+    seg->next[j] = SET_NOT_IN_CHAIN;
   }
 }
 
@@ -113,7 +117,7 @@ int set_add (struct set *set, set_value_t val)
 
   if (b & t) return 1;
 
-  if (seg->next[set->chain] == -1)
+  if (seg->next[set->chain] == SET_NOT_IN_CHAIN)
   { seg->next[set->chain] = set->first;
     set->first = index;
   }
@@ -131,7 +135,8 @@ int set_add (struct set *set, set_value_t val)
    This is implemented by clearing the right bit in the bits for the set's 
    chain, within the segment structure for this value's index.  Removing this
    segment from the linked list of segments for this set if it is no longer
-   needed is deferred to when (if ever) it is looked at in a search. */
+   needed is deferred to when (if ever) it is looked at in a search, except
+   that it is removed now if it is at the front of the list. */
 
 int set_remove (struct set *set, set_value_t val)
 {
@@ -148,8 +153,28 @@ int set_remove (struct set *set, set_value_t val)
   if ((b & t) == 0) return 0;
 
   seg->bits[set->chain] &= ~t;
+  if (seg->bits[set->chain] == 0 && set->first == index)
+  { set->first = seg->next[set->chain];
+    seg->next[set->chain] = SET_NOT_IN_CHAIN;
+  }
 
   return 1;
+}
+
+
+/* FIND POSITION OF LOWEST-ORDER BIT.  The position returned is from 0 up.
+   The argument must not be zero.
+
+   Could be speeded up, but not yet. */
+
+static inline int bitpos (set_bits_t b)
+{ int pos;
+  pos = 0;
+  while ((b & 1) == 0)
+  { pos += 1;
+    b >>= 1;
+  }
+  return pos;
 }
 
 
@@ -157,15 +182,12 @@ int set_remove (struct set *set, set_value_t val)
    in an arbitrary ordering,  Returns SET_NO_VALUE if the set is empty.
 
    The linked list of segments for this set is first trimmed of any at 
-   the front that have no elements set, to save time in any future searches.
-   Once a segment with an element is found, a value is returned directly 
-   if the first bit is set, and otherwise set_next is called.  (Note that 
-   set_next can't do it all because it can't delete segments at the front 
-   of the list.) */
+   the front that have no elements set, to save time in any future searches. */
 
 set_value_t set_first (struct set *set)
 { 
   struct set_segment *seg;
+  set_bits_t b;
 
   CHK_SET(set);
 
@@ -174,31 +196,29 @@ set_value_t set_first (struct set *set)
 
   for (;;)
   { 
-    if (set->first == -2) 
+    if (set->first == SET_END_OF_CHAIN) 
     { return SET_NO_VALUE;
     }
 
     seg = SET_SEGMENT(set->first);
     CHK_SEGMENT(seg,set->chain);
 
-    if (seg->bits[set->chain] != 0)
+    b = seg->bits[set->chain];
+    if (b != 0)
     { break;
     }
 
     set->first = seg->next[set->chain];
-    seg->next[set->chain] = -1;
+    seg->next[set->chain] = SET_NOT_IN_CHAIN;
   }
 
-  /* Return the value directly if it is for the first bit; otherwise
-     use set_next to find the value. */
-
-  set_value_t val = SET_VAL(set->first,0);
-  return (seg->bits[set->chain] & 1) ? val : set_next (set, val);
+  return SET_VAL (set->first, bitpos(b));
 }
 
 
 /* FIND THE NEXT ELEMENT IN A SET.  Returns the next element of 'set'
-   after 'val', or SET_NO_VALUE if there are no elements past 'val'.
+   after 'val', which must be an element of 'set.  Returns SET_NO_VALUE 
+   if there are no elements past 'val'.
 
    If the linked list has to be followed to a later segment, any
    unused segments that are skipped are deleted from the list, to save
@@ -214,10 +234,13 @@ set_value_t set_next (struct set *set, set_value_t val)
   CHK_SEGMENT(seg,set->chain);
 
   /* Get the bits after the one for the element we are looking after.
-     Note that shifting by the number of bits in an operand is undefined,
-     and so must be avoided. */
+     Note that shifting by the number of bits in an operand (or more)
+     is undefined, and so must be avoided. */
 
-  set_bits_t b = (seg->bits[set->chain] >> offset) >> 1;
+  set_bits_t b = seg->bits[set->chain] >> offset;
+  if ((b & 1) == 0) abort();  /* 'val' isn't in 'set' */
+  offset += 1;
+  b >>= 1;
 
   /* If no bits are set after the one we are starting at, go to the
      next segment, removing ones that are unused.  We may discover
@@ -230,7 +253,7 @@ set_value_t set_next (struct set *set, set_value_t val)
     for (;;)
     { 
       nindex = seg->next[set->chain];
-      if (nindex == -2) 
+      if (nindex == SET_END_OF_CHAIN) 
       { return SET_NO_VALUE;
       }
 
@@ -246,19 +269,10 @@ set_value_t set_next (struct set *set, set_value_t val)
     }
 
     index = nindex;
-    offset = -1;
+    offset = 0;
   }
 
-  /* Find the first bit in b that is set, incrementing offset to indicate
-     the position of this bit in the original set of bits. 
-
-     This could be speeded up, but not yet. */
-
-  for (;;)
-  { offset += 1;
-    if (b & 1) break;
-    b >>= 1;
-  } 
+  offset += bitpos(b);
 
   return SET_VAL(index,offset);
 }

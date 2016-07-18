@@ -51,14 +51,16 @@ typedef uint32_t set_value_t;
 
 #define SET_NO_VALUE SET_VAL(~0,0)
 
+#define SET_NOT_IN_CHAIN -1
+#define SET_END_OF_CHAIN -2
+
 struct set_segment
 { set_bits_t bits[SET_CHAINS];   /* Bits indicating membership in sets */
-  set_index_t next[SET_CHAINS];  /* Next segment, -2 = end, -1 = not in chain */
-};
-
+  set_index_t next[SET_CHAINS];  /* Next segment in chain, SET_NOT_IN_CHAIN, */
+};                               /*   or SET_END_OF_CHAIN                    */
 struct set
 { int chain;                     /* Chain used for this set */
-  set_index_t first;             /* First segment, -2 if no segments in chain */
+  set_index_t first;             /* First segment, or SET_END_OF_CHAIN */
 };
 
 void set_init (struct set *set, int chain);
