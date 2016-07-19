@@ -27,9 +27,19 @@
 
 #include <stdint.h>
 
+
+/* TYPES FOR (INDEX, OFFSET) PAIRS.  The set_value_t type is for the pair,
+   and is designed to be 32 bits.  The set_index_t type must be signed,
+   and should also be 32 bits, to limit space used.  The set_offset_t type
+   is used only for local variables, and can be int, as that is presumably
+   most efficient. */
+
 typedef int set_offset_t;
 typedef int32_t set_index_t;
 typedef uint32_t set_value_t;
+
+
+/* MACROS TO CREATE / ACCESS (INDEX, OFFSET) PAIRS. */
 
 #define SET_VAL(index,offset) \
   (((set_value_t)(index) << SET_OFFSET_BITS) | (offset))
@@ -37,6 +47,9 @@ typedef uint32_t set_value_t;
   ((val) >> SET_OFFSET_BITS)
 #define SET_VAL_OFFSET(val) \
   ((val) & (((set_value_t)1 << SET_OFFSET_BITS) - 1))
+
+
+/* TYPE OF THE BIT VECTOR RECORDING SET MEMBERSHIP IN A SEGMENT. */
 
 #if SET_OFFSET_BITS == 3
   typedef uint8_t set_bits_t;
@@ -49,10 +62,25 @@ typedef uint32_t set_value_t;
 #endif
 
 
+/* SPECIAL NULL VALUE.  Uses all 1s in the index, which must therefore not
+   be used otherwise. */
+
 #define SET_NO_VALUE SET_VAL(~0,0)
+
+
+/* SPECIAL INDEXES USED IN CHAINS.  These are not used in real (index, offset)
+   pairs, in which the index is unsigned. */
 
 #define SET_NOT_IN_CHAIN -1
 #define SET_END_OF_CHAIN -2
+
+
+/* DATA FOR A SEGMENT.  Records which objects in the segment are present in
+   the sets using each chain, and the links to the next segments for each
+   chain.  Also may include extra information used by the application, which
+   may take advantage of otherwise wasted padding, and may also have the effect
+   of adjusting the size of the structure to a power of two (advantageous for
+   speed of indexing, and possibly cache performance). */
 
 struct set_segment
 { set_bits_t bits[SET_CHAINS];  /* Bits indicating membership in sets */
@@ -62,10 +90,18 @@ struct set_segment
 # endif                         /*   padding to make struct size a power of 2 */
 };
 
+
+/* DESCRIPTION OF A SET.  The chain used must not be used by any other set,
+   unless the two sets never contain elements from the same segment. */
+
 struct set
-{ int chain;                    /* Chain used for this set */
+{ int chain;                    /* Number of chain used for this set */
   set_index_t first;            /* First segment, or SET_END_OF_CHAIN */
+  set_index_t last;             /* Last segment, or SET_END_OF_CHAIN */
 };
+
+
+/* FUNCTIONS USED BY THE APPLICATION. */
 
 void set_init (struct set *set, int chain);
 void set_segment_init (struct set_segment *seg);
