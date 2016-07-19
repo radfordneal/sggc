@@ -28,7 +28,7 @@
 #include <stdint.h>
 
 typedef int set_offset_t;
-typedef int set_index_t;
+typedef int32_t set_index_t;
 typedef uint32_t set_value_t;
 
 #define SET_VAL(index,offset) \
@@ -55,12 +55,16 @@ typedef uint32_t set_value_t;
 #define SET_END_OF_CHAIN -2
 
 struct set_segment
-{ set_bits_t bits[SET_CHAINS];   /* Bits indicating membership in sets */
-  set_index_t next[SET_CHAINS];  /* Next segment in chain, SET_NOT_IN_CHAIN, */
-};                               /*   or SET_END_OF_CHAIN                    */
+{ set_bits_t bits[SET_CHAINS];  /* Bits indicating membership in sets */
+  set_index_t next[SET_CHAINS]; /* Next / SET_NOT_IN_CHAIN / SET_END_OF_CHAIN */
+# ifdef SET_EXTRA_INFO
+  SET_EXTRA_INFO                /* Extra info of use to the application, or   */
+# endif                         /*   padding to make struct size a power of 2 */
+};
+
 struct set
-{ int chain;                     /* Chain used for this set */
-  set_index_t first;             /* First segment, or SET_END_OF_CHAIN */
+{ int chain;                    /* Chain used for this set */
+  set_index_t first;            /* First segment, or SET_END_OF_CHAIN */
 };
 
 void set_init (struct set *set, int chain);
