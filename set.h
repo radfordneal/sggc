@@ -110,3 +110,5 @@ int set_add (struct set *set, set_value_t val);
 int set_remove (struct set *set, set_value_t val);
 set_value_t set_first (struct set *set);
 set_value_t set_next (struct set *set, set_value_t val);
+set_bits_t set_first_bits (struct set *set);
+void set_move_first (struct set *src, struct set *dst);

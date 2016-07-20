@@ -162,12 +162,35 @@ int set_remove (struct set *set, set_value_t val)
 }
 
 
+/* REMOVE ANY EMPTY SEGMENTS AT THE FRONT OF A SET. */
+
+static inline void remove_empty (struct set *set)
+{
+  struct set_segment *seg;
+
+  CHK_SET(set);
+
+  while (set->first != SET_END_OF_CHAIN)
+  { 
+    seg = SET_SEGMENT(set->first);
+    CHK_SEGMENT(seg,set->chain);
+
+    if (seg->bits[set->chain] != 0)
+    { break;
+    }
+
+    set->first = seg->next[set->chain];
+    seg->next[set->chain] = SET_NOT_IN_CHAIN;
+  }
+}
+
+
 /* FIND POSITION OF LOWEST-ORDER BIT.  The position returned is from 0 up.
    The argument must not be zero.
 
    Could be speeded up, but not yet. */
 
-static inline int bitpos (set_bits_t b)
+static inline int first_bit_pos (set_bits_t b)
 { int pos;
   pos = 0;
   while ((b & 1) == 0)
@@ -191,28 +214,18 @@ set_value_t set_first (struct set *set)
 
   CHK_SET(set);
 
-  /* Loop until a segment with an element is found, or it is discovered
-     that the set is empty, while removing unused segments at the front. */
+  remove_empty(set);
 
-  for (;;)
-  { 
-    if (set->first == SET_END_OF_CHAIN) 
-    { return SET_NO_VALUE;
-    }
-
-    seg = SET_SEGMENT(set->first);
-    CHK_SEGMENT(seg,set->chain);
-
-    b = seg->bits[set->chain];
-    if (b != 0)
-    { break;
-    }
-
-    set->first = seg->next[set->chain];
-    seg->next[set->chain] = SET_NOT_IN_CHAIN;
+  if (set->first == SET_END_OF_CHAIN) 
+  { return SET_NO_VALUE;
   }
 
-  return SET_VAL (set->first, bitpos(b));
+  seg = SET_SEGMENT(set->first);
+  CHK_SEGMENT(seg,set->chain);
+
+  b = seg->bits[set->chain];
+
+  return SET_VAL (set->first, first_bit_pos(b));
 }
 
 
@@ -272,7 +285,54 @@ set_value_t set_next (struct set *set, set_value_t val)
     offset = 0;
   }
 
-  offset += bitpos(b);
+  offset += first_bit_pos(b);
 
   return SET_VAL(index,offset);
 }
+
+
+/* RETURN THE BITS INDICATING MEMBERSHIP FOR THE FIRST SEGMENT OF A SET.  
+   First removes empty segments at the front.  Returns zero if the set
+   is empty (which will not be returned otherwise). */
+
+set_bits_t set_first_bits (struct set *set)
+{
+  struct set_segment *seg;
+
+  CHK_SET(set);
+  remove_empty(set);
+
+  if (set->first == SET_END_OF_CHAIN)
+  { return 0;
+  }
+
+  return SET_SEGMENT(set->first) -> bits[set->chain];
+}
+
+
+/* MOVE THE FIRST SEGMENT OF A SET TO ANOTHER SET.  Adds the first
+   segment of 'src' to 'dst', removing it from 'src'.  It is an error
+   for 'src' to be empty, or for its first segment to be empty, or for
+   'src' and 'dst' to use different chains. */
+
+void set_move_first (struct set *src, struct set *dst)
+{
+  struct set_segment *seg;
+  set_index_t index;
+
+  CHK_SET(src);
+  CHK_SET(dst);
+
+  if (src->chain != dst->chain) abort();
+  if (src->first == SET_END_OF_CHAIN) abort();
+
+  index = src->first;
+  seg = SET_SEGMENT(index);
+  CHK_SEGMENT(seg,src->chain);
+  if (seg->bits[src->chain] == 0) abort();
+  src->first = seg->next[src->chain];
+
+  seg->next[src->chain] = dst->first;
+  dst->first = index;
+}
+
