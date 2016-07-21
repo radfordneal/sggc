@@ -1,5 +1,5 @@
 /* SGGC - A LIBRARY SUPPORTING SEGMENTED GENERATIONAL GARBAGE COLLECTION.
-          Facility for maintaining sets of objects
+          Facility for maintaining sets of objects - function definitions
 
    Copyright (c) 2016 Radford M. Neal.
 
