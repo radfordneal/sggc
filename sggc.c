@@ -104,7 +104,13 @@ int sggc_init (int n_segments)
 
 sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
 {
-  int kind = sggc_kind(type,length);
+  unsigned kind = sggc_kind(type,length);
+  sggc_cptr_t v;
+
+  v = set_first (&free_or_new[kind]);
+  if (v == SET_NO_VALUE)
+  {
+  }
 
   if (sggc_kind_chunks[kind] == 0)
   { 
@@ -117,6 +123,23 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
 
 
 void sggc_collect (int level)
+{ 
+  sggc_cptr_t v;
+
+  sggc_find_root_ptrs();
+  for (;;)
+  { v = set_first (&to_look_at);
+    if (v == SET_NO_VALUE)
+    { break;
+    }
+    sggc_look_at(v);
+  }
+}
+
+void sggc_look_at (sggc_cptr_t ptr)
 {
+  if (ptr != SET_NO_VALUE)
+  { set_add (&to_look_at, ptr);
+  }
 }
 

@@ -47,15 +47,15 @@
   union \
   { struct                 /* For big segments... */ \
     { unsigned big : 1;       /* 1 for a big segment with one large object  */ \
-      unsigned max_len : SGGC_CHUNK_BITS; /* Chunks that fit in the space   */ \
-    } big;                                /*  allocated; 0 if size is fixed */ \
+      unsigned max_chunks : SGGC_CHUNK_BITS;/* Chunks that fit in the space */ \
+    } big;                                  /*  allocated; 0 if size fixed  */ \
     struct                 /* For small segments... */ \
     { unsigned big : 1;       /* 0 for a segment with several small objects */ \
       unsigned phase1 : 5;    /* Managed by the application; suitable for   */ \
       unsigned phase2 : 5;    /*  the "phases" for allocations of auxiliary */ \
       unsigned phase3 : 5;    /*  information for this segment              */ \
-      unsigned n_objects : 8; /* Number of objects that fit in the segment  */ \
-      unsigned n_chunks : 8;  /* Number of storage chunks for each object   */ \
+      unsigned kind : 8;      /* The kind of segment (equal to type if big) */ \
+      unsigned n_chunks : 8;  /* Number of storage chunks allowed for object*/ \
     } small; \
   } x;
 

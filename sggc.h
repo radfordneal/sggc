@@ -20,39 +20,53 @@
 
 /* This header file must be included from the sggc-app.h file provided
    by the application using the set facility, after the definitions of
-   sggc_length_t, sggc_type_t, SGGC_CHUNK_SIZE, SGGC_AUX_ITEMS, and
-   SGGC_N_KINDS. */
+   types sggc_length_t and sggc_nchunks_t, and constants SGGC_N_KINDS,
+   SGGC_CHUNK_SIZE, and SGGC_AUX_ITEMS. */
 
 
 #include "set-app.h"
 
 
-/* COMPRESSED POINTER (INDEX, OFFSET) TYPE, AND UNCOMPRESS MACRO. */
+/* COMPRESSED POINTER (INDEX, OFFSET) TYPE. */
 
 typedef set_value_t sggc_cptr_t;
-
-#define SGGC_UPTR(cptr) \
-  (sggc_data [SET_VAL_INDEX(cptr)] + SGGC_CHUNK_SIZE * SET_VAL_OFFSET(cptr))
 
 
 /* POINTERS TO SPACE FOR MAIN AND AUXILIARY DATA. */
 
 char **sggc_data;
 
+#define SGGC_DATA(cptr) \
+  (sggc_data [SET_VAL_INDEX(cptr)] + SGGC_CHUNK_SIZE * SET_VAL_OFFSET(cptr))
+
 #if SGGC_AUX_ITEMS > 0
   char **sggc_aux[SGGC_AUX_ITEMS];
 #endif
 
+#define SGGC_AUX(cptr,i) \
+  (sggc_aux[i][SET_VAL_INDEX(cptr)] + SGGC_AUX##i##_SIZE * SET_VAL_OFFSET(cptr))
 
-/* TYPES OF SEGMENTS. */
+
+/* TYPES AND KINDS OF SEGMENTS. */
+
+typedef unsigned char sggc_type_t;
 
 sggc_type_t *sggc_type;
+
+#define SGGC_TYPE(cptr) (sggc_type[SET_VAL_INDEX(cptr)])
+
+typedef unsigned char sggc_kind_t;
+
+#define SGGC_KIND(cptr) \
+  (SET_SEGMENT(cptr)->x.big.bih ? SGGC_TYPE(cptr) \
+                                : SET_SEGMENT(cptr)->x.small.kind)
 
 
 /* FUNCTIONS PROVIDED BY THE APPLICATION. */
 
-int sggc_kind (sggc_type_t type, sggc_length_t length);
-int sggc_chunks (sggc_type_t type, sggc_length_t length);
+sggc_kind_t sggc_kind (sggc_type_t type, sggc_length_t length);
+sggc_nchunks_t sggc_chunks (sggc_type_t type, sggc_length_t length);
+void sggc_find_root_ptrs (void);
 void sggc_find_ptrs (sggc_cptr_t cptr);
 
 
