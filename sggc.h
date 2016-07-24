@@ -29,13 +29,13 @@
 
 /* COMPRESSED POINTER (INDEX, OFFSET) TYPE, AND UNCOMPRESS MACRO. */
 
-typedef set_value_t sggc_cptr;
+typedef set_value_t sggc_cptr_t;
 
 #define SGGC_UPTR(cptr) \
   (sggc_data [SET_VAL_INDEX(cptr)] + SGGC_CHUNK_SIZE * SET_VAL_OFFSET(cptr))
 
 
-/* MAIN DATA, AUXILIARY DATA, AND LENGTH FOR SEGMENTS. */
+/* POINTERS TO SPACE FOR MAIN DATA, AUXILIARY DATA, AND LENGTH FOR SEGMENTS. */
 
 char **sggc_data;
 sggc_length_t **sggc_length;
@@ -45,8 +45,21 @@ sggc_length_t **sggc_length;
 #endif
 
 
+/* TYPES OF SEGMENTS. */
+
+sggc_type_t *sggc_type;
+
+
+/* FUNCTIONS PROVIDED BY THE APPLICATION. */
+
+int sggc_kind (sggc_type_t type, sggc_length_t length);
+int sggc_chunks (sggc_type_t type, sggc_length_t length);
+void sggc_find_ptrs (sggc_cptr_t cptr);
+
+
 /* FUNCTIONS USED BY THE APPLICATION. */
 
-void sggc_init (int n_segments);
-sggc_cptr sggc_alloc (sggc_type_t type, sggc_length_t length);
+int sggc_init (int n_segments);
+sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length);
 void sggc_collect (int level);
+void sggc_look_at (sggc_cptr_t cptr);
