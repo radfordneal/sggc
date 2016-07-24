@@ -35,10 +35,9 @@ typedef set_value_t sggc_cptr_t;
   (sggc_data [SET_VAL_INDEX(cptr)] + SGGC_CHUNK_SIZE * SET_VAL_OFFSET(cptr))
 
 
-/* POINTERS TO SPACE FOR MAIN DATA, AUXILIARY DATA, AND LENGTH FOR SEGMENTS. */
+/* POINTERS TO SPACE FOR MAIN AND AUXILIARY DATA. */
 
 char **sggc_data;
-sggc_length_t **sggc_length;
 
 #if SGGC_AUX_ITEMS > 0
   char **sggc_aux[SGGC_AUX_ITEMS];

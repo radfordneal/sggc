@@ -52,10 +52,10 @@ int sggc_init (int n_segments)
 {
   int i;
 
-  /* Allocate space for pointers to segment descriptors, data, length,
-     and possibly auxiliary information for all possible segments.
-     The data, etc. is allocated for a segment later, when the segment
-     is actually used. */
+  /* Allocate space for pointers to segment descriptors, data, and
+     possibly auxiliary information for segments.  The information for
+     a segment these point to is allocated later, when the segment is
+     actually needed. */
 
   sggc_segment = malloc (n_segments * sizeof *sggc_segment);
   if (sggc_segment == NULL)
@@ -64,11 +64,6 @@ int sggc_init (int n_segments)
 
   sggc_data = malloc (n_segments * sizeof *sggc_data);
   if (sggc_data == NULL)
-  { return 1;
-  }
-
-  sggc_length = malloc (n_segments * sizeof *sggc_length);
-  if (sggc_length == NULL)
   { return 1;
   }
 
