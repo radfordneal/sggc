@@ -20,8 +20,7 @@
 
 /* This header file must be included from the sggc-app.h file provided
    by the application using the set facility, after the definitions of
-   types sggc_length_t and sggc_nchunks_t, and constants SGGC_N_KINDS,
-   SGGC_CHUNK_SIZE, and SGGC_AUX_ITEMS. */
+   some required types and constants. */
 
 
 #include "set-app.h"
@@ -31,34 +30,55 @@
 
 typedef set_value_t sggc_cptr_t;
 
+#define SGGC_NO_OBJECT SET_NO_VALUE
 
-/* POINTERS TO SPACE FOR MAIN AND AUXILIARY DATA. */
 
-char **sggc_data;
+/* ARRAYS OF POINTERS TO SPACE FOR MAIN AND AUXILIARY DATA .  The sggc_data
+   and (perhaps) sggc_aux[0], sggc_aux[1], etc. arrays have length equal to
+   the maximum number of segments, and are allocated at initialization.  
+   Pointers in these arrays are set when segments are needed, by the 
+   application, since the application may do tricks like making some of
+   of these be shared between segments, if it knows this is possible. */
+
+char **sggc_data;                  /* Pointer to array of pointers to arrays of 
+                                      data blocks for objects within segments */
+
+/* Macro to get data pointer for an object, from its index and offset. */
 
 #define SGGC_DATA(cptr) \
   (sggc_data [SET_VAL_INDEX(cptr)] + SGGC_CHUNK_SIZE * SET_VAL_OFFSET(cptr))
 
 #if SGGC_AUX_ITEMS > 0
-  char **sggc_aux[SGGC_AUX_ITEMS];
+  char **sggc_aux[SGGC_AUX_ITEMS]; /* Pointer to array of pointers to arrays of 
+                                      auxiliary info for objects in segments */
 #endif
+
+/* Macro to get pointer to auxiliarly information for an object, from its 
+   index and offset, along with the number indicating which auxiliary. 
+   information is required, which must be a literal number (not a #define). */
 
 #define SGGC_AUX(cptr,i) \
   (sggc_aux[i][SET_VAL_INDEX(cptr)] + SGGC_AUX##i##_SIZE * SET_VAL_OFFSET(cptr))
 
 
-/* TYPES AND KINDS OF SEGMENTS. */
+/* TYPES AND KINDS OF SEGMENTS.  Types and kinds must fit in 8 bits, with
+   the kind being equal to the type if it is for a "big" segment.  The
+   array of types is allocated at initialization.  The kind of a small
+   segment is recorded in the segment description. */
 
 typedef unsigned char sggc_type_t;
+typedef unsigned char sggc_kind_t;
 
-sggc_type_t *sggc_type;
+sggc_type_t *sggc_type;            /* Types of objects in each segment */
+
+/* Macro to access type of object, from the index of its segment. */
 
 #define SGGC_TYPE(cptr) (sggc_type[SET_VAL_INDEX(cptr)])
 
-typedef unsigned char sggc_kind_t;
+/* Macro to find the kind of the segment containing an object. */
 
 #define SGGC_KIND(cptr) \
-  (SET_SEGMENT(cptr)->x.big.bih ? SGGC_TYPE(cptr) \
+  (SET_SEGMENT(cptr)->x.big.big ? SGGC_TYPE(cptr) \
                                 : SET_SEGMENT(cptr)->x.small.kind)
 
 
@@ -67,7 +87,7 @@ typedef unsigned char sggc_kind_t;
 sggc_kind_t sggc_kind (sggc_type_t type, sggc_length_t length);
 sggc_nchunks_t sggc_chunks (sggc_type_t type, sggc_length_t length);
 void sggc_find_root_ptrs (void);
-void sggc_find_ptrs (sggc_cptr_t cptr);
+void sggc_find_object_ptrs (sggc_cptr_t cptr);
 
 
 /* FUNCTIONS USED BY THE APPLICATION. */

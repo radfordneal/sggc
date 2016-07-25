@@ -27,7 +27,7 @@
    size found using sggc_chunks.  The application must define the
    initialization as SGGC_KIND_CHUNKS. */
 
-int sggc_kind_chunks[SGGC_N_KINDS] = SGGC_KIND_CHUNKS;
+static int kind_chunks[SGGC_N_KINDS] = SGGC_KIND_CHUNKS;
 
 
 /* SETS OF OBJECTS. */
@@ -39,9 +39,10 @@ static struct set old_to_new;                 /* May have old->new references */
 static struct set to_look_at;                 /* Not yet looked at in sweep */
 
 
-/* INDEX OF NEXT SEGMENT TO USE. */
+/* MAXIMUM NUMBER OF SEGMENTS, AND INDEX OF NEXT SEGMENT TO USE. */
 
-static int next_segment;
+static set_offset_t max_segments;
+static set_offset_t next_segment;
 
 
 /* INITIALIZE SEGMENTED MEMORY.  Allocates space for pointers for the
@@ -94,13 +95,20 @@ int sggc_init (int n_segments)
   set_init(&old_to_new,SET_OLD_TO_NEW);
   set_init(&to_look_at,SET_TO_LOOK_AT);
 
-  /* Initialize to no segments in use. */
+  /* Record maximum, and initialize to no segments in use. */
 
+  max_segments = n_segments;
   next_segment = 0;
 
   return 0;
 }
 
+
+/* ALLOCATE AN OBJECT OF SPECIFIED TYPE AND LENGTH.  The length is
+   (possibly) used in determining the kind for the object, as
+   determined by the sggc_kind function provided by the application.
+   The value returned is SGGC_NO_OBJECT if allocation fails, even
+   after a full garbage collection is done. */
 
 sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
 {
@@ -108,38 +116,76 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
   sggc_cptr_t v;
 
   v = set_first (&free_or_new[kind]);
-  if (v == SET_NO_VALUE)
+  if (v == SGGC_NO_OBJECT)
   {
   }
 
-  if (sggc_kind_chunks[kind] == 0)
+  if (kind_chunks[kind] == 0)
   { 
-    return SET_NO_VALUE;
+    return SGGC_NO_OBJECT;
   }
   else
-  { return SET_NO_VALUE;
+  { return SGGC_NO_OBJECT;
   }
 }
 
+
+/* DO A GARBAGE COLLECTION AT THE SPECIFIED LEVEL.  Levels are 0 for
+   collecting only newly allocated objects, 1 for also collecting
+   objects that have survived one collection, and 2 for collecting all
+   objects.
+
+   This procedure is called automatically when sggc_alloc would
+   otherwise fail, but should also be called by the application
+   according to its heuristics for when this would be desirable. */
 
 void sggc_collect (int level)
 { 
   sggc_cptr_t v;
 
-  sggc_find_root_ptrs();
-  for (;;)
-  { v = set_first (&to_look_at);
-    if (v == SET_NO_VALUE)
+  switch (level)
+  { case 0:
     { break;
     }
+    case 1:
+    case 2:
+    default: abort();
+  }
+
+  sggc_find_root_ptrs();
+
+  for (;;)
+  { 
+    v = set_first (&to_look_at);
+    if (v == SGGC_NO_OBJECT)
+    { break;
+    }
+
+    set_remove(&to_look_at,v);
+
+    switch (level)
+    { case 0: 
+      { set_add(&old_gen1,v); 
+        break;
+      }
+      case 1:
+      case 2:
+      default: abort();
+    }
+
     sggc_look_at(v);
   }
 }
 
+
+/* TELL THE GARBAGE COLLECTOR THAT AN OBJECT NEEDS TO BE LOOKED AT.
+   Called by the application from within its sggc_find_root_ptrs or
+   sggc_find_object_ptrs functions, to signal to the garbage collector
+   that it has found a pointer to an object that must also be looked at. */
+
 void sggc_look_at (sggc_cptr_t ptr)
 {
-  if (ptr != SET_NO_VALUE)
+  if (ptr != SGGC_NO_OBJECT)
   { set_add (&to_look_at, ptr);
   }
 }
-

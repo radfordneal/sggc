@@ -31,8 +31,8 @@
 /* TYPES FOR (INDEX, OFFSET) PAIRS.  The set_value_t type is for the pair,
    and is designed to be 32 bits.  The set_index_t type must be signed,
    and should also be 32 bits, to limit space used.  The set_offset_t type
-   is used only for local variables, and can be int, as that is presumably
-   most efficient. */
+   is not used in data structures, and can be int, as that is big enough
+   and presumably most efficient. */
 
 typedef int set_offset_t;
 typedef int32_t set_index_t;
