@@ -45,6 +45,12 @@ static set_offset_t max_segments;
 static set_offset_t next_segment;
 
 
+/* FLAGS FOR CHECKING FOR OLD-NEW REFERENCES. */
+
+static int has_gen0;   /* Set if has gen2->gen0 references */
+static int has_gen1;   /* Set if has gen2->gen1 referendes */
+
+
 /* INITIALIZE SEGMENTED MEMORY.  Allocates space for pointers for the
    specified number of segments (currently not expandable).  Returns
    zero if successful, non-zero if allocation fails. */
@@ -143,16 +149,57 @@ void sggc_collect (int level)
 { 
   sggc_cptr_t v;
 
-  switch (level)
-  { case 0:
-    { break;
+  if (set_first(&to_look_at) != SET_NO_VALUE) abort();
+
+  /* Put objects in the old generations being collected in the free_or_new set.
+
+     This could be greatly sped up with some special facility in the set
+     module that would do it a segment at a time. */
+
+  if (level == 2)
+  { for (v = set_first(&old_gen2); v!=SET_NO_VALUE; v = set_next(&old_gen2,v,0))
+    { set_add (&free_or_new[SGGC_KIND(v)], v);
     }
-    case 1:
-    case 2:
-    default: abort();
   }
 
+  if (level >= 1)
+  { for (v = set_first(&old_gen1); v!=SET_NO_VALUE; v = set_next(&old_gen1,v,0))
+    { set_add (&free_or_new[SGGC_KIND(v)], v);
+    }
+  }
+
+  /* Handle old-to-new references. */
+
+  v = set_first(&old_to_new);
+  while (v != SET_NO_VALUE)
+  { int remove;
+    if (set_contains (&old_gen1, v))
+    { has_gen0 = has_gen1 = 1;  /* we don't care */
+      sggc_find_object_ptrs (v);
+      remove = 1;
+    }
+    else if (level == 0)
+    { has_gen0 = has_gen1 = 0;  /* look for both generation 0 and generaton 1 */
+      sggc_find_object_ptrs (v);
+      remove = has_gen0 | has_gen1;
+    }
+    else /* level > 0 */
+    { has_gen0 = 0; has_gen1 = 1;  /* look only for generation 0 */
+      sggc_find_object_ptrs (v);
+      remove = has_gen0;
+    }
+    v = set_next (&old_to_new, v, remove);
+  }
+
+  /* Get the application to take root pointers out of the free_or_new set,
+     and put them in the to_look_at set. */
+
   sggc_find_root_ptrs();
+
+  /* Keep looking at objects in the to_look_at set, putting them in
+     the correct old generation, and getting the application to find
+     any pointers they contain (which may add to the to_look_at set),
+     until there are no more in the set. */
 
   for (;;)
   { 
@@ -161,19 +208,16 @@ void sggc_collect (int level)
     { break;
     }
 
-    set_remove(&to_look_at,v);
+    (void) set_remove (&to_look_at, v);
 
-    switch (level)
-    { case 0: 
-      { set_add(&old_gen1,v); 
-        break;
-      }
-      case 1:
-      case 2:
-      default: abort();
+    if (level > 0 && set_remove (&old_gen1, v))
+    { set_add (&old_gen2, v);
+    }
+    else if (level < 2 || !set_contains (&old_gen2, v))
+    { set_add (&old_gen1, v); 
     }
 
-    sggc_look_at(v);
+    sggc_find_object_ptrs (v);
   }
 }
 
@@ -181,11 +225,65 @@ void sggc_collect (int level)
 /* TELL THE GARBAGE COLLECTOR THAT AN OBJECT NEEDS TO BE LOOKED AT.
    Called by the application from within its sggc_find_root_ptrs or
    sggc_find_object_ptrs functions, to signal to the garbage collector
-   that it has found a pointer to an object that must also be looked at. */
+   that it has found a pointer to an object that must also be looked at,
+   and also that it is not free. */
 
 void sggc_look_at (sggc_cptr_t ptr)
 {
   if (ptr != SGGC_NO_OBJECT)
-  { set_add (&to_look_at, ptr);
+  { if ((has_gen0 & has_gen1) == 0)
+    { if (set_contains (&old_gen1, ptr))
+      { has_gen1 = 1;
+      }
+      else if (has_gen0 == 0 && !set_contains (&old_gen2, ptr))
+      { has_gen0 = 1;
+      }
+    }
+    if (set_remove(&free_or_new[SGGC_KIND(ptr)],ptr))
+    { set_add (&to_look_at, ptr);
+    }
   }
+}
+
+
+/* RECORD AN OLD-TO-NEW REFERENCE.  Must be called by the application
+   when about to store a reference to to_ptr in the object from_ptr,
+   unless from_ptr has just been allocated (with no allocations or
+   explicit garbage collections since then), or unless from_ptr has
+   been verified to be in the youngest generation by using
+   sggc_youngest_generation (with no allocations or explicit garbage
+   collections have been done since then). */
+
+void sggc_old_to_new_check (sggc_cptr_t from_ptr, sggc_cptr_t to_ptr)
+{
+  if (set_contains (&old_to_new, from_ptr))
+  { return;
+  }
+
+  if (set_contains (&old_gen2, from_ptr))
+  { if (set_contains (&old_gen2, to_ptr))
+    { return;
+    }
+  }
+  else if (set_contains (&old_gen1, from_ptr))
+  { if (set_contains (&old_gen1, to_ptr) || set_contains (&old_gen2, to_ptr))
+    { return;
+    }
+  }
+  else
+  { return;
+  }
+
+  set_add (&old_to_new, from_ptr);
+}
+
+
+/* CHECK WHETHER AN OBJECT IS IN THE YOUNGEST GENERATION.  If it is,
+   the application can skip the old-to-new check.  Note that an object
+   may cease to be in the youngest generation when an allocation or
+   explicit garbage collection is done. */
+
+int sggc_youngest_generation (sggc_cptr_t from_ptr)
+{
+  return set_contains (&old_to_new, from_ptr);
 }

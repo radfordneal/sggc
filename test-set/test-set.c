@@ -119,7 +119,7 @@ int main (void)
       printf (" %016llx :", (long long) set_first_bits (&set[i]));
       while (v != SET_NO_VALUE)
       { printf(" %d.%d",SET_VAL_INDEX(v),SET_VAL_OFFSET(v));
-        v = set_next (&set[i], v);
+        v = set_next (&set[i], v, 0);
       }
       printf("\n");
     }

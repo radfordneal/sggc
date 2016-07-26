@@ -96,3 +96,7 @@ int sggc_init (int n_segments);
 sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length);
 void sggc_collect (int level);
 void sggc_look_at (sggc_cptr_t cptr);
+int sggc_set_data (set_offset_t segment);
+int sggc_set_aux (set_offset_t segment, int n);
+void sggc_old_to_new_check (sggc_cptr_t from_ptr, sggc_cptr_t to_ptr);
+int sggc_youngest_generation (sggc_cptr_t from_ptr);

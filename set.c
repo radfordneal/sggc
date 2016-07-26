@@ -231,13 +231,14 @@ set_value_t set_first (struct set *set)
 
 /* FIND THE NEXT ELEMENT IN A SET.  Returns the next element of 'set'
    after 'val', which must be an element of 'set.  Returns SET_NO_VALUE 
-   if there are no elements past 'val'.
+   if there are no elements past 'val'.  If the last argument is non-zero,
+   'val' is also removed from 'set'.
 
    If the linked list has to be followed to a later segment, any
    unused segments that are skipped are deleted from the list, to save
    time in any future searches. */
 
-set_value_t set_next (struct set *set, set_value_t val)
+set_value_t set_next (struct set *set, set_value_t val, int remove)
 {
   set_index_t index = SET_VAL_INDEX(val);
   set_offset_t offset = SET_VAL_OFFSET(val);
@@ -247,11 +248,13 @@ set_value_t set_next (struct set *set, set_value_t val)
   CHK_SEGMENT(seg,set->chain);
 
   /* Get the bits after the one for the element we are looking after.
-     Note that shifting by the number of bits in an operand (or more)
-     is undefined, and so must be avoided. */
+     Also clear the bit for 'val' if we are removing it. */
 
   set_bits_t b = seg->bits[set->chain] >> offset;
   if ((b & 1) == 0) abort();  /* 'val' isn't in 'set' */
+  if (remove)
+  { seg->bits[set->chain] &= ~ ((set_bits_t) 1 << offset);
+  }
   offset += 1;
   b >>= 1;
 
