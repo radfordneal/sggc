@@ -86,8 +86,8 @@ struct set_segment
 { set_bits_t bits[SET_CHAINS];  /* Bits indicating membership in sets */
   set_index_t next[SET_CHAINS]; /* Next / SET_NOT_IN_CHAIN / SET_END_OF_CHAIN */
 # ifdef SET_EXTRA_INFO
-  SET_EXTRA_INFO                /* Extra info of use to the application, or   */
-# endif                         /*   padding to make struct size a power of 2 */
+  SET_EXTRA_INFO                /* Extra info of use to the application, or  */
+# endif                         /*  padding to make struct size a power of 2 */
 };
 
 
@@ -97,7 +97,6 @@ struct set_segment
 struct set
 { int chain;                    /* Number of chain used for this set */
   set_index_t first;            /* First segment, or SET_END_OF_CHAIN */
-  set_index_t last;             /* Last segment, or SET_END_OF_CHAIN */
 };
 
 

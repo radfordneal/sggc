@@ -28,9 +28,10 @@
 
 /* COMPRESSED POINTER (INDEX, OFFSET) TYPE. */
 
-typedef set_value_t sggc_cptr_t;
+typedef set_index_t sggc_index_t;  /* Type of segment index */
+typedef set_value_t sggc_cptr_t;   /* Type of compressed point (index,offset) */
 
-#define SGGC_NO_OBJECT SET_NO_VALUE
+#define SGGC_NO_OBJECT SET_NO_VALUE   /* Special "no object" pointer */
 
 
 /* ARRAYS OF POINTERS TO SPACE FOR MAIN AND AUXILIARY DATA .  The sggc_data
@@ -85,9 +86,14 @@ sggc_type_t *sggc_type;            /* Types of objects in each segment */
 /* FUNCTIONS PROVIDED BY THE APPLICATION. */
 
 sggc_kind_t sggc_kind (sggc_type_t type, sggc_length_t length);
-sggc_nchunks_t sggc_chunks (sggc_type_t type, sggc_length_t length);
+sggc_nchunks_t sggc_nchunks (sggc_type_t type, sggc_length_t length);
 void sggc_find_root_ptrs (void);
 void sggc_find_object_ptrs (sggc_cptr_t cptr);
+char *sggc_alloc_big_segment_data (sggc_kind_t kind, sggc_length_t length);
+char *sggc_alloc_small_segment_data (sggc_kind_t kind);
+char *sggc_alloc_segment_aux (sggc_kind_t kind, int n);
+void sggc_free_segment_data (sggc_kind_t kind, char *);
+void sggc_free_segment_aux (sggc_kind_t kind, int n, char *);
 
 
 /* FUNCTIONS USED BY THE APPLICATION. */
@@ -96,7 +102,5 @@ int sggc_init (int n_segments);
 sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length);
 void sggc_collect (int level);
 void sggc_look_at (sggc_cptr_t cptr);
-int sggc_set_data (set_offset_t segment);
-int sggc_set_aux (set_offset_t segment, int n);
 void sggc_old_to_new_check (sggc_cptr_t from_ptr, sggc_cptr_t to_ptr);
 int sggc_youngest_generation (sggc_cptr_t from_ptr);

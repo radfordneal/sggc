@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "sggc-app.h"
 
 struct type0 { int dummy; };
@@ -11,9 +12,32 @@ sggc_kind_t sggc_kind (sggc_type_t type, sggc_length_t length)
   return type;
 }
 
-sggc_nchunks_t sggc_chunks (sggc_type_t type, sggc_length_t length)
+sggc_nchunks_t sggc_nchunks (sggc_type_t type, sggc_length_t length)
 {
   return type<2 ? 1 : (4+length) / 4;
+}
+
+char *sggc_alloc_big_segment_data (sggc_kind_t kind, sggc_length_t length)
+{
+  switch (kind)
+  { case 0: 
+    { struct type0 *p = malloc (sizeof (struct type0));
+      return (char *) p;
+    }
+    case 1: 
+    { struct type1 *p = malloc (sizeof (struct type1));
+      p->x = nil;
+      p->y = nil;
+      return (char *) p;
+    }
+    case 2: 
+    { struct type2 *p
+               = malloc (sizeof (struct type2) + length * sizeof (int32_t));
+      p->len = length;
+      return (char *) p;
+    }
+    default: abort();
+  }
 }
 
 void sggc_find_root_ptrs (void)

@@ -118,20 +118,57 @@ int sggc_init (int n_segments)
 
 sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
 {
+  int collected_already = 0;
   unsigned kind = sggc_kind(type,length);
   sggc_cptr_t v;
 
-  v = set_first (&free_or_new[kind]);
-  if (v == SGGC_NO_OBJECT)
+  for (;;)
   {
+    v = set_first (&free_or_new[kind]);
+
+    if (v == SGGC_NO_OBJECT)
+    { if (next_segment == max_segments)
+      { if (collected_already) 
+        { return SGGC_NO_OBJECT;
+        }
+        sggc_collect(2);
+        collected_already = 1;
+        continue;
+      }
+      v = SET_VAL(next_segment,0);
+      if (kind_chunks[kind] == 0)
+      { SET_SEGMENT(v)->x.big.big = 1;
+        SET_SEGMENT(v)->x.big.max_chunks = 0;
+      }
+      else
+      { SET_SEGMENT(v)->x.small.big = 0;
+        SET_SEGMENT(v)->x.small.kind = kind;
+        SET_SEGMENT(v)->x.small.nchunks = sggc_nchunks (type, length);
+      }
+      set_add (&free_or_new[kind], v);
+      next_segment += 1;
+    }
   }
 
-  if (kind_chunks[kind] == 0)
-  { 
-    return SGGC_NO_OBJECT;
-  }
-  else
-  { return SGGC_NO_OBJECT;
+  for (;;)
+  {
+    if (kind_chunks[kind] == 0)
+    { char *data = sggc_alloc_big_segment_data (kind, length);
+      if (data == NULL)
+      { if (collected_already) 
+        { return SGGC_NO_OBJECT;
+        }
+        sggc_collect(2);
+        collected_already = 1;
+        continue;
+      }
+      sggc_data [SET_VAL_INDEX(v)] = data;
+      return v;
+    }
+    else
+    { /* not done yet */
+      return SGGC_NO_OBJECT;
+    }
   }
 }
 

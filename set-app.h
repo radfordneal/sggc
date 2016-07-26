@@ -55,7 +55,7 @@
       unsigned phase2 : 5;    /*  the "phases" for allocations of auxiliary */ \
       unsigned phase3 : 5;    /*  information for this segment              */ \
       unsigned kind : 8;      /* The kind of segment (equal to type if big) */ \
-      unsigned n_chunks : 8;  /* Number of storage chunks allowed for object*/ \
+      unsigned nchunks : 8;   /* Number of storage chunks allowed for object*/ \
     } small; \
   } x;
 
