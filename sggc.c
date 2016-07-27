@@ -137,13 +137,13 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
       }
       v = SET_VAL(next_segment,0);
       if (kind_chunks[kind] == 0)
-      { SET_SEGMENT(v)->x.big.big = 1;
-        SET_SEGMENT(v)->x.big.max_chunks = 0;
+      { SET_SEGMENT(v) -> x.big.big = 1;
+        SET_SEGMENT(v) -> x.big.max_chunks = 0;
       }
       else
-      { SET_SEGMENT(v)->x.small.big = 0;
-        SET_SEGMENT(v)->x.small.kind = kind;
-        SET_SEGMENT(v)->x.small.nchunks = sggc_nchunks (type, length);
+      { SET_SEGMENT(v) -> x.small.big = 0;
+        SET_SEGMENT(v) -> x.small.kind = kind;
+        SET_SEGMENT(v) -> x.small.nchunks = sggc_nchunks (type, length);
       }
       set_add (&free_or_new[kind], v);
       next_segment += 1;
