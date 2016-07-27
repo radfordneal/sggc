@@ -37,6 +37,9 @@
     CHK_CHAIN((set)->chain); \
     if (DEBUG && (set)->first < 0 \
               && (set)->first != SET_END_OF_CHAIN) abort(); \
+    if (DEBUG && (set)->last < 0 \
+              && (set)->last != SET_END_OF_CHAIN) abort(); \
+    if (DEBUG && ((set)->first < 0) != ((set)->last < 0)) abort(); \
   } while (0)
 
 #define CHK_SEGMENT(seg,chain) \
@@ -50,16 +53,17 @@
   } while (0)
 
 
-/* INITIALIZE A SET, AS EMPTY.  Initializes the set pointed to by 'set' to
-   be an empty set, which will use 'chain' to link elements.  Note that the
-   set must never contain elements with the same index as elements of any
-   other set using the same chain. */
+/* INITIALIZE A SET, AS EMPTY.  Initializes the set pointed to by
+   'set' to be an empty set, which will use 'chain' to link elements.
+   Note that the set must never contain elements with the same segment
+   index as elements of any other set using the same chain. */
 
 void set_init (struct set *set, int chain)
 {
   CHK_CHAIN(chain);
   set->chain = chain;
   set->first = SET_END_OF_CHAIN;
+  set->last = SET_END_OF_CHAIN;
 }
 
 
@@ -95,8 +99,29 @@ int set_contains (struct set *set, set_value_t val)
 }
 
 
+/* CHECK WHETHER A VALUE IS CONTAINED IN ANY SET USING A GIVEN CHAIN.
+   Returns 1 if 'val' is an element of any set using 'chain', 0 if not.
+
+   This is implemented by just looking at the right bit in the bits for
+   the chain. */
+
+int set_chain_contains (int chain, set_value_t val)
+{
+  set_index_t index = SET_VAL_INDEX(val);
+  set_offset_t offset = SET_VAL_OFFSET(val);
+  struct set_segment *seg = SET_SEGMENT(index);
+
+  CHK_SEGMENT(seg,chain);
+
+  return (seg->bits[chain] >> offset) & 1;
+}
+
+
 /* ADD A VALUE TO A SET.  Changes 'set' so that it contains 'val' as
-   an element.  Returns 1 if 'set' had already contained 'val', 0 if not. 
+   an element.  Returns 1 if 'set' had already contained 'val', 0 if
+   not.  Note that 'val' must not be added to a set if that set shares
+   its chain with another set that contains elements in the same segment
+   as 'val'.
 
    This is implemented by setting the right bit in the bits for the set's 
    chain, within the segment structure for this value's index. This segment
@@ -120,6 +145,9 @@ int set_add (struct set *set, set_value_t val)
   if (seg->next[set->chain] == SET_NOT_IN_CHAIN)
   { seg->next[set->chain] = set->first;
     set->first = index;
+    if (set->last == SET_END_OF_CHAIN) 
+    { set->last = index;
+    }
   }
 
   seg->bits[set->chain] |= t;
@@ -155,6 +183,9 @@ int set_remove (struct set *set, set_value_t val)
   seg->bits[set->chain] &= ~t;
   if (seg->bits[set->chain] == 0 && set->first == index)
   { set->first = seg->next[set->chain];
+    if (set->first == SET_END_OF_CHAIN)
+    { set->last = SET_END_OF_CHAIN;
+    }
     seg->next[set->chain] = SET_NOT_IN_CHAIN;
   }
 
@@ -180,6 +211,9 @@ static inline void remove_empty (struct set *set)
     }
 
     set->first = seg->next[set->chain];
+    if (set->first == SET_END_OF_CHAIN)
+    { set->last = SET_END_OF_CHAIN;
+    }
     seg->next[set->chain] = SET_NOT_IN_CHAIN;
   }
 }
@@ -201,8 +235,9 @@ static inline int first_bit_pos (set_bits_t b)
 }
 
 
-/* FIND THE FIRST ELEMENT IN A SET.  Finds an element of 'set', the first
-   in an arbitrary ordering,  Returns SET_NO_VALUE if the set is empty.
+/* FIND THE FIRST ELEMENT IN A SET.  Finds an element of 'set', namely
+   the first in the first segment in its chain with any elements.
+   Returns SET_NO_VALUE if the set is empty.
 
    The linked list of segments for this set is first trimmed of any at 
    the front that have no elements set, to save time in any future searches. */
@@ -236,7 +271,11 @@ set_value_t set_first (struct set *set)
 
    If the linked list has to be followed to a later segment, any
    unused segments that are skipped are deleted from the list, to save
-   time in any future searches. */
+   time in any future searches.  As a consequence, if 'val' is not
+   removed, the value returned (if not SET_NO_VALUE) is in the segment
+   after that containing 'val'.  (But note that if 'val' is removed,
+   the segment containing it is not removed from the list even if it
+   no longer has any elements.) */
 
 set_value_t set_next (struct set *set, set_value_t val, int remove)
 {
@@ -282,6 +321,9 @@ set_value_t set_next (struct set *set, set_value_t val, int remove)
       }
 
       seg->next[set->chain] = nseg->next[set->chain];
+      if (set->last == nindex)
+      { set->last = index;
+      }
     }
 
     index = nindex;
@@ -313,6 +355,21 @@ set_bits_t set_first_bits (struct set *set)
 }
 
 
+/* RETURN BITS INDICATING MEMBERSHIP FOR THE SEGMENT CONTAINING AN ELEMENT. */
+
+set_bits_t set_segment_bits (struct set *set, set_value_t val)
+{
+  set_index_t index = SET_VAL_INDEX(val);
+  set_offset_t offset = SET_VAL_OFFSET(val);
+  struct set_segment *seg = SET_SEGMENT(index);
+
+  CHK_SET(set);
+  CHK_SEGMENT(seg,set->chain);
+
+  return seg->bits[set->chain];
+}
+
+
 /* MOVE THE FIRST SEGMENT OF A SET TO ANOTHER SET.  Adds the first
    segment of 'src' to 'dst', removing it from 'src'.  It is an error
    for 'src' to be empty, or for its first segment to be empty, or for
@@ -333,9 +390,83 @@ void set_move_first (struct set *src, struct set *dst)
   seg = SET_SEGMENT(index);
   CHK_SEGMENT(seg,src->chain);
   if (seg->bits[src->chain] == 0) abort();
+
   src->first = seg->next[src->chain];
 
   seg->next[src->chain] = dst->first;
   dst->first = index;
+  if (dst->last == SET_END_OF_CHAIN)
+  { dst->last = index;
+  }
+
+  if (src->first == SET_END_OF_CHAIN)
+  { src->last = SET_END_OF_CHAIN;
+  }
+}
+
+
+/* MOVE THE SEGMENT AFTER THAT CONTAINING AN ELEMENT TO ANOTHER SET.
+   Adds the first segment after 'val' in 'src' to 'dst', removing it from
+   'src'.  It is an error for there to be no next segment, or for the
+   next segment to be empty. or for 'val' and 'dst' to use different
+   chains. */
+
+void set_move_next (struct set *src, set_value_t val, struct set *dst)
+{
+  set_index_t index = SET_VAL_INDEX(val);
+  set_offset_t offset = SET_VAL_OFFSET(val);
+  struct set_segment *seg = SET_SEGMENT(index);
+
+  CHK_SET(src);
+  CHK_SET(dst);
+
+  if (src->chain != dst->chain) abort();
+  if (src->first == SET_END_OF_CHAIN) abort();
+
+  int chain = src->chain;
+  set_index_t nindex = seg->next[chain];
+
+  if (nindex == SET_END_OF_CHAIN) abort();
+
+  struct set_segment *nseg = SET_SEGMENT(nindex);
+  CHK_SEGMENT(nseg,chain);
+  if (nseg->bits[chain] == 0) abort();
+
+  seg->next[chain] = nseg->next[chain];
+  nseg->next[chain] = dst->first;
+  dst->first = nindex;
+  if (dst->last == SET_END_OF_CHAIN)
+  { dst->last = nindex;
+  }
+
+  if (src->last == nindex)
+  { src->last = index;
+  }
+}
+
+
+/* MOVE ALL OF ONE SET TO ANOTHER SET.  Adds all elements of 'src' to
+   'dst', after which 'src' will be empty.  It is an error for 'src'
+   and 'dst' to use different chains. */
+
+void set_move_all (struct set *src, struct set *dst)
+{
+  CHK_SET(src);
+  CHK_SET(dst);
+
+  if (src->chain != dst->chain) abort();
+
+  if (src->first == SET_END_OF_CHAIN)
+  { return;
+  }
+
+  SET_SEGMENT(src->last) -> next[src->chain] = dst->first;
+  dst->first = src->first;
+  if (dst->last == SET_END_OF_CHAIN)
+  { dst->last = src->last;
+  }
+
+  src->first = SET_END_OF_CHAIN;
+  src->last = SET_END_OF_CHAIN;
 }
 
