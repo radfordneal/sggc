@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include "sggc-app.h"
 
 struct type0 { int dummy; };
@@ -57,11 +58,19 @@ void sggc_find_object_ptrs (sggc_cptr_t cptr)
 
 int main (void)
 {
+  printf("About to call sggc_init\n");
   sggc_init(1000);
+  printf("Done sggc_init\n");
+  printf("Allocating nil\n");
   nil = sggc_alloc (0, 0);
+  printf("Allocating a\n");
   a = sggc_alloc (1, 1);
+  printf("Allocating b\n");
   b = sggc_alloc (2, 10);
+  printf("Allocating a again\n");
   a = sggc_alloc (1, 1);
+  printf("About to call sggc_collect\n");
   sggc_collect(0);
+  printf("Done sggc_collect\n");
   return 0;
 }

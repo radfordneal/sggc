@@ -23,33 +23,33 @@
 
 
 /* DEBUGGING CHECKS.  These check validity of data, calling abort if
-   the check fails.  Enabled only if DEBUG is defined to be non-zero. */
+   the check fails.  Enabled only if SET_DEBUG is defined to be non-zero. */
 
-#define DEBUG 1
+#define SET_DEBUG 1
 
 #define CHK_CHAIN(chain) \
   do { \
-    if (DEBUG && ((chain) < 0 || (chain) >= SET_CHAINS)) abort(); \
+    if (SET_DEBUG && ((chain) < 0 || (chain) >= SET_CHAINS)) abort(); \
   } while (0)
 
 #define CHK_SET(set) \
   do { \
     CHK_CHAIN((set)->chain); \
-    if (DEBUG && (set)->first < 0 \
-              && (set)->first != SET_END_OF_CHAIN) abort(); \
-    if (DEBUG && (set)->last < 0 \
-              && (set)->last != SET_END_OF_CHAIN) abort(); \
-    if (DEBUG && ((set)->first < 0) != ((set)->last < 0)) abort(); \
+    if (SET_DEBUG && (set)->first < 0 \
+                  && (set)->first != SET_END_OF_CHAIN) abort(); \
+    if (SET_DEBUG && (set)->last < 0 \
+                  && (set)->last != SET_END_OF_CHAIN) abort(); \
+    if (SET_DEBUG && ((set)->first < 0) != ((set)->last < 0)) abort(); \
   } while (0)
 
 #define CHK_SEGMENT(seg,chain) \
   do { \
     CHK_CHAIN(chain); \
-    if (DEBUG && (seg)->next[chain] < 0 \
-              && (seg)->next[chain] != SET_NOT_IN_CHAIN \
-              && (seg)->next[chain] != SET_END_OF_CHAIN) abort(); \
-    if (DEBUG && (seg)->next[chain] == SET_NOT_IN_CHAIN \
-              && (seg)->bits[chain] != 0) abort(); \
+    if (SET_DEBUG && (seg)->next[chain] < 0 \
+                  && (seg)->next[chain] != SET_NOT_IN_CHAIN \
+                  && (seg)->next[chain] != SET_END_OF_CHAIN) abort(); \
+    if (SET_DEBUG && (seg)->next[chain] == SET_NOT_IN_CHAIN \
+                  && (seg)->bits[chain] != 0) abort(); \
   } while (0)
 
 

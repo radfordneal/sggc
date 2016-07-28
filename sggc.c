@@ -30,13 +30,25 @@
 static int kind_chunks[SGGC_N_KINDS] = SGGC_KIND_CHUNKS;
 
 
+/* BIT VECTORS FOR FULL SEGMENTS.  Computed at initialization from kind_chunks
+   and SET_OFFSET_BITS. */
+
+static set_bits_t kind_full[SGGC_N_KINDS];
+
+
 /* SETS OF OBJECTS. */
 
+static struct set unused;                     /* Has space, but not in use */
 static struct set free_or_new[SGGC_N_KINDS];  /* Free or newly allocated */
 static struct set old_gen1;                   /* Survived collection once */
 static struct set old_gen2;                   /* Survived collection >1 time */
 static struct set old_to_new;                 /* May have old->new references */
 static struct set to_look_at;                 /* Not yet looked at in sweep */
+
+
+/* NEXT FREE OBJECT OF EACH KIND. */
+
+static sggc_cptr_t next_free[SGGC_N_KINDS];
 
 
 /* MAXIMUM NUMBER OF SEGMENTS, AND INDEX OF NEXT SEGMENT TO USE. */
@@ -91,15 +103,38 @@ int sggc_init (int n_segments)
   { return 1;
   }
 
+  /* Initialize bit vectors that indicate when segments of different kinds
+     are full. */
+
+  for (i = 0; i<SGGC_N_KINDS; i++)
+  { if (kind_chunks[i] == 0) /* big segment */
+    { kind_full[i] = 1;
+    }
+    else /* small segment */
+    { int j;
+      kind_full[i] = 0;
+      for (j = 0; j < (1 << SET_OFFSET_BITS); j += kind_chunks[i])
+      { kind_full[i] |= (set_bits_t)1 << j;
+      }
+    }
+  }
+
   /* Initialize sets of objects, as empty. */
 
+  set_init(&unused,SET_UNUSED_FREE_NEW);
   for (i = 0; i<SGGC_N_KINDS; i++) 
-  { set_init(&free_or_new[i],SET_FREE_OR_NEW);
+  { set_init(&free_or_new[i],SET_UNUSED_FREE_NEW);
   }
   set_init(&old_gen1,SET_OLD_GEN1);
   set_init(&old_gen2,SET_OLD_GEN2);
   set_init(&old_to_new,SET_OLD_TO_NEW);
   set_init(&to_look_at,SET_TO_LOOK_AT);
+
+  /* Initialize to no free objects of each kind. */
+
+  for (i = 0; i<SGGC_N_KINDS; i++)
+  { next_free[i] = SGGC_NO_OBJECT;
+  }
 
   /* Record maximum, and initialize to no segments in use. */
 
@@ -112,63 +147,63 @@ int sggc_init (int n_segments)
 
 /* ALLOCATE AN OBJECT OF SPECIFIED TYPE AND LENGTH.  The length is
    (possibly) used in determining the kind for the object, as
-   determined by the sggc_kind function provided by the application.
-   The value returned is SGGC_NO_OBJECT if allocation fails, even
-   after a full garbage collection is done. */
+   determined by the application's sggc_kind function, and is also
+   needed if the application's sggc_alloc_big_segment_data or
+   sggc_alloc_big_segment_aux functions are used.  The value returned
+   is SGGC_NO_OBJECT if allocation fails, but note that it might
+   succeed if retried after garbage collection is done (which is left
+   to the application to do). */
 
 sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
 {
-  int collected_already = 0;
-  unsigned kind = sggc_kind(type,length);
+  sggc_kind_t kind = sggc_kind(type,length);
   sggc_cptr_t v;
 
-  for (;;)
-  {
-    v = set_first (&free_or_new[kind]);
+  v = next_free[kind];
 
-    if (v == SGGC_NO_OBJECT)
-    { if (next_segment == max_segments)
-      { if (collected_already) 
-        { return SGGC_NO_OBJECT;
-        }
-        sggc_collect(2);
-        collected_already = 1;
-        continue;
-      }
-      v = SET_VAL(next_segment,0);
-      if (kind_chunks[kind] == 0)
-      { SET_SEGMENT(v) -> x.big.big = 1;
-        SET_SEGMENT(v) -> x.big.max_chunks = 0;
-      }
-      else
-      { SET_SEGMENT(v) -> x.small.big = 0;
-        SET_SEGMENT(v) -> x.small.kind = kind;
-        SET_SEGMENT(v) -> x.small.nchunks = sggc_nchunks (type, length);
-      }
-      set_add (&free_or_new[kind], v);
-      next_segment += 1;
-    }
+  if (v != SGGC_NO_OBJECT)
+  { next_free[kind] = set_next (&free_or_new[kind], v, 0);
   }
+  else
+  { 
+    if (next_segment == max_segments)
+    { return SGGC_NO_OBJECT;
+    }
+    sggc_segment[next_segment] = malloc (sizeof **sggc_segment);
+    if (sggc_segment[next_segment] == NULL)
+    { return SGGC_NO_OBJECT;
+    }
+    v = SET_VAL(next_segment,0);
 
-  for (;;)
-  {
+    struct set_segment *seg = SET_SEGMENT (next_segment);
+    set_segment_init (seg);
+    sggc_type[next_segment] = type;
+    next_segment += 1;
+
     if (kind_chunks[kind] == 0)
-    { char *data = sggc_alloc_big_segment_data (kind, length);
-      if (data == NULL)
-      { if (collected_already) 
-        { return SGGC_NO_OBJECT;
-        }
-        sggc_collect(2);
-        collected_already = 1;
-        continue;
-      }
-      sggc_data [SET_VAL_INDEX(v)] = data;
-      return v;
+    { seg->x.big.big = 1;
+      seg->x.big.max_chunks = 0;
     }
     else
-    { /* not done yet */
-      return SGGC_NO_OBJECT;
+    { seg->x.small.big = 0;
+      seg->x.small.kind = kind;
+      seg->x.small.nchunks = sggc_nchunks (type, length);
     }
+
+    set_add (&free_or_new[kind], v);
+  }
+
+  if (kind_chunks[kind] == 0) /* big segment */
+  { char *data = sggc_alloc_big_segment_data (kind, length);
+    if (data == NULL)
+    { return SGGC_NO_OBJECT;
+    }
+    sggc_data [SET_VAL_INDEX(v)] = data;
+    return v;
+  }
+  else /* small segment */
+  { /* not done yet */
+    return SGGC_NO_OBJECT;
   }
 }
 
@@ -227,6 +262,8 @@ void sggc_collect (int level)
     }
     v = set_next (&old_to_new, v, remove);
   }
+
+  has_gen0 = has_gen1 = 1;  /* we don't care */
 
   /* Get the application to take root pointers out of the free_or_new set,
      and put them in the to_look_at set. */

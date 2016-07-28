@@ -62,10 +62,10 @@ char **sggc_data;                  /* Pointer to array of pointers to arrays of
   (sggc_aux[i][SET_VAL_INDEX(cptr)] + SGGC_AUX##i##_SIZE * SET_VAL_OFFSET(cptr))
 
 
-/* TYPES AND KINDS OF SEGMENTS.  Types and kinds must fit in 8 bits, with
-   the kind being equal to the type if it is for a "big" segment.  The
-   array of types is allocated at initialization.  The kind of a small
-   segment is recorded in the segment description. */
+/* TYPES AND KINDS OF SEGMENTS.  Types and kinds must fit in 8 bits,
+   with the kind being equal to the type if it is for a "big" segment.
+   The kind of a small segment is recorded in the segment description.
+   The array of types for segments is allocated at initialization. */
 
 typedef unsigned char sggc_type_t;
 typedef unsigned char sggc_kind_t;
@@ -79,8 +79,8 @@ sggc_type_t *sggc_type;            /* Types of objects in each segment */
 /* Macro to find the kind of the segment containing an object. */
 
 #define SGGC_KIND(cptr) \
-  (SET_SEGMENT(cptr)->x.big.big ? SGGC_TYPE(cptr) \
-                                : SET_SEGMENT(cptr)->x.small.kind)
+  (SET_SEGMENT(SET_VAL_INDEX(cptr))->x.big.big ? SGGC_TYPE(cptr) \
+    : SET_SEGMENT(SET_VAL_INDEX(cptr))->x.small.kind)
 
 
 /* FUNCTIONS PROVIDED BY THE APPLICATION. */

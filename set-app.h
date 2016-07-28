@@ -28,7 +28,7 @@
    one set for each possible kind of object. */
 
 #define SET_CHAINS 5       /* Number of chains that can be used for sets */
-#  define SET_FREE_OR_NEW 0   /* Free or newly alloc'd objects, sets by kind */
+#  define SET_UNUSED_FREE_NEW 0  /* Unused, free or newly allocated objects */
 #  define SET_OLD_GEN1 1      /* Objects that survived one GC */
 #  define SET_OLD_GEN2 2      /* Objects that survived more than one GC */
 #  define SET_OLD_TO_NEW 3    /* Objects maybe having old-to-new references */
