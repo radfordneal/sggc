@@ -89,10 +89,7 @@ sggc_kind_t sggc_kind (sggc_type_t type, sggc_length_t length);
 sggc_nchunks_t sggc_nchunks (sggc_type_t type, sggc_length_t length);
 void sggc_find_root_ptrs (void);
 void sggc_find_object_ptrs (sggc_cptr_t cptr);
-char *sggc_alloc_big_segment_data (sggc_kind_t kind, sggc_length_t length);
-char *sggc_alloc_small_segment_data (sggc_kind_t kind);
 char *sggc_alloc_segment_aux (sggc_kind_t kind, int n);
-void sggc_free_segment_data (sggc_kind_t kind, char *);
 void sggc_free_segment_aux (sggc_kind_t kind, int n, char *);
 
 

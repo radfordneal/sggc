@@ -18,29 +18,6 @@ sggc_nchunks_t sggc_nchunks (sggc_type_t type, sggc_length_t length)
   return type<2 ? 1 : (4+length) / 4;
 }
 
-char *sggc_alloc_big_segment_data (sggc_kind_t kind, sggc_length_t length)
-{
-  switch (kind)
-  { case 0: 
-    { struct type0 *p = malloc (sizeof (struct type0));
-      return (char *) p;
-    }
-    case 1: 
-    { struct type1 *p = malloc (sizeof (struct type1));
-      p->x = nil;
-      p->y = nil;
-      return (char *) p;
-    }
-    case 2: 
-    { struct type2 *p
-               = malloc (sizeof (struct type2) + length * sizeof (int32_t));
-      p->len = length;
-      return (char *) p;
-    }
-    default: abort();
-  }
-}
-
 void sggc_find_root_ptrs (void)
 { sggc_look_at(nil);
   sggc_look_at(a);
@@ -68,6 +45,21 @@ static sggc_cptr_t alloc (sggc_type_t type, sggc_length_t length)
     { printf("CAN'T ALLOCATE\n");
       abort();
       exit(1);
+    }
+  }
+  switch (type)
+  { case 1: 
+    { struct type1 *p = (struct type1 *) SGGC_DATA(a);
+      p->x = p->y = nil;
+      break;
+    }
+    case 2:
+    { struct type2 *p = (struct type2 *) SGGC_DATA(a);
+      p->len = length;
+      break;
+    }
+    default:
+    { break;
     }
   }
   printf("ALLOC RETURNING %x\n",(unsigned)a);

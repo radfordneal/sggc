@@ -172,12 +172,15 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
   { printf("sggc_alloc: type %u, length %u\n",(unsigned)type,(unsigned)length);
   }
 
-  /* Find a segment for this object to go in (and offset within it). */
+  /* Find a segment for this object to go in (and offset within it). The 
+     object will be in free_or_new, but before next_free (for small segment), 
+     and so won't be  taken again (at least before next collection). */
 
   if (kind_chunks[kind] == 0) /* uses big segments */
   { v = set_first (&unused);
     if (v != SGGC_NO_OBJECT)
     { if (SGGC_DEBUG) printf("sggc_alloc: found %x in unused\n",(unsigned)v);
+      sggc_type[SET_VAL_INDEX(v)] = type;
       set_move_first (&unused, &free_or_new[kind]);
     }
   }
@@ -210,7 +213,7 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
 
     if (kind_chunks[kind] == 0)
     { seg->x.big.big = 1;
-      seg->x.big.max_chunks = 0;
+      seg->x.big.max_chunks = 0;  /* for now */
     }
     else
     { seg->x.small.big = 0;
@@ -220,10 +223,13 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
     set_add (&free_or_new[kind], v);
   }
 
-  /* Allocate space for data / auxiliary info, for a big segment. */
+  /* Allocate space for data, for a big segment. */
 
   if (kind_chunks[kind] == 0)
-  { char *data = sggc_alloc_big_segment_data (kind, length);
+  { sggc_nchunks_t nch = sggc_nchunks (type, length);
+    char *data = malloc ((size_t)nch * SGGC_CHUNK_SIZE);
+    if (SGGC_DEBUG) printf ("called malloc for %x (%d chunks): %p\n", 
+                             v, (int)nch, data);
     if (data == NULL)
     { return SGGC_NO_OBJECT;
     }
@@ -345,6 +351,9 @@ void sggc_collect (int level)
         if (SGGC_DEBUG) printf("Putting %x in unused\n",(unsigned)v);
         (void) set_remove (&free_or_new[i], v);
         (void) set_add (&unused, v);
+        if (SGGC_DEBUG) printf ("calling free for %x: %p\n", v, SGGC_DATA(v));
+        free (SGGC_DATA(v));
+        sggc_data [SET_VAL_INDEX(v)] = NULL;
       }
     }
   }
