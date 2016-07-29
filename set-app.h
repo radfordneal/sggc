@@ -51,12 +51,11 @@
     } big;                                  /*  allocated; 0 if size fixed  */ \
     struct                 /* For small segments... */ \
     { unsigned big : 1;       /* 0 for a segment with several small objects */ \
-      unsigned phase1 : 5;    /* Managed by the application; suitable for   */ \
-      unsigned phase2 : 5;    /*  the "phases" for allocations of auxiliary */ \
-      unsigned phase3 : 5;    /*  information for this segment              */ \
+      unsigned unused : 7; \
       unsigned kind : 8;      /* The kind of segment (equal to type if big) */ \
-      unsigned nchunks : 8;   /* Number of storage chunks allowed for object*/ \
-    } small; \
+      unsigned phase1 : 8;    /* Managed by the application; suitable for   */ \
+      unsigned phase2 : 8;    /*  the "phases" for allocations of auxiliary */ \
+    } small;                  /*  information for this segment              */ \
   } x;
 
 
@@ -66,9 +65,8 @@
 
 
 /* POINTER TO ARRAY OF POINTERS TO SEGMENTS.  This array of pointers
-   is allocated when the GC is initialized (and possibly reallocated
-   with increased size later), with the segments themselves allocated
-   later, as needed. */
+   is allocated when the GC is initialized, with the segments themselves
+   allocated later, as needed. */
 
 struct set_segment **sggc_segment;
 

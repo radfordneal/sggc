@@ -18,8 +18,17 @@
    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
 
+#include <stdio.h>
 #include <stdlib.h>
 #include "sggc-app.h"
+
+
+/* DEBUGGING FLAG.  Set to 1 to enable debug output.  May be set by a compiler
+   flag, in which case it isn't overridden here. */
+
+#ifndef SGGC_DEBUG
+#define SGGC_DEBUG 1
+#endif
 
 
 /* NUMBERS OF CHUNKS ALLOWED FOR AN OBJECT IN KINDS OF SEGMENTS.  Zero
@@ -53,14 +62,14 @@ static sggc_cptr_t next_free[SGGC_N_KINDS];
 
 /* MAXIMUM NUMBER OF SEGMENTS, AND INDEX OF NEXT SEGMENT TO USE. */
 
-static set_offset_t max_segments;
-static set_offset_t next_segment;
+static set_offset_t max_segments;             /* Max segments, fixed for now */
+static set_offset_t next_segment;             /* Number of segments in use */
 
 
 /* FLAGS FOR CHECKING FOR OLD-NEW REFERENCES. */
 
-static int has_gen0;   /* Set if has gen2->gen0 references */
-static int has_gen1;   /* Set if has gen2->gen1 referendes */
+static int has_gen0;                          /* Has gen2->gen0 references? */
+static int has_gen1;                          /* Has gen2->gen1 references? */
 
 
 /* INITIALIZE SEGMENTED MEMORY.  Allocates space for pointers for the
@@ -72,8 +81,8 @@ int sggc_init (int n_segments)
   int i;
 
   /* Allocate space for pointers to segment descriptors, data, and
-     possibly auxiliary information for segments.  The information for
-     a segment these point to is allocated later, when the segment is
+     possibly auxiliary information for segments.  Information for
+     segments these point to is allocated later, when the segment is
      actually needed. */
 
   sggc_segment = malloc (n_segments * sizeof *sggc_segment);
@@ -83,14 +92,14 @@ int sggc_init (int n_segments)
 
   sggc_data = malloc (n_segments * sizeof *sggc_data);
   if (sggc_data == NULL)
-  { return 1;
+  { return 2;
   }
 
 # if SGGC_AUX_ITEMS > 0
   { for (i = 0; i<SGGC_AUX_ITEMS; i++)
     { sggc_aux[i] = malloc (n_segments * sizeof *sggc_aux[i]);
       if (sggc_aux[i] == NULL)
-      { return 1;
+      { return 3;
       }
     }
   }
@@ -100,7 +109,7 @@ int sggc_init (int n_segments)
 
   sggc_type = malloc (n_segments * sizeof *sggc_type);
   if (sggc_type == NULL)
-  { return 1;
+  { return 4;
   }
 
   /* Initialize bit vectors that indicate when segments of different kinds
@@ -136,7 +145,7 @@ int sggc_init (int n_segments)
   { next_free[i] = SGGC_NO_OBJECT;
   }
 
-  /* Record maximum, and initialize to no segments in use. */
+  /* Record maximum segments, and initialize to no segments in use. */
 
   max_segments = n_segments;
   next_segment = 0;
@@ -151,20 +160,36 @@ int sggc_init (int n_segments)
    needed if the application's sggc_alloc_big_segment_data or
    sggc_alloc_big_segment_aux functions are used.  The value returned
    is SGGC_NO_OBJECT if allocation fails, but note that it might
-   succeed if retried after garbage collection is done (which is left
-   to the application to do). */
+   succeed if retried after garbage collection is done (but this is
+   left to the application to do if it wants to). */
 
 sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
 {
   sggc_kind_t kind = sggc_kind(type,length);
   sggc_cptr_t v;
 
-  v = next_free[kind];
-
-  if (v != SGGC_NO_OBJECT)
-  { next_free[kind] = set_next (&free_or_new[kind], v, 0);
+  if (SGGC_DEBUG) 
+  { printf("sggc_alloc: type %u, length %u\n",(unsigned)type,(unsigned)length);
   }
-  else
+
+  /* Find a segment for this object to go in (and offset within it). */
+
+  if (kind_chunks[kind] == 0) /* uses big segments */
+  { v = set_first (&unused);
+    if (v != SGGC_NO_OBJECT)
+    { if (SGGC_DEBUG) printf("sggc_alloc: found %x in unused\n",(unsigned)v);
+      set_move_first (&unused, &free_or_new[kind]);
+    }
+  }
+  else /* uses small segments */
+  { v = next_free[kind]; 
+    if (v != SGGC_NO_OBJECT)
+    { next_free[kind] = set_next (&free_or_new[kind], v, 1);
+      if (SGGC_DEBUG) printf("sggc_alloc: found %x in next_free\n",(unsigned)v);
+    }
+  }
+
+  if (v == SGGC_NO_OBJECT)
   { 
     if (next_segment == max_segments)
     { return SGGC_NO_OBJECT;
@@ -174,6 +199,9 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
     { return SGGC_NO_OBJECT;
     }
     v = SET_VAL(next_segment,0);
+    if (SGGC_DEBUG) 
+    { printf("sggc_alloc: created %x in new segment\n", (unsigned)v);
+    }
 
     struct set_segment *seg = SET_SEGMENT (next_segment);
     set_segment_init (seg);
@@ -187,24 +215,22 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
     else
     { seg->x.small.big = 0;
       seg->x.small.kind = kind;
-      seg->x.small.nchunks = sggc_nchunks (type, length);
     }
 
     set_add (&free_or_new[kind], v);
   }
 
-  if (kind_chunks[kind] == 0) /* big segment */
+  /* Allocate space for data / auxiliary info, for a big segment. */
+
+  if (kind_chunks[kind] == 0)
   { char *data = sggc_alloc_big_segment_data (kind, length);
     if (data == NULL)
     { return SGGC_NO_OBJECT;
     }
     sggc_data [SET_VAL_INDEX(v)] = data;
-    return v;
   }
-  else /* small segment */
-  { /* not done yet */
-    return SGGC_NO_OBJECT;
-  }
+
+  return v;
 }
 
 
@@ -220,6 +246,9 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
 void sggc_collect (int level)
 { 
   sggc_cptr_t v;
+  int i;
+
+  if (SGGC_DEBUG) printf("Collecting at level %d\n",level);
 
   if (set_first(&to_look_at) != SET_NO_VALUE) abort();
 
@@ -231,12 +260,14 @@ void sggc_collect (int level)
   if (level == 2)
   { for (v = set_first(&old_gen2); v!=SET_NO_VALUE; v = set_next(&old_gen2,v,0))
     { set_add (&free_or_new[SGGC_KIND(v)], v);
+      if (SGGC_DEBUG) printf("Put %x from old_gen2 in free\n",(unsigned)v);
     }
   }
 
   if (level >= 1)
   { for (v = set_first(&old_gen1); v!=SET_NO_VALUE; v = set_next(&old_gen1,v,0))
     { set_add (&free_or_new[SGGC_KIND(v)], v);
+      if (SGGC_DEBUG) printf("Put %x from old_gen1 in free\n",(unsigned)v);
     }
   }
 
@@ -245,6 +276,7 @@ void sggc_collect (int level)
   v = set_first(&old_to_new);
   while (v != SET_NO_VALUE)
   { int remove;
+    if (SGGC_DEBUG) printf("Followed old->new in %x\n",(unsigned)v);
     if (set_contains (&old_gen1, v))
     { has_gen0 = has_gen1 = 1;  /* we don't care */
       sggc_find_object_ptrs (v);
@@ -283,15 +315,38 @@ void sggc_collect (int level)
     }
 
     (void) set_remove (&to_look_at, v);
+    if (SGGC_DEBUG) printf("Looking at %x\n",(unsigned)v);
 
     if (level > 0 && set_remove (&old_gen1, v))
     { set_add (&old_gen2, v);
+      if (SGGC_DEBUG) printf("Now %x is in old_gen2\n",(unsigned)v);
     }
     else if (level < 2 || !set_contains (&old_gen2, v))
     { set_add (&old_gen1, v); 
+      if (SGGC_DEBUG) printf("Now %x is in old_gen1\n",(unsigned)v);
+    }
+    else
+    { if (SGGC_DEBUG) printf("No generation change for %x (%d %d)\n",
+        (unsigned)v, set_contains(&old_gen1,v), set_contains(&old_gen2,v));
     }
 
     sggc_find_object_ptrs (v);
+  }
+
+  /* Move big segments to the 'unused' set, while freeing their storage. */
+
+  for (i = 0; i < SGGC_N_TYPES; i++)
+  { if (kind_chunks[i] == 0)
+    { for (;;)
+      { v = set_first (&free_or_new[i]);
+        if (v == SGGC_NO_OBJECT) 
+        { break;
+        }
+        if (SGGC_DEBUG) printf("Putting %x in unused\n",(unsigned)v);
+        (void) set_remove (&free_or_new[i], v);
+        (void) set_add (&unused, v);
+      }
+    }
   }
 }
 
@@ -315,6 +370,7 @@ void sggc_look_at (sggc_cptr_t ptr)
     }
     if (set_remove(&free_or_new[SGGC_KIND(ptr)],ptr))
     { set_add (&to_look_at, ptr);
+      if (SGGC_DEBUG) printf("Will look at %x\n",(unsigned)ptr);
     }
   }
 }

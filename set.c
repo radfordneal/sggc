@@ -23,9 +23,13 @@
 
 
 /* DEBUGGING CHECKS.  These check validity of data, calling abort if
-   the check fails.  Enabled only if SET_DEBUG is defined to be non-zero. */
+   the check fails.  Enabled only if SET_DEBUG is defined to be 1.
+   This may be done with a compiler flag, in which case it isn't
+   overridden here. */
 
+#ifndef SET_DEBUG
 #define SET_DEBUG 1
+#endif
 
 #define CHK_CHAIN(chain) \
   do { \
@@ -371,9 +375,9 @@ set_bits_t set_segment_bits (struct set *set, set_value_t val)
 
 
 /* MOVE THE FIRST SEGMENT OF A SET TO ANOTHER SET.  Adds the first
-   segment of 'src' to 'dst', removing it from 'src'.  It is an error
-   for 'src' to be empty, or for its first segment to be empty, or for
-   'src' and 'dst' to use different chains. */
+   segment of 'src' as the first element of 'dst', removing it from
+   'src'.  It is an error for 'src' to be empty, or for its first
+   segment to be empty, or for 'src' and 'dst' to use different chains. */
 
 void set_move_first (struct set *src, struct set *dst)
 {
@@ -406,10 +410,10 @@ void set_move_first (struct set *src, struct set *dst)
 
 
 /* MOVE THE SEGMENT AFTER THAT CONTAINING AN ELEMENT TO ANOTHER SET.
-   Adds the first segment after 'val' in 'src' to 'dst', removing it from
-   'src'.  It is an error for there to be no next segment, or for the
-   next segment to be empty. or for 'val' and 'dst' to use different
-   chains. */
+   Adds the first segment after 'val' of 'src' as the first element of
+   'dst', removing it from 'src'.  It is an error for there to be no
+   next segment, or for the next segment to be empty. or for 'val' and
+   'dst' to use different chains. */
 
 void set_move_next (struct set *src, set_value_t val, struct set *dst)
 {

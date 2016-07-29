@@ -56,21 +56,42 @@ void sggc_find_object_ptrs (sggc_cptr_t cptr)
   }
 }
 
-int main (void)
+static sggc_cptr_t alloc (sggc_type_t type, sggc_length_t length)
 {
-  printf("About to call sggc_init\n");
-  sggc_init(1000);
-  printf("Done sggc_init\n");
-  printf("Allocating nil\n");
-  nil = sggc_alloc (0, 0);
-  printf("Allocating a\n");
-  a = sggc_alloc (1, 1);
-  printf("Allocating b\n");
-  b = sggc_alloc (2, 10);
-  printf("Allocating a again\n");
-  a = sggc_alloc (1, 1);
-  printf("About to call sggc_collect\n");
-  sggc_collect(0);
-  printf("Done sggc_collect\n");
+  sggc_cptr_t a;
+  a = sggc_alloc(type,length);
+  if (a == SGGC_NO_OBJECT)
+  { printf("ABOUT TO CALL sggc_collect IN ALLOC\n");
+    sggc_collect(2);
+    a = sggc_alloc(type,length);
+    if (a == SGGC_NO_OBJECT)
+    { printf("CAN'T ALLOCATE\n");
+      abort();
+      exit(1);
+    }
+  }
+  printf("ALLOC RETURNING %x\n",(unsigned)a);
+  return a;
+}
+
+int main (void)
+{ int i;
+  printf("ABOUT TO CALL sggc_init\n");
+  sggc_init(4);
+  printf("DONE sggc_init\n");
+  printf("ALLOCATING nil\n");
+  nil = alloc (0, 0);
+  for (i = 0; i<10; i++)
+  { printf("\nITERATION %d\n",i);
+    printf("ALLOCATING a\n");
+    a = alloc (1, 1);
+    printf("ALLOCATING b\n");
+    b = alloc (2, 10);
+    printf("ALLOCATING a AGAIN\n");
+    a = alloc (1, 1);
+    printf("ABOUT TO CALL sggc_collect\n");
+    sggc_collect(0);
+    printf("DONE sggc_collect\n");
+  }
   return 0;
 }
