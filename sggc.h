@@ -107,3 +107,4 @@ void sggc_collect (int level);
 void sggc_look_at (sggc_cptr_t cptr);
 void sggc_old_to_new_check (sggc_cptr_t from_ptr, sggc_cptr_t to_ptr);
 int sggc_youngest_generation (sggc_cptr_t from_ptr);
+int sggc_not_marked (sggc_cptr_t ptr);

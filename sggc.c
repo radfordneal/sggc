@@ -440,3 +440,11 @@ int sggc_youngest_generation (sggc_cptr_t from_ptr)
 {
   return set_contains (&old_to_new, from_ptr);
 }
+
+
+/* TEST WHETHER AN OBJECT IS NOT (YET) MARKED AS IN USE. */
+
+int sggc_not_marked (sggc_cptr_t ptr)
+{
+  return !set_chain_contains (SET_UNUSED_FREE_NEW, ptr);
+}
