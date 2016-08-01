@@ -1,5 +1,5 @@
 /* SGGC - A LIBRARY SUPPORTING SEGMENTED GENERATIONAL GARBAGE COLLECTION.
-          Garbage collection routines.
+          Segmented garbage collection - function definitions
 
    Copyright (c) 2016 Radford M. Neal.
 
@@ -34,7 +34,8 @@
 /* NUMBERS OF CHUNKS ALLOWED FOR AN OBJECT IN KINDS OF SEGMENTS.  Zero
    means that this kind of segment is big, containing one object of
    size found using sggc_chunks.  The application must define the
-   initialization as SGGC_KIND_CHUNKS. */
+   initialization as SGGC_KIND_CHUNKS.  Must not be greater than
+   SGGC_CHUNKS_IN_SMALL_SEGMENT. */
 
 static int kind_chunks[SGGC_N_KINDS] = SGGC_KIND_CHUNKS;
 
@@ -78,7 +79,7 @@ static int has_gen1;                          /* Has gen2->gen1 references? */
 
 int sggc_init (int n_segments)
 {
-  int i;
+  int i, j, k;
 
   /* Allocate space for pointers to segment descriptors, data, and
      possibly auxiliary information for segments.  Information for
@@ -96,7 +97,7 @@ int sggc_init (int n_segments)
   }
 
 # if SGGC_AUX_ITEMS > 0
-  { for (i = 0; i<SGGC_AUX_ITEMS; i++)
+  { for (i = 0; i < SGGC_AUX_ITEMS; i++)
     { sggc_aux[i] = malloc (n_segments * sizeof *sggc_aux[i]);
       if (sggc_aux[i] == NULL)
       { return 3;
@@ -115,14 +116,14 @@ int sggc_init (int n_segments)
   /* Initialize bit vectors that indicate when segments of different kinds
      are full. */
 
-  for (i = 0; i<SGGC_N_KINDS; i++)
-  { if (kind_chunks[i] == 0) /* big segment */
-    { kind_full[i] = 1;
+  for (k = 0; k < SGGC_N_KINDS; k++)
+  { if (kind_chunks[k] == 0) /* big segment */
+    { kind_full[k] = 1;
     }
     else /* small segment */
-    { int j;
-      kind_full[i] = 0;
-      for (j = 0; j < (1 << SET_OFFSET_BITS); j += kind_chunks[i])
+    { if (kind_chunks[k] > SGGC_CHUNKS_IN_SMALL_SEGMENT) abort();
+      kind_full[k] = 0;
+      for (j = 0; j < SGGC_CHUNKS_IN_SMALL_SEGMENT; j += kind_chunks[i])
       { kind_full[i] |= (set_bits_t)1 << j;
       }
     }
@@ -131,8 +132,8 @@ int sggc_init (int n_segments)
   /* Initialize sets of objects, as empty. */
 
   set_init(&unused,SET_UNUSED_FREE_NEW);
-  for (i = 0; i<SGGC_N_KINDS; i++) 
-  { set_init(&free_or_new[i],SET_UNUSED_FREE_NEW);
+  for (k = 0; k < SGGC_N_KINDS; k++) 
+  { set_init(&free_or_new[k],SET_UNUSED_FREE_NEW);
   }
   set_init(&old_gen1,SET_OLD_GEN1);
   set_init(&old_gen2,SET_OLD_GEN2);
@@ -141,8 +142,8 @@ int sggc_init (int n_segments)
 
   /* Initialize to no free objects of each kind. */
 
-  for (i = 0; i<SGGC_N_KINDS; i++)
-  { next_free[i] = SGGC_NO_OBJECT;
+  for (k = 0; k < SGGC_N_KINDS; k++)
+  { next_free[k] = SGGC_NO_OBJECT;
   }
 
   /* Record maximum segments, and initialize to no segments in use. */
@@ -167,6 +168,7 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
 {
   sggc_kind_t kind = sggc_kind(type,length);
   sggc_cptr_t v;
+  int i;
 
   if (SGGC_DEBUG) 
   { printf("sggc_alloc: type %u, length %u\n",(unsigned)type,(unsigned)length);
@@ -211,19 +213,25 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
     sggc_type[next_segment] = type;
     next_segment += 1;
 
-    if (kind_chunks[kind] == 0)
+    if (kind_chunks[kind] == 0) /* big segment */
     { seg->x.big.big = 1;
       seg->x.big.max_chunks = 0;  /* for now */
     }
-    else
-    { seg->x.small.big = 0;
+    else /* small segment */
+    { char *data;
+      data = malloc ((size_t) SGGC_CHUNK_SIZE * SGGC_CHUNKS_IN_SMALL_SEGMENT);
+      if (data == NULL) 
+      { return SGGC_NO_OBJECT;
+      }
+      seg->x.small.big = 0;
       seg->x.small.kind = kind;
     }
 
     set_add (&free_or_new[kind], v);
+    /* NEED MORE HERE */
   }
 
-  /* Allocate space for data, for a big segment. */
+  /* Allocate space for data for a big segment. */
 
   if (kind_chunks[kind] == 0)
   { sggc_nchunks_t nch = sggc_nchunks (type, length);
@@ -252,7 +260,7 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
 void sggc_collect (int level)
 { 
   sggc_cptr_t v;
-  int i;
+  int k;
 
   if (SGGC_DEBUG) printf("Collecting at level %d\n",level);
 
@@ -341,15 +349,15 @@ void sggc_collect (int level)
 
   /* Move big segments to the 'unused' set, while freeing their storage. */
 
-  for (i = 0; i < SGGC_N_TYPES; i++)
-  { if (kind_chunks[i] == 0)
+  for (k = 0; k < SGGC_N_TYPES; k++)
+  { if (kind_chunks[k] == 0)
     { for (;;)
-      { v = set_first (&free_or_new[i]);
+      { v = set_first (&free_or_new[k]);
         if (v == SGGC_NO_OBJECT) 
         { break;
         }
         if (SGGC_DEBUG) printf("Putting %x in unused\n",(unsigned)v);
-        (void) set_remove (&free_or_new[i], v);
+        (void) set_remove (&free_or_new[k], v);
         (void) set_add (&unused, v);
         if (SGGC_DEBUG) printf ("calling free for %x: %p\n", v, SGGC_DATA(v));
         free (SGGC_DATA(v));
@@ -363,8 +371,14 @@ void sggc_collect (int level)
 /* TELL THE GARBAGE COLLECTOR THAT AN OBJECT NEEDS TO BE LOOKED AT.
    Called by the application from within its sggc_find_root_ptrs or
    sggc_find_object_ptrs functions, to signal to the garbage collector
-   that it has found a pointer to an object that must also be looked at,
-   and also that it is not free. */
+   that it has found a pointer to an object that must also be looked
+   at, and also that it is not free.  If the object is presently in
+   the free_or_new set, it will be removed, and put in the set of
+   objects to be looked at.  (If it is not in free_or_new, it has
+   already been looked at, and so needn't be looked at again.)
+
+   The global has_gen0 or has_gen1 flag is set to 1 if ptr is in the
+   corresponding generation. */
 
 void sggc_look_at (sggc_cptr_t ptr)
 {

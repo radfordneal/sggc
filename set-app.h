@@ -1,5 +1,5 @@
 /* SGGC - A LIBRARY SUPPORTING SEGMENTED GENERATIONAL GARBAGE COLLECTION.
-          Header for use of the facility for maintaining sets of objects
+          Header for sggc's use of the facility for maintaining sets of objects
 
    Copyright (c) 2016 Radford M. Neal.
 
@@ -23,9 +23,9 @@
 #define SET_OFFSET_BITS 6  /* Maximum for using 64-bit shift/mask operations */
 
 
-/* CHAINS FOR LINKING SEGMENTS IN SETS.  All sets used have their own chain,
-   except that the SET_FREE_OR_NEW chain is shared amongst a collection of sets,
-   one set for each possible kind of object. */
+/* CHAINS FOR LINKING SEGMENTS IN SETS.  All sets used have their own
+   chain, except that the SET_UNUSED_FREE_NEW chain is shared amongst 
+   a collection of sets, one set for each possible kind of object. */
 
 #define SET_CHAINS 5       /* Number of chains that can be used for sets */
 #  define SET_UNUSED_FREE_NEW 0  /* Unused, free or newly allocated objects */

@@ -1,5 +1,5 @@
 /* SGGC - A LIBRARY SUPPORTING SEGMENTED GENERATIONAL GARBAGE COLLECTION.
-          Header file for the garbage collection routines.
+          Segmented garbage collection - header file
 
    Copyright (c) 2016 Radford M. Neal.
 
@@ -26,7 +26,7 @@
 #include "set-app.h"
 
 
-/* COMPRESSED POINTER (INDEX, OFFSET) TYPE. */
+/* COMPRESSED POINTER (INDEX, OFFSET) TYPE, AND NO OBJECT CONSTANT. */
 
 typedef set_index_t sggc_index_t;  /* Type of segment index */
 typedef set_value_t sggc_cptr_t;   /* Type of compressed point (index,offset) */
@@ -39,10 +39,16 @@ typedef set_value_t sggc_cptr_t;   /* Type of compressed point (index,offset) */
    the maximum number of segments, and are allocated at initialization.  
    Pointers in these arrays are set when segments are needed, by the 
    application, since the application may do tricks like making some of
-   of these be shared between segments, if it knows this is possible. */
+   of these be shared between segments, if it knows this is possible.
+
+   Main data is for one object in a 'big' segment, and for several in a
+   'small' segment, having total number of chunks no more than given by
+   SGGC_CHUNKS_IN_SMALL_SEGMENT. */
 
 char **sggc_data;                  /* Pointer to array of pointers to arrays of 
                                       data blocks for objects within segments */
+
+#define SGGC_CHUNKS_IN_SMALL_SEGMENT (1 << SET_OFFSET_BITS)
 
 /* Macro to get data pointer for an object, from its index and offset. */
 
