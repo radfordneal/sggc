@@ -168,7 +168,6 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
 {
   sggc_kind_t kind = sggc_kind(type,length);
   sggc_cptr_t v;
-  int i;
 
   if (SGGC_DEBUG) 
   { printf("sggc_alloc: type %u, length %u\n",(unsigned)type,(unsigned)length);
@@ -176,13 +175,12 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
 
   /* Find a segment for this object to go in (and offset within it). The 
      object will be in free_or_new, but before next_free (for small segment), 
-     and so won't be  taken again (at least before next collection). */
+     and so won't be taken again (at least before next collection). */
 
   if (kind_chunks[kind] == 0) /* uses big segments */
   { v = set_first (&unused, 0);
     if (v != SGGC_NO_OBJECT)
     { if (SGGC_DEBUG) printf("sggc_alloc: found %x in unused\n",(unsigned)v);
-      sggc_type[SET_VAL_INDEX(v)] = type;
       set_move_first (&unused, &free_or_new[kind]);
     }
   }
@@ -199,49 +197,63 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
     if (next_segment == max_segments)
     { return SGGC_NO_OBJECT;
     }
+
     sggc_segment[next_segment] = malloc (sizeof **sggc_segment);
     if (sggc_segment[next_segment] == NULL)
     { return SGGC_NO_OBJECT;
     }
+
+    set_segment_init (SET_SEGMENT(next_segment));
+    sggc_data[next_segment] = NULL;
+    
     v = SET_VAL(next_segment,0);
     if (SGGC_DEBUG) 
     { printf("sggc_alloc: created %x in new segment\n", (unsigned)v);
     }
 
-    struct set_segment *seg = SET_SEGMENT (next_segment);
-    set_segment_init (seg);
-    sggc_type[next_segment] = type;
     next_segment += 1;
+  }
+
+  if (sggc_data[SET_VAL_INDEX(v)] == NULL)
+  {
+    struct set_segment *seg = SET_SEGMENT(SET_VAL_INDEX(v));
+    char *data;
+
+    sggc_type[SET_VAL_INDEX(v)] = type;
 
     if (kind_chunks[kind] == 0) /* big segment */
-    { seg->x.big.big = 1;
-      seg->x.big.max_chunks = 0;  /* for now */
+    { 
+      sggc_nchunks_t nch = sggc_nchunks (type, length);
+
+      seg->x.big.big = 1;
+      seg->x.big.max_chunks = (nch >> SGGC_CHUNK_BITS) == 0 ? nch : 0;
+
+      data = malloc ((size_t) SGGC_CHUNK_SIZE * nch);
+      if (SGGC_DEBUG) printf ("called malloc for %x (big, %d chunks): %p\n", 
+                               v, (int)nch, data);
     }
+
     else /* small segment */
-    { char *data;
-      data = malloc ((size_t) SGGC_CHUNK_SIZE * SGGC_CHUNKS_IN_SMALL_SEGMENT);
-      if (data == NULL) 
-      { return SGGC_NO_OBJECT;
-      }
+    { 
       seg->x.small.big = 0;
       seg->x.small.kind = kind;
+
+      data = malloc ((size_t) SGGC_CHUNK_SIZE * SGGC_CHUNKS_IN_SMALL_SEGMENT);
+      if (SGGC_DEBUG) printf ("called malloc for %x (small, %d chunks): %p\n", 
+                               v, (int)SGGC_CHUNKS_IN_SMALL_SEGMENT, data);
+    }
+
+    sggc_data [SET_VAL_INDEX(v)] = data;
+
+    if (data == NULL) 
+    { return SGGC_NO_OBJECT;
     }
 
     set_add (&free_or_new[kind], v);
-    /* NEED MORE HERE */
-  }
 
-  /* Allocate space for data for a big segment. */
-
-  if (kind_chunks[kind] == 0)
-  { sggc_nchunks_t nch = sggc_nchunks (type, length);
-    char *data = malloc ((size_t)nch * SGGC_CHUNK_SIZE);
-    if (SGGC_DEBUG) printf ("called malloc for %x (%d chunks): %p\n", 
-                             v, (int)nch, data);
-    if (data == NULL)
-    { return SGGC_NO_OBJECT;
+    if (kind_chunks[kind] != 0)
+    { set_assign_segment_bits (&free_or_new[kind], v, kind_full[kind]);
     }
-    sggc_data [SET_VAL_INDEX(v)] = data;
   }
 
   return v;

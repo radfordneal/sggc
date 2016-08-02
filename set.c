@@ -382,6 +382,21 @@ set_bits_t set_segment_bits (struct set *set, set_value_t val)
 }
 
 
+/* ASSIGN BITS INDICATING MEMBERSHIP FOR THE SEGMENT CONTAINING AN ELEMENT. */
+
+void set_assign_segment_bits (struct set *set, set_value_t val, set_bits_t b)
+{
+  set_index_t index = SET_VAL_INDEX(val);
+  set_offset_t offset = SET_VAL_OFFSET(val);
+  struct set_segment *seg = SET_SEGMENT(index);
+
+  CHK_SET(set);
+  CHK_SEGMENT(seg,set->chain);
+
+  seg->bits[set->chain] = b;
+}
+
+
 /* MOVE THE FIRST SEGMENT OF A SET TO ANOTHER SET.  Adds the first
    segment of 'src' as the first element of 'dst', removing it from
    'src'.  It is an error for 'src' to be empty, or for its first

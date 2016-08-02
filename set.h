@@ -62,10 +62,10 @@ typedef uint32_t set_value_t;
 #endif
 
 
-/* SPECIAL NULL VALUE.  Uses all 1s in the index, which must therefore not
-   be used otherwise. */
+/* SPECIAL NULL VALUE.  Uses all 1s in the index and offset.  This value must 
+   not be used for an actual object. */
 
-#define SET_NO_VALUE SET_VAL(~0,0)
+#define SET_NO_VALUE SET_VAL(~0,(1<<SET_OFFSET_BITS)-1)
 
 
 /* SPECIAL INDEXES USED IN CHAINS.  These are not used in real (index, offset)
@@ -113,6 +113,7 @@ set_value_t set_first (struct set *set, int remove);
 set_value_t set_next (struct set *set, set_value_t val, int remove);
 set_bits_t set_first_bits (struct set *set);
 set_bits_t set_segment_bits (struct set *set, set_value_t val);
+void set_assign_segment_bits (struct set *set, set_value_t val, set_bits_t b);
 void set_move_first (struct set *src, struct set *dst);
 void set_move_next (struct set *src, set_value_t val, struct set *dst);
 void set_move_all (struct set *src, struct set *dst);
