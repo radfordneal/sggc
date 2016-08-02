@@ -229,8 +229,10 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
       seg->x.big.max_chunks = (nch >> SGGC_CHUNK_BITS) == 0 ? nch : 0;
 
       data = malloc ((size_t) SGGC_CHUNK_SIZE * nch);
-      if (SGGC_DEBUG) printf ("called malloc for %x (big, %d chunks): %p\n", 
-                               v, (int)nch, data);
+      if (SGGC_DEBUG) 
+      { printf ("sggc_alloc: called malloc for %x (big, %d chunks): %p\n", 
+                 v, (int)nch, data);
+      }
     }
 
     else /* small segment */
@@ -239,8 +241,10 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
       seg->x.small.kind = kind;
 
       data = malloc ((size_t) SGGC_CHUNK_SIZE * SGGC_CHUNKS_IN_SMALL_SEGMENT);
-      if (SGGC_DEBUG) printf ("called malloc for %x (small, %d chunks): %p\n", 
-                               v, (int)SGGC_CHUNKS_IN_SMALL_SEGMENT, data);
+      if (SGGC_DEBUG) 
+      { printf ("sggc_alloc: called malloc for %x (small, %d chunks): %p\n", 
+                 v, (int)SGGC_CHUNKS_IN_SMALL_SEGMENT, data);
+      }
     }
 
     sggc_data [SET_VAL_INDEX(v)] = data;
@@ -274,7 +278,7 @@ void sggc_collect (int level)
   sggc_cptr_t v;
   int k;
 
-  if (SGGC_DEBUG) printf("Collecting at level %d\n",level);
+  if (SGGC_DEBUG) printf("sggc_collect: level %d\n",level);
 
   if (set_first(&to_look_at, 0) != SET_NO_VALUE) abort();
 
@@ -288,7 +292,9 @@ void sggc_collect (int level)
          v != SET_NO_VALUE; 
          v = set_next(&old_gen2,v,0))
     { set_add (&free_or_new[SGGC_KIND(v)], v);
-      if (SGGC_DEBUG) printf("Put %x from old_gen2 in free\n",(unsigned)v);
+      if (SGGC_DEBUG) 
+      { printf("sggc_collect: put %x from old_gen2 in free\n",(unsigned)v);
+      }
     }
   }
 
@@ -297,7 +303,9 @@ void sggc_collect (int level)
          v != SET_NO_VALUE; 
          v = set_next(&old_gen1,v,0))
     { set_add (&free_or_new[SGGC_KIND(v)], v);
-      if (SGGC_DEBUG) printf("Put %x from old_gen1 in free\n",(unsigned)v);
+      if (SGGC_DEBUG) 
+      { printf("sggc_collect: put %x from old_gen1 in free\n",(unsigned)v);
+      }
     }
   }
 
@@ -306,7 +314,9 @@ void sggc_collect (int level)
   v = set_first(&old_to_new, 0);
   while (v != SET_NO_VALUE)
   { int remove;
-    if (SGGC_DEBUG) printf("Followed old->new in %x\n",(unsigned)v);
+    if (SGGC_DEBUG) 
+    { printf("sggc_collect: old->new followed for %x\n",(unsigned)v);
+    }
     if (set_contains (&old_gen1, v))
     { has_gen0 = has_gen1 = 1;  /* we don't care */
       sggc_find_object_ptrs (v);
@@ -321,6 +331,14 @@ void sggc_collect (int level)
     { has_gen0 = 0; has_gen1 = 1;  /* look only for generation 0 */
       sggc_find_object_ptrs (v);
       remove = has_gen0;
+    }
+    if (SGGC_DEBUG) 
+    { if (remove) 
+      { printf("sggc_collect: old->new for %x no longer needed\n",(unsigned)v);
+      }
+      else 
+      { printf("sggc_collect: old->new for %x still needed\n",(unsigned)v);
+      }
     }
     v = set_next (&old_to_new, v, remove);
   }
@@ -345,19 +363,15 @@ int phase = 1;
   { 
     while ((v = set_first (&to_look_at, 1)) != SGGC_NO_OBJECT)
     {
-      if (SGGC_DEBUG) printf("Looking at %x\n",(unsigned)v);
+      if (SGGC_DEBUG) printf("sggc_collect: looking at %x\n",(unsigned)v);
   
       if (level > 0 && set_remove (&old_gen1, v))
       { set_add (&old_gen2, v);
-        if (SGGC_DEBUG) printf("Now %x is in old_gen2\n",(unsigned)v);
+        if (SGGC_DEBUG) printf("sggc_collect: %x now old_gen2\n",(unsigned)v);
       }
       else if (level < 2 || !set_contains (&old_gen2, v))
       { set_add (&old_gen1, v); 
-        if (SGGC_DEBUG) printf("Now %x is in old_gen1\n",(unsigned)v);
-      }
-      else
-      { if (SGGC_DEBUG) printf("No generation change for %x (%d %d)\n",
-          (unsigned)v, set_contains(&old_gen1,v), set_contains(&old_gen2,v));
+        if (SGGC_DEBUG) printf("sggc_collect: %x now old_gen1\n",(unsigned)v);
       }
   
       sggc_find_object_ptrs (v);
@@ -374,10 +388,14 @@ int phase = 1;
   for (k = 0; k < SGGC_N_TYPES; k++)
   { if (kind_chunks[k] == 0)
     { while ((v = set_first (&free_or_new[k], 0)) != SGGC_NO_OBJECT)
-      { if (SGGC_DEBUG) printf ("calling free for %x: %p\n", v, SGGC_DATA(v));
+      { if (SGGC_DEBUG) 
+        { printf ("sggc_collect: calling free for %x: %p\n", v, SGGC_DATA(v));
+        }
         free (SGGC_DATA(v));
         sggc_data [SET_VAL_INDEX(v)] = NULL;
-        if (SGGC_DEBUG) printf("Putting %x in unused\n",(unsigned)v);
+        if (SGGC_DEBUG) 
+        { printf("sggc_collect: putting %x in unused\n",(unsigned)v);
+        }
         set_move_first (&free_or_new[k], &unused);
       }
     }
@@ -410,7 +428,7 @@ void sggc_look_at (sggc_cptr_t ptr)
     }
     if (set_remove(&free_or_new[SGGC_KIND(ptr)],ptr))
     { set_add (&to_look_at, ptr);
-      if (SGGC_DEBUG) printf("Will look at %x\n",(unsigned)ptr);
+      if (SGGC_DEBUG) printf("sggc_look_at: will look at %x\n",(unsigned)ptr);
     }
   }
 }

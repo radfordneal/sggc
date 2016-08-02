@@ -40,7 +40,7 @@ struct type2 { sggc_length_t len; int32_t data[]; };
 
 /* VARIABLES THAT ARE ROOTS FOR THE GARBAGE COLLECTOR. */
 
-static sggc_cptr_t nil, a, b, c, d;
+static sggc_cptr_t nil, a, b, c, d, e;
 
 
 /* FUNCTIONS THAT THE APPLICATION NEEDS TO PROVIDE TO THE SGGC MODULE. */
@@ -61,6 +61,7 @@ void sggc_find_root_ptrs (void)
   sggc_look_at(b);
   sggc_look_at(c);
   sggc_look_at(d);
+  sggc_look_at(e);
 }
 
 void sggc_find_object_ptrs (sggc_cptr_t cptr)
@@ -73,8 +74,8 @@ void sggc_find_object_ptrs (sggc_cptr_t cptr)
 
 
 /* ALLOCATE FUNCTION FOR THIS APPLICATION.  Calls the garbage collector
-   when necessary, or otherwise every 10th allocation, with every 100th
-   being level 1, and every 1000th being level 2. */
+   when necessary, or otherwise every 8th allocation, with every 24th
+   being level 1, and every 48th being level 2. */
 
 static sggc_cptr_t alloc (sggc_type_t type, sggc_length_t length)
 {
@@ -85,10 +86,10 @@ static sggc_cptr_t alloc (sggc_type_t type, sggc_length_t length)
      not after allocating the object, which would then get collected! */
 
   alloc_count += 1;
-  if (alloc_count % 10 == 0)
+  if (alloc_count % 8 == 0)
   { printf("ABOUNT TO CALL sggc_collect IN ALLOC DUE TO %d ALLOCATIONS\n",
             alloc_count);
-    sggc_collect (alloc_count % 1000 == 0 ? 2 : alloc_count % 100 == 0 ? 1 : 0);
+    sggc_collect (alloc_count % 48 == 0 ? 2 : alloc_count % 24 == 0 ? 1 : 0);
   }
 
   /* Try to allocate object, calling garbage collector if this initially 
@@ -129,19 +130,19 @@ static sggc_cptr_t alloc (sggc_type_t type, sggc_length_t length)
 
 /* MAIN TEST PROGRAM. */
 
-int main (void)
+int main (int argc, char **argv)
 { int i, j;
 
   /* Initialize and allocate initial nil object, which should be represented
      as zero. */
 
   printf("ABOUT TO CALL sggc_init\n");
-  sggc_init(8);  /* Minimum for no allocation failure is 8 */
+  sggc_init(argc<2 ? 11 /* min for no failure */ : atoi(argv[1]));  
   printf("DONE sggc_init\n");
   nil = alloc (0, 0);
   printf("ALLOCATED nil: %d\n",(int)nil);
 
-  a = b = c = d = nil;
+  a = b = c = d = e = nil;
 
   for (i = 0; i < 10; i++)
   { 
@@ -168,6 +169,17 @@ int main (void)
     TYPE2(d)->data[0] = 7777;
 
     printf("ALLOCATING a AGAIN, leaving contents as nil\n");
+    if (i == 2)
+    { printf("BUT KEEPING REFERENCE TO OLD a IN e\n");
+      e = a;
+    }
+    else if (i == 7)
+    { printf("BUT KEEPING REFERENCES TO OLD a IN e->x AND TO b IN e->y\n");
+      TYPE1(e)->x = a;
+      sggc_old_to_new_check(e,a);
+      TYPE1(e)->y = b;
+      sggc_old_to_new_check(e,b);
+    }
     a = alloc (1, 1);
 
 #   if 0  /* can be enabled to test explicit collection */
@@ -176,7 +188,7 @@ int main (void)
       printf("DONE sggc_collect\n");
 #   endif
 
-    /* Check that the final contents are correct. */
+    /* Check that the contents are correct. */
 
     printf("CHECKING CONTENTS\n");
 
@@ -187,10 +199,22 @@ int main (void)
     { abort();
     }
 
-    for (j = 0; j < TYPE2(b)->len; j++)
-    { if (TYPE2(b)->data[j] != 100*i + j) 
-      { abort();
+    if (i < 2)
+    { if (e != nil) abort();
+    }
+    else if (i < 7)
+    { if (SGGC_TYPE(e)!=1 || TYPE1(e)->x != nil || TYPE1(e)->y != nil) abort();
+    }
+    else
+    { if (SGGC_TYPE(e) != 1 || SGGC_TYPE(TYPE1(e)->x) != 1 
+                            || SGGC_TYPE(TYPE1(e)->y) != 2) abort();
+      for (j = 0; j < TYPE2(TYPE1(e)->y)->len; j++)
+      { if (TYPE2(TYPE1(e)->y)->data[j] != 100*7 + j) abort();
       }
+    }
+
+    for (j = 0; j < TYPE2(b)->len; j++)
+    { if (TYPE2(b)->data[j] != 100*i + j) abort();
     }
   }
 
