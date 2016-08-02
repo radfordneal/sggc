@@ -179,7 +179,7 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
      and so won't be  taken again (at least before next collection). */
 
   if (kind_chunks[kind] == 0) /* uses big segments */
-  { v = set_first (&unused);
+  { v = set_first (&unused, 0);
     if (v != SGGC_NO_OBJECT)
     { if (SGGC_DEBUG) printf("sggc_alloc: found %x in unused\n",(unsigned)v);
       sggc_type[SET_VAL_INDEX(v)] = type;
@@ -264,7 +264,7 @@ void sggc_collect (int level)
 
   if (SGGC_DEBUG) printf("Collecting at level %d\n",level);
 
-  if (set_first(&to_look_at) != SET_NO_VALUE) abort();
+  if (set_first(&to_look_at, 0) != SET_NO_VALUE) abort();
 
   /* Put objects in the old generations being collected in the free_or_new set.
 
@@ -272,14 +272,18 @@ void sggc_collect (int level)
      module that would do it a segment at a time. */
 
   if (level == 2)
-  { for (v = set_first(&old_gen2); v!=SET_NO_VALUE; v = set_next(&old_gen2,v,0))
+  { for (v = set_first(&old_gen2, 0); 
+         v != SET_NO_VALUE; 
+         v = set_next(&old_gen2,v,0))
     { set_add (&free_or_new[SGGC_KIND(v)], v);
       if (SGGC_DEBUG) printf("Put %x from old_gen2 in free\n",(unsigned)v);
     }
   }
 
   if (level >= 1)
-  { for (v = set_first(&old_gen1); v!=SET_NO_VALUE; v = set_next(&old_gen1,v,0))
+  { for (v = set_first(&old_gen1, 0);
+         v != SET_NO_VALUE; 
+         v = set_next(&old_gen1,v,0))
     { set_add (&free_or_new[SGGC_KIND(v)], v);
       if (SGGC_DEBUG) printf("Put %x from old_gen1 in free\n",(unsigned)v);
     }
@@ -287,7 +291,7 @@ void sggc_collect (int level)
 
   /* Handle old-to-new references. */
 
-  v = set_first(&old_to_new);
+  v = set_first(&old_to_new, 0);
   while (v != SET_NO_VALUE)
   { int remove;
     if (SGGC_DEBUG) printf("Followed old->new in %x\n",(unsigned)v);
@@ -321,47 +325,48 @@ void sggc_collect (int level)
      any pointers they contain (which may add to the to_look_at set),
      until there are no more in the set. */
 
-  for (;;)
+#ifdef SGGC_AFTER_COLLECT
+int phase = 1;
+#endif
+
+  do
   { 
-    v = set_first (&to_look_at);
-    if (v == SGGC_NO_OBJECT)
-    { break;
+    while ((v = set_first (&to_look_at, 1)) != SGGC_NO_OBJECT)
+    {
+      if (SGGC_DEBUG) printf("Looking at %x\n",(unsigned)v);
+  
+      if (level > 0 && set_remove (&old_gen1, v))
+      { set_add (&old_gen2, v);
+        if (SGGC_DEBUG) printf("Now %x is in old_gen2\n",(unsigned)v);
+      }
+      else if (level < 2 || !set_contains (&old_gen2, v))
+      { set_add (&old_gen1, v); 
+        if (SGGC_DEBUG) printf("Now %x is in old_gen1\n",(unsigned)v);
+      }
+      else
+      { if (SGGC_DEBUG) printf("No generation change for %x (%d %d)\n",
+          (unsigned)v, set_contains(&old_gen1,v), set_contains(&old_gen2,v));
+      }
+  
+      sggc_find_object_ptrs (v);
     }
 
-    (void) set_remove (&to_look_at, v);
-    if (SGGC_DEBUG) printf("Looking at %x\n",(unsigned)v);
+#   ifdef SGGC_AFTER_COLLECT
+    sggc_after_collect (phase++);
+#   endif
 
-    if (level > 0 && set_remove (&old_gen1, v))
-    { set_add (&old_gen2, v);
-      if (SGGC_DEBUG) printf("Now %x is in old_gen2\n",(unsigned)v);
-    }
-    else if (level < 2 || !set_contains (&old_gen2, v))
-    { set_add (&old_gen1, v); 
-      if (SGGC_DEBUG) printf("Now %x is in old_gen1\n",(unsigned)v);
-    }
-    else
-    { if (SGGC_DEBUG) printf("No generation change for %x (%d %d)\n",
-        (unsigned)v, set_contains(&old_gen1,v), set_contains(&old_gen2,v));
-    }
-
-    sggc_find_object_ptrs (v);
-  }
+  } while (set_first (&to_look_at, 0) != SGGC_NO_OBJECT);
 
   /* Move big segments to the 'unused' set, while freeing their storage. */
 
   for (k = 0; k < SGGC_N_TYPES; k++)
   { if (kind_chunks[k] == 0)
-    { for (;;)
-      { v = set_first (&free_or_new[k]);
-        if (v == SGGC_NO_OBJECT) 
-        { break;
-        }
-        if (SGGC_DEBUG) printf("Putting %x in unused\n",(unsigned)v);
-        (void) set_remove (&free_or_new[k], v);
-        (void) set_add (&unused, v);
-        if (SGGC_DEBUG) printf ("calling free for %x: %p\n", v, SGGC_DATA(v));
+    { while ((v = set_first (&free_or_new[k], 0)) != SGGC_NO_OBJECT)
+      { if (SGGC_DEBUG) printf ("calling free for %x: %p\n", v, SGGC_DATA(v));
         free (SGGC_DATA(v));
         sggc_data [SET_VAL_INDEX(v)] = NULL;
+        if (SGGC_DEBUG) printf("Putting %x in unused\n",(unsigned)v);
+        set_move_first (&free_or_new[k], &unused);
       }
     }
   }

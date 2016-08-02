@@ -230,6 +230,7 @@ static inline void remove_empty (struct set *set)
 
 static inline int first_bit_pos (set_bits_t b)
 { int pos;
+  if (SET_DEBUG && b == 0) abort();
   pos = 0;
   while ((b & 1) == 0)
   { pos += 1;
@@ -241,15 +242,17 @@ static inline int first_bit_pos (set_bits_t b)
 
 /* FIND THE FIRST ELEMENT IN A SET.  Finds an element of 'set', namely
    the first in the first segment in its chain with any elements.
-   Returns SET_NO_VALUE if the set is empty.
+   Returns SET_NO_VALUE if the set is empty.  If the last argument is
+   non-zero, the element returned is also removed from 'set'.
 
    The linked list of segments for this set is first trimmed of any at 
    the front that have no elements set, to save time in any future searches. */
 
-set_value_t set_first (struct set *set)
+set_value_t set_first (struct set *set, int remove)
 { 
   struct set_segment *seg;
   set_bits_t b;
+  int o;
 
   CHK_SET(set);
 
@@ -263,23 +266,28 @@ set_value_t set_first (struct set *set)
   CHK_SEGMENT(seg,set->chain);
 
   b = seg->bits[set->chain];
+  o = first_bit_pos(b);
 
-  return SET_VAL (set->first, first_bit_pos(b));
+  if (remove) 
+  { seg->bits[set->chain] &= ~ ((set_bits_t)1 << o);
+  }
+
+  return SET_VAL (set->first, o);
 }
 
 
 /* FIND THE NEXT ELEMENT IN A SET.  Returns the next element of 'set'
    after 'val', which must be an element of 'set.  Returns SET_NO_VALUE 
    if there are no elements past 'val'.  If the last argument is non-zero,
-   'val' is also removed from 'set'.
+   'val' is also removed from 'set' (but the element returned is not removed).
 
    If the linked list has to be followed to a later segment, any
    unused segments that are skipped are deleted from the list, to save
    time in any future searches.  As a consequence, if 'val' is not
-   removed, the value returned (if not SET_NO_VALUE) is in the segment
-   after that containing 'val'.  (But note that if 'val' is removed,
-   the segment containing it is not removed from the list even if it
-   no longer has any elements.) */
+   removed, the value returned (if not SET_NO_VALUE) is either in the
+   segment containing 'val' or the following segment.  (But note that
+   if 'val' is removed, the segment containing it is not removed from
+   the list even if it no longer has any elements.) */
 
 set_value_t set_next (struct set *set, set_value_t val, int remove)
 {

@@ -109,7 +109,7 @@ int set_contains (struct set *set, set_value_t val);
 int set_chain_contains (int chain, set_value_t val);
 int set_add (struct set *set, set_value_t val);
 int set_remove (struct set *set, set_value_t val);
-set_value_t set_first (struct set *set);
+set_value_t set_first (struct set *set, int remove);
 set_value_t set_next (struct set *set, set_value_t val, int remove);
 set_bits_t set_first_bits (struct set *set);
 set_bits_t set_segment_bits (struct set *set, set_value_t val);

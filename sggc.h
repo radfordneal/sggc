@@ -97,6 +97,7 @@ void sggc_find_root_ptrs (void);
 void sggc_find_object_ptrs (sggc_cptr_t cptr);
 char *sggc_alloc_segment_aux (sggc_kind_t kind, int n);
 void sggc_free_segment_aux (sggc_kind_t kind, int n, char *);
+void sggc_after_collect (int phase);  /* only if SGGC_AFTER_COLLECT defined */
 
 
 /* FUNCTIONS USED BY THE APPLICATION. */

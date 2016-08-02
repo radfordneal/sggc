@@ -111,7 +111,7 @@ int main (void)
     for (i = 0; i<N_SET; i++)
     { set_value_t v;
       printf("Set %d :",i);
-      v = set_first (&set[i]);
+      v = set_first (&set[i], 0);
       if (v == SET_NO_VALUE)
       { printf(" empty\n");
         continue;
