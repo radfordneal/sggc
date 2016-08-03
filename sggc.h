@@ -105,7 +105,7 @@ void sggc_after_collect (int phase);  /* only if SGGC_AFTER_COLLECT defined */
 int sggc_init (int n_segments);
 sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length);
 void sggc_collect (int level);
-void sggc_look_at (sggc_cptr_t cptr);
+int sggc_look_at (sggc_cptr_t cptr);
 void sggc_old_to_new_check (sggc_cptr_t from_ptr, sggc_cptr_t to_ptr);
 int sggc_youngest_generation (sggc_cptr_t from_ptr);
 int sggc_not_marked (sggc_cptr_t ptr);

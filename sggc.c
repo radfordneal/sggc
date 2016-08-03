@@ -67,10 +67,10 @@ static set_offset_t max_segments;             /* Max segments, fixed for now */
 static set_offset_t next_segment;             /* Number of segments in use */
 
 
-/* FLAGS FOR CHECKING FOR OLD-NEW REFERENCES. */
+/* GLOBAL VARIABLES USED FOR LOOKING AT OLD-NEW REFERENCES. */
 
-static int has_gen0;                          /* Has gen2->gen0 references? */
-static int has_gen1;                          /* Has gen2->gen1 references? */
+static int collect_level;     /* Level of current garbage collection */
+static int old_to_new_check;  /* 1 if should look for old-to-new reference */
 
 
 /* INITIALIZE SEGMENTED MEMORY.  Allocates space for pointers for the
@@ -311,26 +311,30 @@ void sggc_collect (int level)
 
   /* Handle old-to-new references. */
 
+  collect_level = level;
   v = set_first(&old_to_new, 0);
+
   while (v != SET_NO_VALUE)
   { int remove;
     if (SGGC_DEBUG) 
-    { printf("sggc_collect: old->new followed for %x\n",(unsigned)v);
+    { printf("sggc_collect: old->new for %x\n",(unsigned)v);
     }
-    if (set_contains (&old_gen1, v))
-    { has_gen0 = has_gen1 = 1;  /* we don't care */
+    if (set_contains (&old_gen2, v)) /* v is in old generation 2 */
+    { old_to_new_check = 2;
       sggc_find_object_ptrs (v);
-      remove = 1;
+      remove = old_to_new_check;
     }
-    else if (level == 0)
-    { has_gen0 = has_gen1 = 0;  /* look for both generation 0 and generaton 1 */
-      sggc_find_object_ptrs (v);
-      remove = has_gen0 | has_gen1;
-    }
-    else /* level > 0 */
-    { has_gen0 = 0; has_gen1 = 1;  /* look only for generation 0 */
-      sggc_find_object_ptrs (v);
-      remove = has_gen0;
+    else /* v is in old generation 1 */
+    { if (level == 0)
+      { old_to_new_check = 0;
+        sggc_find_object_ptrs (v);
+        remove = 1;
+      }
+      else
+      { old_to_new_check = 1;
+        sggc_find_object_ptrs (v);
+        remove = old_to_new_check;
+      }
     }
     if (SGGC_DEBUG) 
     { if (remove) 
@@ -343,7 +347,7 @@ void sggc_collect (int level)
     v = set_next (&old_to_new, v, remove);
   }
 
-  has_gen0 = has_gen1 = 1;  /* we don't care */
+  old_to_new_check = 0;
 
   /* Get the application to take root pointers out of the free_or_new set,
      and put them in the to_look_at set. */
@@ -355,9 +359,9 @@ void sggc_collect (int level)
      any pointers they contain (which may add to the to_look_at set),
      until there are no more in the set. */
 
-#ifdef SGGC_AFTER_COLLECT
-int phase = 1;
-#endif
+# ifdef SGGC_AFTER_COLLECT
+  int phase = 1;
+# endif
 
   do
   { 
@@ -383,6 +387,34 @@ int phase = 1;
 
   } while (set_first (&to_look_at, 0) != SGGC_NO_OBJECT);
 
+  /* Remove objects that are still in the free_or_new set from the old 
+     generations that were collected.
+
+     This could be greatly sped up with some special facility in the set
+     module that would do it a segment at a time. */
+
+  if (level == 2)
+  { v = set_first (&old_gen2, 0); 
+    while (v != SET_NO_VALUE)
+    { int remove = set_contains (&free_or_new[SGGC_KIND(v)], v);
+      v = set_next (&old_gen2, v, remove);
+      if (SGGC_DEBUG && remove) 
+      { printf("sggc_collect: %x in old_gen2 now free\n",(unsigned)v);
+      }
+    }
+  }
+
+  if (level >= 1)
+  { v = set_first (&old_gen1, 0); 
+    while (v != SET_NO_VALUE)
+    { int remove = set_contains (&free_or_new[SGGC_KIND(v)], v);
+      v = set_next (&old_gen1, v, remove);
+      if (SGGC_DEBUG && remove) 
+      { printf("sggc_collect: %x in old_gen1 now free\n",(unsigned)v);
+      }
+    }
+  }
+
   /* Move big segments to the 'unused' set, while freeing their storage. */
 
   for (k = 0; k < SGGC_N_TYPES; k++)
@@ -406,24 +438,41 @@ int phase = 1;
 /* TELL THE GARBAGE COLLECTOR THAT AN OBJECT NEEDS TO BE LOOKED AT.
    Called by the application from within its sggc_find_root_ptrs or
    sggc_find_object_ptrs functions, to signal to the garbage collector
-   that it has found a pointer to an object that must also be looked
-   at, and also that it is not free.  If the object is presently in
-   the free_or_new set, it will be removed, and put in the set of
-   objects to be looked at.  (If it is not in free_or_new, it has
-   already been looked at, and so needn't be looked at again.)
+   that it has found a pointer to an object for the GC to look at.
+   The caller should continue calling sggc_look_at for all root pointers,
+   and for all pointers in an object, except that the rest of the 
+   pointers in an object should be skipped if sggc_look_at returns 0.
 
-   The global has_gen0 or has_gen1 flag is set to 1 if ptr is in the
-   corresponding generation. */
+   The principal use of this is to mark objects as in use.  If the
+   object is presently in the free_or_new set, it is removed, and put
+   in the set of objects to be looked at.  (If it is not in
+   free_or_new, it has already been looked at, and so needn't be
+   looked at again.)
 
-void sggc_look_at (sggc_cptr_t ptr)
+   This procedure is also used as part of the old-to-new scheme to
+   check whether an object in the old-to-new set still needs to be
+   there, as well as sometimes marking the objects it points to. */
+
+int sggc_look_at (sggc_cptr_t ptr)
 {
   if (ptr != SGGC_NO_OBJECT)
-  { if ((has_gen0 & has_gen1) == 0)
-    { if (set_contains (&old_gen1, ptr))
-      { has_gen1 = 1;
+  { if (old_to_new_check != 0)
+    { if (collect_level == 0)
+      { if (!set_contains (&old_gen2, ptr))
+        { old_to_new_check = 0;
+        }
       }
-      else if (has_gen0 == 0 && !set_contains (&old_gen2, ptr))
-      { has_gen0 = 1;
+      else if (collect_level == 1 && old_to_new_check == 2)
+      { if (set_chain_contains (SET_UNUSED_FREE_NEW, ptr))
+        { old_to_new_check = 0;
+        }
+      }
+      else
+      { if (set_chain_contains (SET_UNUSED_FREE_NEW, ptr))
+        { old_to_new_check = 0;
+          return 0;
+        }
+        return 1;
       }
     }
     if (set_remove(&free_or_new[SGGC_KIND(ptr)],ptr))
@@ -431,6 +480,8 @@ void sggc_look_at (sggc_cptr_t ptr)
       if (SGGC_DEBUG) printf("sggc_look_at: will look at %x\n",(unsigned)ptr);
     }
   }
+
+  return 1;
 }
 
 
