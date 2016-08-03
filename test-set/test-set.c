@@ -110,7 +110,7 @@ int main (void)
 
     for (i = 0; i<N_SET; i++)
     { set_value_t v;
-      printf("Set %d :",i);
+      printf("Set %d, %d elements:",i,set_n_elements(&set[i]));
       v = set_first (&set[i], 0);
       if (v == SET_NO_VALUE)
       { printf(" empty\n");

@@ -279,6 +279,16 @@ void sggc_collect (int level)
   int k;
 
   if (SGGC_DEBUG) printf("sggc_collect: level %d\n",level);
+  if (SGGC_DEBUG)
+  { printf("  old_gen1: %d,  old_gen2: %d,  old_to_new: %d,  to_look_at: %d\n",
+      set_n_elements(&old_gen1), set_n_elements(&old_gen2), 
+      set_n_elements(&old_to_new), set_n_elements(&to_look_at));
+    printf("  unused: %d", set_n_elements(&unused));
+    for (k = 0; k < SGGC_N_KINDS; k++) 
+    { printf(" free_or_new[%d]: %d",k,set_n_elements(&free_or_new[k]));
+    }
+    printf("\n");
+  }
 
   if (set_first(&to_look_at, 0) != SET_NO_VALUE) abort();
 
@@ -431,6 +441,18 @@ void sggc_collect (int level)
         set_move_first (&free_or_new[k], &unused);
       }
     }
+  }
+
+  if (SGGC_DEBUG) printf("sggc_collect: done\n");
+  if (SGGC_DEBUG)
+  { printf("  old_gen1: %d,  old_gen2: %d,  old_to_new: %d,  to_look_at: %d\n",
+      set_n_elements(&old_gen1), set_n_elements(&old_gen2), 
+      set_n_elements(&old_to_new), set_n_elements(&to_look_at));
+    printf("  unused: %d", set_n_elements(&unused));
+    for (k = 0; k < SGGC_N_KINDS; k++) 
+    { printf(" free_or_new[%d]: %d",k,set_n_elements(&free_or_new[k]));
+    }
+    printf("\n");
   }
 }
 

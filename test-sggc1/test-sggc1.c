@@ -139,8 +139,8 @@ int main (int argc, char **argv)
   printf("ABOUT TO CALL sggc_init\n");
   sggc_init(argc<2 ? 11 /* min for no failure */ : atoi(argv[1]));  
   printf("DONE sggc_init\n");
+  printf("ALLOCATING nil\n");
   nil = alloc (0, 0);
-  printf("ALLOCATED nil: %d\n",(int)nil);
 
   a = b = c = d = e = nil;
 

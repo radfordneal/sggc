@@ -41,6 +41,14 @@
     CHK_CHAIN((set)->chain); \
     if (SET_DEBUG && (set)->first < 0 \
                   && (set)->first != SET_END_OF_CHAIN) abort(); \
+    if (SET_DEBUG && (set)->n_elements != 0 \
+                  && (set)->first == SET_END_OF_CHAIN) abort(); \
+    if (!check_n_elements((set))) abort(); \
+  } while (0)
+
+#define CHK_SET_INDEX(set,index) \
+  do { \
+    if (!check_has_seg((set),(index))) abort(); \
   } while (0)
 
 #define CHK_SEGMENT(seg,chain) \
@@ -54,6 +62,76 @@
   } while (0)
 
 
+/* FIND POSITION OF LOWEST-ORDER BIT.  The position returned is from 0 up.
+   The argument must not be zero.
+
+   Could be sped up, but not yet. */
+
+static inline int first_bit_pos (set_bits_t b)
+{ int pos;
+  if (SET_DEBUG && b == 0) abort();
+  pos = 0;
+  while ((b & 1) == 0)
+  { pos += 1;
+    b >>= 1;
+  }
+  return pos;
+}
+
+
+/* FIND THE NUMBER OF BITS IN A SET OF BITS.  
+
+   Could be sped up, but not yet. */
+
+static inline int bit_count (set_bits_t b)
+{ int cnt;
+  cnt = 0;
+  while (b != 0)
+  { cnt += (b & 1);
+    b >>= 1;
+  }
+  return cnt;
+}
+
+
+/* CHECK WHETHER THE COUNT OF NUMBER OF ELEMENTS IN A SET IS CORRECT. */
+
+static int check_n_elements (struct set *set)
+{
+  struct set_segment *seg;
+  set_index_t index;
+  set_value_t cnt;
+  int chain;
+
+  chain = set->chain;
+  cnt = set->n_elements;
+  index = set->first;
+
+  while (index != SET_END_OF_CHAIN)
+  { seg = SET_SEGMENT(index);
+    cnt -= bit_count (seg->bits[chain]);
+    index = seg->next[chain];
+  }
+
+  return cnt == 0;
+}
+
+
+/* CHECK WHETHER A SET CONTAINS A SEGMENT WITH GIVEN INDEX. */
+
+static int check_has_seg (struct set *set, set_index_t index)
+{
+  set_index_t ix = set->first;
+  while (ix != SET_END_OF_CHAIN)
+  { if (ix == index) 
+    { return 1;
+    }
+    ix = SET_SEGMENT(ix) -> next[set->chain];
+  }
+  return 0;
+}
+
+
 /* INITIALIZE A SET, AS EMPTY.  Initializes the set pointed to by
    'set' to be an empty set, which will use 'chain' to link elements.
    Note that the set must never contain elements with the same segment
@@ -64,6 +142,7 @@ void set_init (struct set *set, int chain)
   CHK_CHAIN(chain);
   set->chain = chain;
   set->first = SET_END_OF_CHAIN;
+  set->n_elements = 0;
 }
 
 
@@ -123,10 +202,10 @@ int set_chain_contains (int chain, set_value_t val)
    its chain with another set that contains elements in the same segment
    as 'val'.
 
-   This is implemented by setting the right bit in the bits for the set's 
-   chain, within the segment structure for this value's index. This segment
-   is then added to the linked list of segments for this set if it is not 
-   there already. */
+   This is implemented by setting the right bit in the bits for the
+   set's chain, within the segment structure for this value's index.
+   This segment is then added to the linked list of segments for this
+   set if it is not there already. */
 
 int set_add (struct set *set, set_value_t val)
 {
@@ -148,6 +227,10 @@ int set_add (struct set *set, set_value_t val)
   }
 
   seg->bits[set->chain] |= t;
+  set->n_elements += 1;
+
+  CHK_SET_INDEX(set,index);
+  CHK_SET(set);
 
   return 0;
 }
@@ -183,6 +266,10 @@ int set_remove (struct set *set, set_value_t val)
     seg->next[set->chain] = SET_NOT_IN_CHAIN;
   }
 
+  set->n_elements -= 1;
+
+  CHK_SET(set);
+
   return 1;
 }
 
@@ -207,23 +294,6 @@ static inline void remove_empty (struct set *set)
     set->first = seg->next[set->chain];
     seg->next[set->chain] = SET_NOT_IN_CHAIN;
   }
-}
-
-
-/* FIND POSITION OF LOWEST-ORDER BIT.  The position returned is from 0 up.
-   The argument must not be zero.
-
-   Could be speeded up, but not yet. */
-
-static inline int first_bit_pos (set_bits_t b)
-{ int pos;
-  if (SET_DEBUG && b == 0) abort();
-  pos = 0;
-  while ((b & 1) == 0)
-  { pos += 1;
-    b >>= 1;
-  }
-  return pos;
 }
 
 
@@ -257,7 +327,10 @@ set_value_t set_first (struct set *set, int remove)
 
   if (remove) 
   { seg->bits[set->chain] &= ~ ((set_bits_t)1 << o);
+    set->n_elements -= 1;
   }
+
+  CHK_SET(set);
 
   return SET_VAL (set->first, o);
 }
@@ -284,6 +357,7 @@ set_value_t set_next (struct set *set, set_value_t val, int remove)
 
   CHK_SET(set);
   CHK_SEGMENT(seg,set->chain);
+  CHK_SET_INDEX(set,index);
 
   /* Get the bits after the one for the element we are looking after.
      Also clear the bit for 'val' if we are removing it. */
@@ -292,6 +366,7 @@ set_value_t set_next (struct set *set, set_value_t val, int remove)
   if ((b & 1) == 0) abort();  /* 'val' isn't in 'set' */
   if (remove)
   { seg->bits[set->chain] &= ~ ((set_bits_t) 1 << offset);
+    set->n_elements -= 1;
   }
   offset += 1;
   b >>= 1;
@@ -320,6 +395,7 @@ set_value_t set_next (struct set *set, set_value_t val, int remove)
       }
 
       seg->next[set->chain] = nseg->next[set->chain];
+      nseg->next[set->chain] = SET_NOT_IN_CHAIN;
     }
 
     index = nindex;
@@ -327,6 +403,8 @@ set_value_t set_next (struct set *set, set_value_t val, int remove)
   }
 
   offset += first_bit_pos(b);
+
+  CHK_SET(set);
 
   return SET_VAL(index,offset);
 }
@@ -361,6 +439,7 @@ set_bits_t set_segment_bits (struct set *set, set_value_t val)
 
   CHK_SET(set);
   CHK_SEGMENT(seg,set->chain);
+  CHK_SET_INDEX(set,index);
 
   return seg->bits[set->chain];
 }
@@ -376,8 +455,13 @@ void set_assign_segment_bits (struct set *set, set_value_t val, set_bits_t b)
 
   CHK_SET(set);
   CHK_SEGMENT(seg,set->chain);
+  CHK_SET_INDEX(set,index);
 
+  set->n_elements -= bit_count(seg->bits[set->chain]);
   seg->bits[set->chain] = b;
+  set->n_elements += bit_count(b);
+
+  CHK_SET(set);
 }
 
 
@@ -390,6 +474,7 @@ void set_move_first (struct set *src, struct set *dst)
 {
   struct set_segment *seg;
   set_index_t index;
+  set_value_t cnt;
 
   CHK_SET(src);
   CHK_SET(dst);
@@ -402,10 +487,17 @@ void set_move_first (struct set *src, struct set *dst)
   CHK_SEGMENT(seg,src->chain);
   if (seg->bits[src->chain] == 0) abort();
 
+  cnt = bit_count(seg->bits[src->chain]);
+  src->n_elements -= cnt;
+  dst->n_elements += cnt;
+
   src->first = seg->next[src->chain];
 
   seg->next[src->chain] = dst->first;
   dst->first = index;
+
+  CHK_SET(src);
+  CHK_SET(dst);
 }
 
 
@@ -420,12 +512,13 @@ void set_move_next (struct set *src, set_value_t val, struct set *dst)
   set_index_t index = SET_VAL_INDEX(val);
   set_offset_t offset = SET_VAL_OFFSET(val);
   struct set_segment *seg = SET_SEGMENT(index);
+  set_value_t cnt;
 
   CHK_SET(src);
+  CHK_SET_INDEX(src,index);
   CHK_SET(dst);
 
   if (src->chain != dst->chain) abort();
-  if (src->first == SET_END_OF_CHAIN) abort();
 
   int chain = src->chain;
   set_index_t nindex = seg->next[chain];
@@ -436,7 +529,24 @@ void set_move_next (struct set *src, set_value_t val, struct set *dst)
   CHK_SEGMENT(nseg,chain);
   if (nseg->bits[chain] == 0) abort();
 
+  cnt = bit_count(nseg->bits[chain]);
+  src->n_elements -= cnt;
+  dst->n_elements += cnt;
+
   seg->next[chain] = nseg->next[chain];
   nseg->next[chain] = dst->first;
   dst->first = nindex;
+
+  CHK_SET(src);
+  CHK_SET(dst);
+}
+
+
+/* RETURN THE NUMBER OF ELEMENTS IN A SET. */
+
+set_value_t set_n_elements (struct set *set)
+{
+  CHK_SET(set);
+
+  return set->n_elements;
 }
