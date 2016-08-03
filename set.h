@@ -97,7 +97,6 @@ struct set_segment
 struct set
 { int chain;                    /* Number of chain used for this set */
   set_index_t first;            /* First segment, or SET_END_OF_CHAIN */
-  set_index_t last;             /* Last segment, or SET_END_OF_CHAIN */
 };
 
 
@@ -116,4 +115,3 @@ set_bits_t set_segment_bits (struct set *set, set_value_t val);
 void set_assign_segment_bits (struct set *set, set_value_t val, set_bits_t b);
 void set_move_first (struct set *src, struct set *dst);
 void set_move_next (struct set *src, set_value_t val, struct set *dst);
-void set_move_all (struct set *src, struct set *dst);

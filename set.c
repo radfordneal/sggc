@@ -41,9 +41,6 @@
     CHK_CHAIN((set)->chain); \
     if (SET_DEBUG && (set)->first < 0 \
                   && (set)->first != SET_END_OF_CHAIN) abort(); \
-    if (SET_DEBUG && (set)->last < 0 \
-                  && (set)->last != SET_END_OF_CHAIN) abort(); \
-    if (SET_DEBUG && ((set)->first < 0) != ((set)->last < 0)) abort(); \
   } while (0)
 
 #define CHK_SEGMENT(seg,chain) \
@@ -67,7 +64,6 @@ void set_init (struct set *set, int chain)
   CHK_CHAIN(chain);
   set->chain = chain;
   set->first = SET_END_OF_CHAIN;
-  set->last = SET_END_OF_CHAIN;
 }
 
 
@@ -149,9 +145,6 @@ int set_add (struct set *set, set_value_t val)
   if (seg->next[set->chain] == SET_NOT_IN_CHAIN)
   { seg->next[set->chain] = set->first;
     set->first = index;
-    if (set->last == SET_END_OF_CHAIN) 
-    { set->last = index;
-    }
   }
 
   seg->bits[set->chain] |= t;
@@ -187,9 +180,6 @@ int set_remove (struct set *set, set_value_t val)
   seg->bits[set->chain] &= ~t;
   if (seg->bits[set->chain] == 0 && set->first == index)
   { set->first = seg->next[set->chain];
-    if (set->first == SET_END_OF_CHAIN)
-    { set->last = SET_END_OF_CHAIN;
-    }
     seg->next[set->chain] = SET_NOT_IN_CHAIN;
   }
 
@@ -215,9 +205,6 @@ static inline void remove_empty (struct set *set)
     }
 
     set->first = seg->next[set->chain];
-    if (set->first == SET_END_OF_CHAIN)
-    { set->last = SET_END_OF_CHAIN;
-    }
     seg->next[set->chain] = SET_NOT_IN_CHAIN;
   }
 }
@@ -333,9 +320,6 @@ set_value_t set_next (struct set *set, set_value_t val, int remove)
       }
 
       seg->next[set->chain] = nseg->next[set->chain];
-      if (set->last == nindex)
-      { set->last = index;
-      }
     }
 
     index = nindex;
@@ -422,13 +406,6 @@ void set_move_first (struct set *src, struct set *dst)
 
   seg->next[src->chain] = dst->first;
   dst->first = index;
-  if (dst->last == SET_END_OF_CHAIN)
-  { dst->last = index;
-  }
-
-  if (src->first == SET_END_OF_CHAIN)
-  { src->last = SET_END_OF_CHAIN;
-  }
 }
 
 
@@ -462,38 +439,4 @@ void set_move_next (struct set *src, set_value_t val, struct set *dst)
   seg->next[chain] = nseg->next[chain];
   nseg->next[chain] = dst->first;
   dst->first = nindex;
-  if (dst->last == SET_END_OF_CHAIN)
-  { dst->last = nindex;
-  }
-
-  if (src->last == nindex)
-  { src->last = index;
-  }
 }
-
-
-/* MOVE ALL OF ONE SET TO ANOTHER SET.  Adds all elements of 'src' to
-   'dst', after which 'src' will be empty.  It is an error for 'src'
-   and 'dst' to use different chains. */
-
-void set_move_all (struct set *src, struct set *dst)
-{
-  CHK_SET(src);
-  CHK_SET(dst);
-
-  if (src->chain != dst->chain) abort();
-
-  if (src->first == SET_END_OF_CHAIN)
-  { return;
-  }
-
-  SET_SEGMENT(src->last) -> next[src->chain] = dst->first;
-  dst->first = src->first;
-  if (dst->last == SET_END_OF_CHAIN)
-  { dst->last = src->last;
-  }
-
-  src->first = SET_END_OF_CHAIN;
-  src->last = SET_END_OF_CHAIN;
-}
-
