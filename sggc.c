@@ -34,8 +34,8 @@
 /* NUMBERS OF CHUNKS ALLOWED FOR AN OBJECT IN KINDS OF SEGMENTS.  Zero
    means that this kind of segment is big, containing one object of
    size found using sggc_chunks.  The application must define the
-   initialization as SGGC_KIND_CHUNKS.  Must not be greater than
-   SGGC_CHUNKS_IN_SMALL_SEGMENT. */
+   initialization as SGGC_KIND_CHUNKS.  Entries Must not be greater
+   than SGGC_CHUNKS_IN_SMALL_SEGMENT. */
 
 static int kind_chunks[SGGC_N_KINDS] = SGGC_KIND_CHUNKS;
 
@@ -44,6 +44,27 @@ static int kind_chunks[SGGC_N_KINDS] = SGGC_KIND_CHUNKS;
    and SET_OFFSET_BITS. */
 
 static set_bits_t kind_full[SGGC_N_KINDS];
+
+
+/* SIZES AND READ-ONLY FLAGS FOR AUXILIARY INFORMATION. */
+
+#if SGGC_AUX_ITEMS >= 1
+static int aux_sz1[SGGC_N_KINDS] = SGGC_AUX1_SZ;
+static int aux_ro1[SGGC_N_KINDS]
+#ifdef SGGC_AUX1_RO
+ = SGGC_AUX1_RO
+#endif
+;
+#endif
+
+#if SGGC_AUX_ITEMS >= 2
+static int aux_sz2[SGGC_N_KINDS] = SGGC_AUX2_SZ;
+static int aux_ro2[SGGC_N_KINDS]
+#ifdef SGGC_AUX2_RO
+ = SGGC_AUX2_RO
+#endif
+;
+#endif
 
 
 /* SETS OF OBJECTS. */

@@ -55,17 +55,24 @@ char **sggc_data;                  /* Pointer to array of pointers to arrays of
 #define SGGC_DATA(cptr) \
   (sggc_data [SET_VAL_INDEX(cptr)] + SGGC_CHUNK_SIZE * SET_VAL_OFFSET(cptr))
 
-#if SGGC_AUX_ITEMS > 0
-  char **sggc_aux[SGGC_AUX_ITEMS]; /* Pointer to array of pointers to arrays of 
+#if SGGC_AUX_ITEMS >= 1
+char **sggc_aux1;                  /* Pointer to array of pointers to arrays of 
                                       auxiliary info for objects in segments */
 #endif
 
-/* Macro to get pointer to auxiliarly information for an object, from its 
-   index and offset, along with the number indicating which auxiliary. 
-   information is required, which must be a literal number (not a #define). */
+#if SGGC_AUX_ITEMS >= 2
+char **sggc_aux2;                  /* Pointer to array of pointers to arrays of 
+                                      auxiliary info for objects in segments */
+#endif
 
-#define SGGC_AUX(cptr,i) \
-  (sggc_aux[i][SET_VAL_INDEX(cptr)] + SGGC_AUX##i##_SIZE * SET_VAL_OFFSET(cptr))
+/* Macros to get pointer to auxiliarly information for an object, from its 
+   index and offset. */
+
+#define SGGC_AUX1(cptr) \
+  (sggc_aux1[SET_VAL_INDEX(cptr)] + SGGC_AUX1_SIZE * SET_VAL_OFFSET(cptr))
+
+#define SGGC_AUX2(cptr) \
+  (sggc_aux2[SET_VAL_INDEX(cptr)] + SGGC_AUX2_SIZE * SET_VAL_OFFSET(cptr))
 
 
 /* TYPES AND KINDS OF SEGMENTS.  Types and kinds must fit in 8 bits,
@@ -95,8 +102,10 @@ sggc_kind_t sggc_kind (sggc_type_t type, sggc_length_t length);
 sggc_nchunks_t sggc_nchunks (sggc_type_t type, sggc_length_t length);
 void sggc_find_root_ptrs (void);
 void sggc_find_object_ptrs (sggc_cptr_t cptr);
-char *sggc_alloc_segment_aux (sggc_kind_t kind, int n);
-void sggc_free_segment_aux (sggc_kind_t kind, int n, char *);
+char *sggc_alloc_segment_aux1 (sggc_kind_t kind);
+char *sggc_alloc_segment_aux2 (sggc_kind_t kind);
+void sggc_free_segment_aux1 (sggc_kind_t kind, char *);
+void sggc_free_segment_aux2 (sggc_kind_t kind, char *);
 void sggc_after_collect (int phase);  /* only if SGGC_AFTER_COLLECT defined */
 
 
