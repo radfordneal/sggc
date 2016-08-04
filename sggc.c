@@ -327,7 +327,8 @@ void sggc_collect (int level)
   while (v != SET_NO_VALUE)
   { int remove;
     if (SGGC_DEBUG) 
-    { printf("sggc_collect: old->new for %x\n",(unsigned)v);
+    { printf ("sggc_collect: old->new for %x (gen%d)\n", (unsigned)v,
+        set_contains(&old_gen2,v) ? 2 : set_contains(&old_gen1,v) ? 1 : 0);
     }
     if (set_contains (&old_gen2, v)) /* v is in old generation 2 */
     { old_to_new_check = 2;

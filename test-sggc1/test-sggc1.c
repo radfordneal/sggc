@@ -144,7 +144,7 @@ int main (int argc, char **argv)
 
   a = b = c = d = e = nil;
 
-  for (i = 0; i < 10; i++)
+  for (i = 0; i <= 10; i++)
   { 
     printf("\nITERATION %d\n",i);
 
@@ -173,7 +173,7 @@ int main (int argc, char **argv)
     { printf("BUT KEEPING REFERENCE TO OLD a IN e\n");
       e = a;
     }
-    else if (i == 7)
+    else if (i == 6)
     { printf("BUT KEEPING REFERENCES TO OLD a IN e->x AND TO b IN e->y\n");
       TYPE1(e)->x = a;
       sggc_old_to_new_check(e,a);
@@ -181,12 +181,11 @@ int main (int argc, char **argv)
       sggc_old_to_new_check(e,b);
     }
     a = alloc (1, 1);
-
-#   if 0  /* can be enabled to test explicit collection */
-      printf("ABOUT TO CALL sggc_collect\n");
-      sggc_collect(0);
-      printf("DONE sggc_collect\n");
-#   endif
+    if (i == 8)
+    { printf("AND KEEP REFERENCE TO NEW a IN e->x\n");
+      TYPE1(e)->x = a;
+      sggc_old_to_new_check(e,a);
+    }
 
     /* Check that the contents are correct. */
 
@@ -202,14 +201,14 @@ int main (int argc, char **argv)
     if (i < 2)
     { if (e != nil) abort();
     }
-    else if (i < 7)
+    else if (i < 6)
     { if (SGGC_TYPE(e)!=1 || TYPE1(e)->x != nil || TYPE1(e)->y != nil) abort();
     }
     else
     { if (SGGC_TYPE(e) != 1 || SGGC_TYPE(TYPE1(e)->x) != 1 
                             || SGGC_TYPE(TYPE1(e)->y) != 2) abort();
       for (j = 0; j < TYPE2(TYPE1(e)->y)->len; j++)
-      { if (TYPE2(TYPE1(e)->y)->data[j] != 100*7 + j) abort();
+      { if (TYPE2(TYPE1(e)->y)->data[j] != 100*6 + j) abort();
       }
     }
 
