@@ -21,8 +21,10 @@
 /* This test program uses mostly small segments, and no auxiliary
    data.  Optional garbage collections are done according to a simple
    scheme based just on number of allocations done.  It is run with
-   one program argument giving the maximum number of segments (default
-   7, the minimum for not running out of space). */
+   its first program argument giving the maximum number of segments
+   (default 5, the minimum for not running out of space), and its
+   second giving the number of iterations of the test loop (default
+   50). */
 
 
 #include <stdlib.h>
@@ -140,20 +142,23 @@ static sggc_cptr_t alloc (sggc_type_t type, sggc_length_t length)
 /* MAIN TEST PROGRAM. */
 
 int main (int argc, char **argv)
-{ int i, j;
+{ 
+  int segs = argc<2 ? 5 /* min for no failure */ : atoi(argv[1]);
+  int iters = argc<3 ? 50 : atoi(argv[2]);
+  int i, j;
 
   /* Initialize and allocate initial nil object, which should be represented
      as zero. */
 
   printf("ABOUT TO CALL sggc_init\n");
-  sggc_init(argc<2 ? 7 /* min for no failure */ : atoi(argv[1]));  
+  sggc_init(segs);
   printf("DONE sggc_init\n");
   printf("ALLOCATING nil\n");
   nil = alloc (0, 0);
 
   a = b = c = d = e = nil;
 
-  for (i = 0; i <= 50; i++)
+  for (i = 1; i <= iters; i++)
   { 
     printf("\nITERATION %d\n",i);
 
