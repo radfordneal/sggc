@@ -41,26 +41,11 @@
    size (maybe advantageous for index computation (if needed), and
    perhaps for cache behaviour). */
 
-#define SGGC_CHUNK_BITS 31    /* Bits used to record the number of chunks */
+#define SGGC_CHUNK_BITS 31 /* Bits used to record the number of chunks */
 
-/* Extra information possibly defined by the application.  Should be as
-   bit fields with more than 7 bits total (unless SGGC_AUX_ITEMS is less
-   than two, in which case more bits will be available). */
-
-#ifndef SGGC_EXTRA_INFO
-#define SGGC_EXTRA_INFO
-#endif
-
-/* Phases for allocations of auxilary information, allowing overlap
-   when an object of this kind takes up more than one chunk.  Will
-   cause expansion of the segment structure if SGGC_AUX_ITEMS is
-   greater than two. */
-
-#if SGGC_AUX_ITEMS > 0
-#define SGGC_AUX_PHASES unsigned char phase[SGGC_AUX_ITEMS];
-#else
-#define SGGC_AUX_PHASES 
-#endif
+#ifndef SGGC_EXTRA_INFO    /* Extra info for small segments possibly defined */
+#define SGGC_EXTRA_INFO    /*  the application.  Should be bit fields with   */
+#endif                     /*  total of no more than 7 bits.                 */
 
 #define SET_EXTRA_INFO \
   union \
@@ -71,7 +56,8 @@
     struct                 /* For small segments... */ \
     { unsigned big : 1;       /* 0 for a segment with several small objects */ \
       SGGC_EXTRA_INFO         /* Extra app information for small segments   */ \
-      SGGC_AUX_PHASES         /* Phases for auxiliary storage allocations   */ \
+      unsigned char phase1;   /* Phase of storage for aux1 information      */ \
+      unsigned char phase2;   /* Phase of storage for aux2 information      */ \
       unsigned char kind;     /* The kind of segment (equal to type if big) */ \
     } small; \
   } x;
