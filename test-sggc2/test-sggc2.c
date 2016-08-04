@@ -18,11 +18,11 @@
    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
 
-/* This test program uses only big segments, and no auxiliary data.
-   Optional garbage collections are done according to a simple scheme
-   based just on number of allocations done.  It is run with one
-   program argument giving the maximum number of segments (default 11,
-   the minimum for not running out of space). */
+/* This test program uses mostly small segments, and no auxiliary
+   data.  Optional garbage collections are done according to a simple
+   scheme based just on number of allocations done.  It is run with
+   one program argument giving the maximum number of segments (default
+   7, the minimum for not running out of space). */
 
 
 #include <stdlib.h>
@@ -50,6 +50,12 @@ static sggc_cptr_t nil, a, b, c, d, e;
 
 sggc_kind_t sggc_kind (sggc_type_t type, sggc_length_t length)
 { 
+  if (type == 2)
+  { if (length <= 3)  return SGGC_N_TYPES+0;
+    if (length <= 7)  return SGGC_N_TYPES+1;
+    if (length <= 11) return SGGC_N_TYPES+2;
+  }
+
   return type;
 }
 
@@ -140,14 +146,14 @@ int main (int argc, char **argv)
      as zero. */
 
   printf("ABOUT TO CALL sggc_init\n");
-  sggc_init(argc<2 ? 11 /* min for no failure */ : atoi(argv[1]));  
+  sggc_init(argc<2 ? 7 /* min for no failure */ : atoi(argv[1]));  
   printf("DONE sggc_init\n");
   printf("ALLOCATING nil\n");
   nil = alloc (0, 0);
 
   a = b = c = d = e = nil;
 
-  for (i = 0; i <= 10; i++)
+  for (i = 0; i <= 50; i++)
   { 
     printf("\nITERATION %d\n",i);
 
@@ -194,10 +200,16 @@ int main (int argc, char **argv)
 
     printf("CHECKING CONTENTS\n");
 
-    if (SGGC_TYPE(a) != 1 || TYPE1(a)->x != nil || TYPE1(a)->y != nil
-     || SGGC_TYPE(b) != 2 || TYPE2(b)->len != 10
-     || SGGC_TYPE(c) != 1 || SGGC_TYPE(TYPE1(c)->x) != 1 || TYPE1(c)->y != b
-     || SGGC_TYPE(d) != 2 || TYPE2(d)->len != 1 || TYPE2(d)->data[0] != 7777)
+    if (SGGC_TYPE(a) != 1 || TYPE1(a)->x != nil || TYPE1(a)->y != nil)
+    { abort();
+    }
+    if (SGGC_TYPE(b) != 2 || TYPE2(b)->len != 10)
+    { abort();
+    }
+    if (SGGC_TYPE(c) != 1 || SGGC_TYPE(TYPE1(c)->x) != 1 || TYPE1(c)->y != b)
+    { abort();
+    }
+    if (SGGC_TYPE(d) != 2 || TYPE2(d)->len != 1 || TYPE2(d)->data[0] != 7777)
     { abort();
     }
 
