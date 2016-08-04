@@ -68,25 +68,25 @@
     else if (i == 6)
     { printf("BUT KEEPING REFERENCES TO OLD a IN e->x AND TO b IN e->y\n");
       TYPE1(e)->x = a;
-      sggc_old_to_new_check(e,a);
+      OLD_TO_NEW_CHECK(e,a);
       TYPE1(e)->y = b;
-      sggc_old_to_new_check(e,b);
+      OLD_TO_NEW_CHECK(e,b);
     }
     a = alloc (1, 1);
     if (i == 8)
     { printf("AND KEEP REFERENCE TO NEW a IN e->x\n");
       TYPE1(e)->x = a;
-      sggc_old_to_new_check(e,a);
+      OLD_TO_NEW_CHECK(e,a);
     }
 
     /* Check that the contents are correct. */
 
     printf("CHECKING CONTENTS\n");
 
-    if (SGGC_TYPE(a) != 1 || TYPE1(a)->x != nil || TYPE1(a)->y != nil
-     || SGGC_TYPE(b) != 2 || TYPE2(b)->len != 10
-     || SGGC_TYPE(c) != 1 || SGGC_TYPE(TYPE1(c)->x) != 1 || TYPE1(c)->y != b
-     || SGGC_TYPE(d) != 2 || TYPE2(d)->len != 1 || TYPE2(d)->data[0] != 7777)
+    if (TYPE(a) != 1 || TYPE1(a)->x != nil || TYPE1(a)->y != nil
+     || TYPE(b) != 2 || TYPE2(b)->len != 10
+     || TYPE(c) != 1 || TYPE(TYPE1(c)->x) != 1 || TYPE1(c)->y != b
+     || TYPE(d) != 2 || TYPE2(d)->len != 1 || TYPE2(d)->data[0] != 7777)
     { abort();
     }
 
@@ -94,11 +94,11 @@
     { if (e != nil) abort();
     }
     else if (i < 6)
-    { if (SGGC_TYPE(e)!=1 || TYPE1(e)->x != nil || TYPE1(e)->y != nil) abort();
+    { if (TYPE(e)!=1 || TYPE1(e)->x != nil || TYPE1(e)->y != nil) abort();
     }
     else
-    { if (SGGC_TYPE(e) != 1 || SGGC_TYPE(TYPE1(e)->x) != 1 
-                            || SGGC_TYPE(TYPE1(e)->y) != 2) abort();
+    { if (TYPE(e) != 1 || TYPE(TYPE1(e)->x) != 1 
+                       || TYPE(TYPE1(e)->y) != 2) abort();
       for (j = 0; j < TYPE2(TYPE1(e)->y)->len; j++)
       { if (TYPE2(TYPE1(e)->y)->data[j] != 100*6 + j) abort();
       }

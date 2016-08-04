@@ -18,13 +18,13 @@
    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
 
-/* This test program uses mostly small segments, and no auxiliary
-   data.  Optional garbage collections are done according to a simple
-   scheme based just on number of allocations done.  It is run with
-   its first program argument giving the maximum number of segments
-   (default 5, the minimum for not running out of space), and its
-   second giving the number of iterations of the test loop (default
-   50). */
+/* This test program uses compressed pointers, small segments (except
+   for nil), and no auxiliary data.  Optional garbage collections are
+   done according to a simple scheme based just on number of
+   allocations done.  It is run with its first program argument giving
+   the maximum number of segments (default 5, the minimum for not
+   running out of space), and its second giving the number of
+   iterations of the test loop (default 50). */
 
 
 #include <stdlib.h>
@@ -32,9 +32,14 @@
 #include "sggc-app.h"
 
 
-/* TYPE OF A POINTER USED IN THIS APPLICATION.  Uses compressed pointers. */
+/* TYPE OF A POINTER USED IN THIS APPLICATION.  Uses compressed pointers. 
+   The OLD_TO_NEW_CHECK macro can therefore just call sggc_old_to_new,
+   and TYPE is just SGGC_TYPE. */
 
 typedef sggc_cptr_t ptr_t;
+
+#define OLD_TO_NEW_CHECK(old,new) sggc_old_to_new_check(old,new)
+#define TYPE(v) SGGC_TYPE(v)
 
 
 /* TYPES FOR THIS APPLICATION.  Type 0 is a "nil" type.  Type 1 is a 
