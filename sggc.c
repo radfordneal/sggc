@@ -565,7 +565,7 @@ int sggc_look_at (sggc_cptr_t ptr)
         return 1;
       }
     }
-    if (set_remove(&free_or_new[SGGC_KIND(ptr)],ptr))
+    if (set_remove (&free_or_new[SGGC_KIND(ptr)], ptr))
     { set_add (&to_look_at, ptr);
       if (SGGC_DEBUG) printf("sggc_look_at: will look at %x\n",(unsigned)ptr);
     }

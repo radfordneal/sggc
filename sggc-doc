@@ -1,0 +1,54 @@
+SEGMENTED GENERATIONAL GARBAGE COLLECTOR
+
+Copyright (c) 2016 Radford M. Neal.
+
+   The SGGC library is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License along
+   with this program; if not, write to the Free Software Foundation, Inc.,
+   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+
+INTRODUCTION
+
+This library manages memory for "objects" that contain data, which may
+include references to other objects.  It was designed for use by a
+interpreter for a language such as R, though use in other applications
+would also be possible.
+
+The SGGC library provides the application with a function for
+allocating a new object.  Memory for objects that are no longer in use
+is automatically freed or reused.  To allow this, the application must
+provide procedures for finding all "root" pointers, and for finding
+all pointers to other objects that are contained in an object.  The
+application also provides information regarding the types of objects,
+and how much storage they require.
+
+Objects are allocated in "segments", and can be referenced by a pair
+consisting of a segment index and an offset within a segment.  Such
+"compressed pointers" will typically fit in a 32-bit word, even when
+regular pointers are 64 bits in size.  SGGC is designed to allow fast
+translation of a compressed pointer to a regular pointer to data.
+
+An application can choose whether to use such compressed pointers for
+all object references, or to sometimes or always use regular pointers,
+for its own purposes.  If regular pointers are used, however, each
+object will need to store a compressed pointer to themselves in its
+data space, to allow translation from regular to compressed pointers,
+as will be needed for the application to pass compressed pointers to
+SGGC.
+
+Memory is freed using a "mark and sweep" garbage collector, with three
+"generations" of objects, allowing quick recovery of recently
+allocated objects without taking time for a full sweep.  The SGGC
+library does not decide when a garbage collection (at any of the three
+levels) will be done, but instead provides information allowing the
+application to implement a policy in this regard.
