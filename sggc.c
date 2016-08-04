@@ -180,7 +180,7 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
   /* Find a segment for this object to go in (and offset within it). The 
      object will be in free_or_new, but not between next_free and end_free
      (for small segments), and so won't be taken again (at least before the
-     next collection). */
+     next collection).  If the segment is new, it's data will be NULL. */
 
   if (kind_chunks[kind] == 0) /* uses big segments */
   { v = set_first (&unused, 0);
@@ -192,7 +192,7 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
   else /* uses small segments */
   { v = next_free[kind]; 
     if (v != end_free[kind])
-    { next_free[kind] = set_next (&free_or_new[kind], v, 1);
+    { next_free[kind] = set_next (&free_or_new[kind], v, 0);
       if (SGGC_DEBUG) printf("sggc_alloc: found %x in next_free\n",(unsigned)v);
     }
   }
@@ -219,6 +219,8 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
     next_segment += 1;
   }
 
+  /* Set up type and data for a new segment. */
+
   if (sggc_data[SET_VAL_INDEX(v)] == NULL)
   {
     struct set_segment *seg = SET_SEGMENT(SET_VAL_INDEX(v));
@@ -244,6 +246,8 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
       if (data == NULL) 
       { return SGGC_NO_OBJECT;
       }
+  
+      set_add (&free_or_new[kind], v);
     }
 
     else /* small segment */
@@ -528,6 +532,10 @@ void sggc_collect (int level)
 
 int sggc_look_at (sggc_cptr_t ptr)
 {
+  if (SGGC_DEBUG) 
+  { printf ("sggc_look_at: %x %d\n", (unsigned)ptr ,old_to_new_check);
+  }
+
   if (ptr != SGGC_NO_OBJECT)
   { if (old_to_new_check != 0)
     { if (collect_level == 0)
