@@ -160,7 +160,8 @@ void set_segment_init (struct set_segment *seg)
 
 
 /* CHECK WHETHER A SET CONTAINS A SPECIFIED VALUE.  Returns 1 if 'val' is
-   an element of 'set', 0 if not. 
+   an element of 'set', 0 if not.  For correct operation, 'val' must be
+   guaranteed to not be in a set using the same chain as 'set'.
 
    This is implemented by just looking at the right bit in the bits for
    the set's chain, within the segment structure for this value's index. */

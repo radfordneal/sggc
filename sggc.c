@@ -287,6 +287,13 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
     }
   }
 
+  if (1) /* can be enabled for consistency checks */
+  { if (set_contains (&old_gen1, v)) abort();
+    if (set_contains (&old_gen2, v)) abort();
+    if (set_contains (&old_to_new, v)) abort();
+    if (set_contains (&to_look_at, v)) abort();
+  }
+
   return v;
 }
 
@@ -303,12 +310,12 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
 static void collect_debug (void)
 { int k;
   printf(
- "unused: %d,  old_gen1: %d,  old_gen2: %d,  old_to_new: %d,  to_look_at: %d\n",
-     set_n_elements(&unused), 
-     set_n_elements(&old_gen1), 
-     set_n_elements(&old_gen2), 
-     set_n_elements(&old_to_new),
-     set_n_elements(&to_look_at));
+  "  unused: %d, old_gen1: %d, old_gen2: %d, old_to_new: %d, to_look_at: %d\n",
+       set_n_elements(&unused), 
+       set_n_elements(&old_gen1), 
+       set_n_elements(&old_gen2), 
+       set_n_elements(&old_to_new),
+       set_n_elements(&to_look_at));
   printf("  free_or_new");
   for (k = 0; k < SGGC_N_KINDS; k++) 
   { printf(" [%d]: %3d ",k,set_n_elements(&free_or_new[k]));
@@ -462,10 +469,10 @@ void sggc_collect (int level)
   { v = set_first (&old_gen2, 0); 
     while (v != SET_NO_VALUE)
     { int remove = set_contains (&free_or_new[SGGC_KIND(v)], v);
-      v = set_next (&old_gen2, v, remove);
       if (SGGC_DEBUG && remove) 
       { printf("sggc_collect: %x in old_gen2 now free\n",(unsigned)v);
       }
+      v = set_next (&old_gen2, v, remove);
     }
   }
 
@@ -473,14 +480,16 @@ void sggc_collect (int level)
   { v = set_first (&old_gen1, 0); 
     while (v != SET_NO_VALUE)
     { int remove = set_contains (&free_or_new[SGGC_KIND(v)], v);
-      v = set_next (&old_gen1, v, remove);
       if (SGGC_DEBUG && remove) 
       { printf("sggc_collect: %x in old_gen1 now free\n",(unsigned)v);
       }
+      v = set_next (&old_gen1, v, remove);
     }
   }
 
-  /* Move big segments to the 'unused' set, while freeing their storage. */
+  /* Move big segments to the 'unused' set, while freeing their storage. 
+     Note that all big kinds are equal to their types, so we stop the
+     loop at SGGC_N_TYPES. */
 
   for (k = 0; k < SGGC_N_TYPES; k++)
   { if (kind_chunks[k] == 0)
@@ -500,7 +509,7 @@ void sggc_collect (int level)
 
   /* Set up new next_free and end_free pointers, to use all of free_or_new. */
 
-  for (k = 0; k < SGGC_N_TYPES; k++)
+  for (k = 0; k < SGGC_N_KINDS; k++)
   { if (kind_chunks[k] != 0)
     { next_free[k] = set_first (&free_or_new[k], 0);
       end_free[k] = SGGC_NO_OBJECT;
