@@ -56,9 +56,10 @@ static struct set old_to_new;                 /* May have old->new references */
 static struct set to_look_at;                 /* Not yet looked at in sweep */
 
 
-/* NEXT FREE OBJECT OF EACH KIND. */
+/* NEXT FREE OBJECT AND END OF FREE OBJECTS FOR EACH KIND. */
 
 static sggc_cptr_t next_free[SGGC_N_KINDS];
+static sggc_cptr_t end_free[SGGC_N_KINDS];
 
 
 /* MAXIMUM NUMBER OF SEGMENTS, AND INDEX OF NEXT SEGMENT TO USE. */
@@ -146,6 +147,7 @@ int sggc_init (int n_segments)
 
   for (k = 0; k < SGGC_N_KINDS; k++)
   { next_free[k] = SGGC_NO_OBJECT;
+    end_free[k] = SGGC_NO_OBJECT;
   }
 
   /* Record maximum segments, and initialize to no segments in use. */
@@ -176,8 +178,9 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
   }
 
   /* Find a segment for this object to go in (and offset within it). The 
-     object will be in free_or_new, but before next_free (for small segment), 
-     and so won't be taken again (at least before next collection). */
+     object will be in free_or_new, but not between next_free and end_free
+     (for small segments), and so won't be taken again (at least before the
+     next collection). */
 
   if (kind_chunks[kind] == 0) /* uses big segments */
   { v = set_first (&unused, 0);
@@ -188,7 +191,7 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
   }
   else /* uses small segments */
   { v = next_free[kind]; 
-    if (v != SGGC_NO_OBJECT)
+    if (v != end_free[kind])
     { next_free[kind] = set_next (&free_or_new[kind], v, 1);
       if (SGGC_DEBUG) printf("sggc_alloc: found %x in next_free\n",(unsigned)v);
     }
@@ -260,7 +263,11 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
       { return SGGC_NO_OBJECT;
       }
   
-      int was_empty = set_first (&free_or_new[kind], 0) == SGGC_NO_OBJECT;
+      int none_free = next_free[kind] == end_free[kind];
+
+      if (none_free) 
+      { end_free[kind] = set_first (&free_or_new[kind], 0);
+      }
   
       set_add (&free_or_new[kind], v);
   
@@ -269,8 +276,8 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
       { printf("sggc_alloc: new segment has bits %016llx\n", 
                 (unsigned long long) set_segment_bits (&free_or_new[kind], v));
       }
-  
-      if (was_empty)
+
+      if (none_free)
       { next_free[kind] = set_next (&free_or_new[kind], v, 0);
       }
     }
@@ -289,22 +296,39 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
    otherwise fail, but should also be called by the application
    according to its heuristics for when this would be desirable. */
 
+static void collect_debug (void)
+{ int k;
+  printf(
+ "unused: %d,  old_gen1: %d,  old_gen2: %d,  old_to_new: %d,  to_look_at: %d\n",
+     set_n_elements(&unused), 
+     set_n_elements(&old_gen1), 
+     set_n_elements(&old_gen2), 
+     set_n_elements(&old_to_new),
+     set_n_elements(&to_look_at));
+  printf("  free_or_new");
+  for (k = 0; k < SGGC_N_KINDS; k++) 
+  { printf(" [%d]: %d ",k,set_n_elements(&free_or_new[k]));
+  }
+  printf("\n");
+  printf("    next_free");
+  for (k = 0; k < SGGC_N_KINDS; k++) 
+  { printf(" [%d]: %llx ",k,(unsigned long long)next_free[k]);
+  }
+  printf("\n");
+  printf("     end_free");
+  for (k = 0; k < SGGC_N_KINDS; k++) 
+  { printf(" [%d]: %llx ",k,(unsigned long long)end_free[k]);
+  }
+  printf("\n");
+}
+
 void sggc_collect (int level)
 { 
   sggc_cptr_t v;
   int k;
 
   if (SGGC_DEBUG) printf("sggc_collect: level %d\n",level);
-  if (SGGC_DEBUG)
-  { printf("  old_gen1: %d,  old_gen2: %d,  old_to_new: %d,  to_look_at: %d\n",
-      set_n_elements(&old_gen1), set_n_elements(&old_gen2), 
-      set_n_elements(&old_to_new), set_n_elements(&to_look_at));
-    printf("  unused: %d, free_or_new", set_n_elements(&unused));
-    for (k = 0; k < SGGC_N_KINDS; k++) 
-    { printf(" [%d]: %d ",k,set_n_elements(&free_or_new[k]));
-    }
-    printf("\n");
-  }
+  if (SGGC_DEBUG) collect_debug();
 
   if (set_first(&to_look_at, 0) != SET_NO_VALUE) abort();
 
@@ -460,17 +484,17 @@ void sggc_collect (int level)
     }
   }
 
-  if (SGGC_DEBUG) printf("sggc_collect: done\n");
-  if (SGGC_DEBUG)
-  { printf("  old_gen1: %d,  old_gen2: %d,  old_to_new: %d,  to_look_at: %d\n",
-      set_n_elements(&old_gen1), set_n_elements(&old_gen2), 
-      set_n_elements(&old_to_new), set_n_elements(&to_look_at));
-    printf("  unused: %d, free_or_new", set_n_elements(&unused));
-    for (k = 0; k < SGGC_N_KINDS; k++) 
-    { printf(" [%d]: %d ",k,set_n_elements(&free_or_new[k]));
+  /* Set up new next_free and end_free pointers, to use all of free_or_new. */
+
+  for (k = 0; k < SGGC_N_TYPES; k++)
+  { if (kind_chunks[k] != 0)
+    { next_free[k] = set_first (&free_or_new[k], 0);
+      end_free[k] = SGGC_NO_OBJECT;
     }
-    printf("\n");
   }
+
+  if (SGGC_DEBUG) printf("sggc_collect: done\n");
+  if (SGGC_DEBUG) collect_debug();
 }
 
 
