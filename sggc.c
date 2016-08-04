@@ -123,8 +123,10 @@ int sggc_init (int n_segments)
     else /* small segment */
     { if (kind_chunks[k] > SGGC_CHUNKS_IN_SMALL_SEGMENT) abort();
       kind_full[k] = 0;
-      for (j = 0; j < SGGC_CHUNKS_IN_SMALL_SEGMENT; j += kind_chunks[i])
-      { kind_full[i] |= (set_bits_t)1 << j;
+      for (j = 0;
+           j + kind_chunks[k] <= SGGC_CHUNKS_IN_SMALL_SEGMENT; 
+           j += kind_chunks[k])
+      { kind_full[k] |= (set_bits_t)1 << j;
       }
     }
   }
@@ -230,8 +232,14 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
 
       data = malloc ((size_t) SGGC_CHUNK_SIZE * nch);
       if (SGGC_DEBUG) 
-      { printf ("sggc_alloc: called malloc for %x (big, %d chunks): %p\n", 
-                 v, (int)nch, data);
+      { printf ("sggc_alloc: called malloc for %x (big %d, %d chunks): %p\n", 
+                 v, kind, (int)nch, data);
+      }
+
+      sggc_data [SET_VAL_INDEX(v)] = data;
+
+      if (data == NULL) 
+      { return SGGC_NO_OBJECT;
       }
     }
 
@@ -242,21 +250,29 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
 
       data = malloc ((size_t) SGGC_CHUNK_SIZE * SGGC_CHUNKS_IN_SMALL_SEGMENT);
       if (SGGC_DEBUG) 
-      { printf ("sggc_alloc: called malloc for %x (small, %d chunks): %p\n", 
-                 v, (int)SGGC_CHUNKS_IN_SMALL_SEGMENT, data);
+      { printf ("sggc_alloc: called malloc for %x (small %d, %d chunks): %p\n", 
+                 v, kind, (int)SGGC_CHUNKS_IN_SMALL_SEGMENT, data);
       }
-    }
-
-    sggc_data [SET_VAL_INDEX(v)] = data;
-
-    if (data == NULL) 
-    { return SGGC_NO_OBJECT;
-    }
-
-    set_add (&free_or_new[kind], v);
-
-    if (kind_chunks[kind] != 0)
-    { set_assign_segment_bits (&free_or_new[kind], v, kind_full[kind]);
+  
+      sggc_data [SET_VAL_INDEX(v)] = data;
+  
+      if (data == NULL) 
+      { return SGGC_NO_OBJECT;
+      }
+  
+      int was_empty = set_first (&free_or_new[kind], 0) == SGGC_NO_OBJECT;
+  
+      set_add (&free_or_new[kind], v);
+  
+      set_assign_segment_bits (&free_or_new[kind], v, kind_full[kind]);
+      if (SGGC_DEBUG)
+      { printf("sggc_alloc: new segment has bits %016llx\n", 
+                (unsigned long long) set_segment_bits (&free_or_new[kind], v));
+      }
+  
+      if (was_empty)
+      { next_free[kind] = set_next (&free_or_new[kind], v, 0);
+      }
     }
   }
 
@@ -283,9 +299,9 @@ void sggc_collect (int level)
   { printf("  old_gen1: %d,  old_gen2: %d,  old_to_new: %d,  to_look_at: %d\n",
       set_n_elements(&old_gen1), set_n_elements(&old_gen2), 
       set_n_elements(&old_to_new), set_n_elements(&to_look_at));
-    printf("  unused: %d", set_n_elements(&unused));
+    printf("  unused: %d, free_or_new", set_n_elements(&unused));
     for (k = 0; k < SGGC_N_KINDS; k++) 
-    { printf(" free_or_new[%d]: %d",k,set_n_elements(&free_or_new[k]));
+    { printf(" [%d]: %d ",k,set_n_elements(&free_or_new[k]));
     }
     printf("\n");
   }
@@ -449,9 +465,9 @@ void sggc_collect (int level)
   { printf("  old_gen1: %d,  old_gen2: %d,  old_to_new: %d,  to_look_at: %d\n",
       set_n_elements(&old_gen1), set_n_elements(&old_gen2), 
       set_n_elements(&old_to_new), set_n_elements(&to_look_at));
-    printf("  unused: %d", set_n_elements(&unused));
+    printf("  unused: %d, free_or_new", set_n_elements(&unused));
     for (k = 0; k < SGGC_N_KINDS; k++) 
-    { printf(" free_or_new[%d]: %d",k,set_n_elements(&free_or_new[k]));
+    { printf(" [%d]: %d ",k,set_n_elements(&free_or_new[k]));
     }
     printf("\n");
   }

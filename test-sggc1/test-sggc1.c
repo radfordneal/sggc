@@ -38,6 +38,7 @@ struct type2 { sggc_length_t len; int32_t data[]; };
 #define TYPE1(v) ((struct type1 *) SGGC_DATA(v))
 #define TYPE2(v) ((struct type2 *) SGGC_DATA(v))
 
+
 /* VARIABLES THAT ARE ROOTS FOR THE GARBAGE COLLECTOR. */
 
 static sggc_cptr_t nil, a, b, c, d, e;
@@ -87,7 +88,7 @@ static sggc_cptr_t alloc (sggc_type_t type, sggc_length_t length)
 
   alloc_count += 1;
   if (alloc_count % 8 == 0)
-  { printf("ABOUNT TO CALL sggc_collect IN ALLOC DUE TO %d ALLOCATIONS\n",
+  { printf("ABOUT TO CALL sggc_collect IN ALLOC DUE TO %d ALLOCATIONS\n",
             alloc_count);
     sggc_collect (alloc_count % 48 == 0 ? 2 : alloc_count % 24 == 0 ? 1 : 0);
   }
