@@ -31,11 +31,16 @@
 #include "sggc-app.h"
 
 
+/* TYPE OF A POINTER USED IN THIS APPLICATION.  Uses compressed pointers. */
+
+typedef sggc_cptr_t ptr_t;
+
+
 /* TYPES FOR THIS APPLICATION.  Type 0 is a "nil" type.  Type 1 is a 
    typical "dotted pair" type.  Type 3 is a typical numeric vector type. */
 
 struct type0 { int dummy; };
-struct type1 { sggc_cptr_t x, y; };
+struct type1 { ptr_t x, y; };
 struct type2 { sggc_length_t len; int32_t data[]; };
 
 #define TYPE1(v) ((struct type1 *) SGGC_DATA(v))
@@ -44,7 +49,7 @@ struct type2 { sggc_length_t len; int32_t data[]; };
 
 /* VARIABLES THAT ARE ROOTS FOR THE GARBAGE COLLECTOR. */
 
-static sggc_cptr_t nil, a, b, c, d, e;
+static ptr_t nil, a, b, c, d, e;
 
 
 /* FUNCTIONS THAT THE APPLICATION NEEDS TO PROVIDE TO THE SGGC MODULE. */
@@ -81,7 +86,7 @@ void sggc_find_object_ptrs (sggc_cptr_t cptr)
    when necessary, or otherwise every 8th allocation, with every 24th
    being level 1, and every 48th being level 2. */
 
-static sggc_cptr_t alloc (sggc_type_t type, sggc_length_t length)
+static ptr_t alloc (sggc_type_t type, sggc_length_t length)
 {
   static unsigned alloc_count = 0;
   sggc_cptr_t a;
@@ -138,95 +143,8 @@ int main (int argc, char **argv)
 { 
   int segs = argc<2 ? 11 /* min for no failure */ : atoi(argv[1]);
   int iters = argc<3 ? 15 : atoi(argv[2]);
-  int i, j;
 
-  printf ("TEST-SGGC1: segs = %d, iters = %d\n\n", segs, iters);
-
-  /* Initialize and allocate initial nil object, which should be represented
-     as zero. */
-
-  printf("ABOUT TO CALL sggc_init\n");
-  sggc_init(segs);
-  printf("DONE sggc_init\n");
-  printf("ALLOCATING nil\n");
-  nil = alloc (0, 0);
-
-  a = b = c = d = e = nil;
-
-  for (i = 1; i <= iters; i++)
-  { 
-    printf("\nITERATION %d\n",i);
-
-    /* Do some allocations, and set data fields. */
-
-    printf("ALLOCATING a, leaving contents as nil\n");
-    a = alloc (1, 1);
-
-    printf("ALLOCATING b, setting contents to 100*i .. 100*i+9\n");
-    b = alloc (2, 10);
-    for (j = 0; j < TYPE2(b)->len; j++)
-    { TYPE2(b)->data[j] = 100*i + j;
-    }
-
-    printf("ALLOCATING c, setting its contents to a and b\n");
-    c = alloc (1, 1);
-    TYPE1(c)->x = a;
-    TYPE1(c)->y = b;
-
-    printf("ALLOCATING d, setting contents to 7777\n");
-    d = alloc (2, 1);
-    TYPE2(d)->data[0] = 7777;
-
-    printf("ALLOCATING a AGAIN, leaving contents as nil\n");
-    if (i == 2)
-    { printf("BUT KEEPING REFERENCE TO OLD a IN e\n");
-      e = a;
-    }
-    else if (i == 6)
-    { printf("BUT KEEPING REFERENCES TO OLD a IN e->x AND TO b IN e->y\n");
-      TYPE1(e)->x = a;
-      sggc_old_to_new_check(e,a);
-      TYPE1(e)->y = b;
-      sggc_old_to_new_check(e,b);
-    }
-    a = alloc (1, 1);
-    if (i == 8)
-    { printf("AND KEEP REFERENCE TO NEW a IN e->x\n");
-      TYPE1(e)->x = a;
-      sggc_old_to_new_check(e,a);
-    }
-
-    /* Check that the contents are correct. */
-
-    printf("CHECKING CONTENTS\n");
-
-    if (SGGC_TYPE(a) != 1 || TYPE1(a)->x != nil || TYPE1(a)->y != nil
-     || SGGC_TYPE(b) != 2 || TYPE2(b)->len != 10
-     || SGGC_TYPE(c) != 1 || SGGC_TYPE(TYPE1(c)->x) != 1 || TYPE1(c)->y != b
-     || SGGC_TYPE(d) != 2 || TYPE2(d)->len != 1 || TYPE2(d)->data[0] != 7777)
-    { abort();
-    }
-
-    if (i < 2)
-    { if (e != nil) abort();
-    }
-    else if (i < 6)
-    { if (SGGC_TYPE(e)!=1 || TYPE1(e)->x != nil || TYPE1(e)->y != nil) abort();
-    }
-    else
-    { if (SGGC_TYPE(e) != 1 || SGGC_TYPE(TYPE1(e)->x) != 1 
-                            || SGGC_TYPE(TYPE1(e)->y) != 2) abort();
-      for (j = 0; j < TYPE2(TYPE1(e)->y)->len; j++)
-      { if (TYPE2(TYPE1(e)->y)->data[j] != 100*6 + j) abort();
-      }
-    }
-
-    for (j = 0; j < TYPE2(b)->len; j++)
-    { if (TYPE2(b)->data[j] != 100*i + j) abort();
-    }
-  }
-
-  printf("DONE TESTING\n");
+# include "test-common.h"
 
   return 0;
 }

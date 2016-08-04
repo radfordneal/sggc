@@ -44,15 +44,17 @@
 #define SGGC_CHUNK_BITS 31    /* Bits used to record the number of chunks */
 
 /* Extra information possibly defined by the application.  Should be as
-   bit fields with more than 7 bits total. */
+   bit fields with more than 7 bits total (unless SGGC_AUX_ITEMS is less
+   than two, in which case more bits will be available). */
 
 #ifndef SGGC_EXTRA_INFO
 #define SGGC_EXTRA_INFO
 #endif
 
-/* Phases for allocations of auxilary information, allowing overlap when
-   an item takes up more than one chunk.  Will cause expansion of the
-   segment structure if SGGC_AUX_ITEMS is greater than two. */
+/* Phases for allocations of auxilary information, allowing overlap
+   when an object of this kind takes up more than one chunk.  Will
+   cause expansion of the segment structure if SGGC_AUX_ITEMS is
+   greater than two. */
 
 #if SGGC_AUX_ITEMS > 0
 #define SGGC_AUX_PHASES unsigned char phase[SGGC_AUX_ITEMS];
