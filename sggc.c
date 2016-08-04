@@ -307,17 +307,27 @@ static void collect_debug (void)
      set_n_elements(&to_look_at));
   printf("  free_or_new");
   for (k = 0; k < SGGC_N_KINDS; k++) 
-  { printf(" [%d]: %d ",k,set_n_elements(&free_or_new[k]));
+  { printf(" [%d]: %3d ",k,set_n_elements(&free_or_new[k]));
   }
   printf("\n");
   printf("    next_free");
   for (k = 0; k < SGGC_N_KINDS; k++) 
-  { printf(" [%d]: %llx ",k,(unsigned long long)next_free[k]);
+  { if (next_free[k] == SGGC_NO_OBJECT)
+    { printf(" [%d]: --- ",k);
+    }
+    else
+    { printf(" [%d]: %3llx ",k,(unsigned long long)next_free[k]);
+    }
   }
   printf("\n");
   printf("     end_free");
   for (k = 0; k < SGGC_N_KINDS; k++) 
-  { printf(" [%d]: %llx ",k,(unsigned long long)end_free[k]);
+  { if (end_free[k] == SGGC_NO_OBJECT)
+    { printf(" [%d]: --- ",k);
+    }
+    else
+    { printf(" [%d]: %3llx ",k,(unsigned long long)end_free[k]);
+    }
   }
   printf("\n");
 }
