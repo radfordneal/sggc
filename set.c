@@ -28,7 +28,7 @@
    overridden here. */
 
 #ifndef SET_DEBUG
-#define SET_DEBUG 1
+#define SET_DEBUG 0
 #endif
 
 #define CHK_CHAIN(chain) \

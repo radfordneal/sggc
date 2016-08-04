@@ -27,7 +27,7 @@
    flag, in which case it isn't overridden here. */
 
 #ifndef SGGC_DEBUG
-#define SGGC_DEBUG 1
+#define SGGC_DEBUG 0
 #endif
 
 

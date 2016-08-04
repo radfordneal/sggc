@@ -147,6 +147,8 @@ int main (int argc, char **argv)
   int iters = argc<3 ? 50 : atoi(argv[2]);
   int i, j;
 
+  printf ("TEST-SGGC2: segs = %d, iters = %d\n\n", segs, iters);
+
   /* Initialize and allocate initial nil object, which should be represented
      as zero. */
 
