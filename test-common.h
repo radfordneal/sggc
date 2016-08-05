@@ -47,7 +47,7 @@
 
     printf("ALLOCATING b, setting contents to 100*i .. 100*i+9\n");
     b = alloc (2, 10);
-    for (j = 0; j < TYPE2(b)->len; j++)
+    for (j = 0; j < LENGTH(b); j++)
     { TYPE2(b)->data[j] = 100*i + j;
     }
 
@@ -84,9 +84,9 @@
     printf("CHECKING CONTENTS\n");
 
     if (TYPE(a) != 1 || TYPE1(a)->x != nil || TYPE1(a)->y != nil
-     || TYPE(b) != 2 || TYPE2(b)->len != 10
+     || TYPE(b) != 2 || LENGTH(b) != 10
      || TYPE(c) != 1 || TYPE(TYPE1(c)->x) != 1 || TYPE1(c)->y != b
-     || TYPE(d) != 2 || TYPE2(d)->len != 1 || TYPE2(d)->data[0] != 7777)
+     || TYPE(d) != 2 || LENGTH(d) != 1 || TYPE2(d)->data[0] != 7777)
     { abort();
     }
 
@@ -99,12 +99,12 @@
     else
     { if (TYPE(e) != 1 || TYPE(TYPE1(e)->x) != 1 
                        || TYPE(TYPE1(e)->y) != 2) abort();
-      for (j = 0; j < TYPE2(TYPE1(e)->y)->len; j++)
+      for (j = 0; j < LENGTH(TYPE1(e)->y); j++)
       { if (TYPE2(TYPE1(e)->y)->data[j] != 100*6 + j) abort();
       }
     }
 
-    for (j = 0; j < TYPE2(b)->len; j++)
+    for (j = 0; j < LENGTH(b); j++)
     { if (TYPE2(b)->data[j] != 100*i + j) abort();
     }
   }

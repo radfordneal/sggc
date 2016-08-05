@@ -1,5 +1,5 @@
 /* SGGC - A LIBRARY SUPPORTING SEGMENTED GENERATIONAL GARBAGE COLLECTION.
-          Test program #3 - main program
+          Test program #4 - main program
 
    Copyright (c) 2016 Radford M. Neal.
 
@@ -18,13 +18,13 @@
    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
 
-/* This test program uses regular (uncompressed pointers), big
-   segments only, and no auxiliary data.  Optional garbage collections
-   are done according to a simple scheme based just on number of
-   allocations done.  It is run with its first program argument giving
-   the maximum number of segments (default 11, the minimum for not
-   running out of space), and its second giving the number of
-   iterations of the test loop (default 15). */
+/* This test program uses compressed pointers, big segments only, and
+   no auxiliary data.  Optional garbage collections are done according
+   to a simple scheme based just on number of allocations done.  It is
+   run with its first program argument giving the maximum number of
+   segments (default 11, the minimum for not running out of space),
+   and its second giving the number of iterations of the test loop
+   (default 15). */
 
 
 #include <stdlib.h>
@@ -32,30 +32,27 @@
 #include "sggc-app.h"
 
 
-/* TYPE OF A POINTER USED IN THIS APPLICATION.  Uses regular, uncompressed 
-   pointers.  CPTR converts to a compressed pointer.  The OLD_TO_NEW_CHECK
-   macro also has to convert, as does TYPE. */
+/* TYPE OF A POINTER USED IN THIS APPLICATION.  Uses compressed pointers.
+   The OLD_TO_NEW_CHECK macro can therefore just call sggc_old_to_new,
+   and TYPE is just SGGC_TYPE. */
 
-typedef char *ptr_t;
+typedef sggc_cptr_t ptr_t;
 
-#define CPTR(p) (* (sggc_cptr_t *) (p))
-
-#define OLD_TO_NEW_CHECK(old,new) sggc_old_to_new_check(CPTR(old),CPTR(new))
-#define TYPE(p) SGGC_TYPE(CPTR(p))
+#define OLD_TO_NEW_CHECK(old,new) sggc_old_to_new_check(old,new)
+#define TYPE(v) SGGC_TYPE(v)
 
 
 /* TYPES FOR THIS APPLICATION.  Type 0 is a "nil" type.  Type 1 is a 
-   typical "dotted pair" type.  Type 3 is a typical numeric vector type.
-   All types must start with a compressed "self" pointer. */
+   typical "dotted pair" type.  Type 3 is a typical numeric vector type. */
 
-struct type0 { sggc_cptr_t self; };
-struct type1 { sggc_cptr_t self; ptr_t x, y; };
-struct type2 { sggc_cptr_t self; sggc_length_t len; int32_t data[]; };
+struct type0 { int dummy; };
+struct type1 { ptr_t x, y; };
+struct type2 { int32_t data[1]; };
 
-#define TYPE1(v) ((struct type1 *) (v))
-#define TYPE2(v) ((struct type2 *) (v))
+#define TYPE1(v) ((struct type1 *) SGGC_DATA(v))
+#define TYPE2(v) ((struct type2 *) SGGC_DATA(v))
 
-#define LENGTH(v) (TYPE2(v)->len)  /* only works for type 2 */
+#define LENGTH(v) (* (sggc_length_t *) SGGC_AUX1(v))
 
 
 /* VARIABLES THAT ARE ROOTS FOR THE GARBAGE COLLECTOR. */
@@ -72,24 +69,32 @@ sggc_kind_t sggc_kind (sggc_type_t type, sggc_length_t length)
 
 sggc_nchunks_t sggc_nchunks (sggc_type_t type, sggc_length_t length)
 {
-  return type == 0 ? 1 : type == 1 ? 2 : (5+length) / 4;
+  return type != 2 ? 1 : (3+length) / 4;
 }
 
 void sggc_find_root_ptrs (void)
-{ sggc_look_at(CPTR(nil));
-  sggc_look_at(CPTR(a));
-  sggc_look_at(CPTR(b));
-  sggc_look_at(CPTR(c));
-  sggc_look_at(CPTR(d));
-  sggc_look_at(CPTR(e));
+{ sggc_look_at(nil);
+  sggc_look_at(a);
+  sggc_look_at(b);
+  sggc_look_at(c);
+  sggc_look_at(d);
+  sggc_look_at(e);
 }
 
 void sggc_find_object_ptrs (sggc_cptr_t cptr)
 {
   if (SGGC_TYPE(cptr) == 1)
-  { if (!sggc_look_at (CPTR(TYPE1(SGGC_DATA(cptr))->x))) return;
-    if (!sggc_look_at (CPTR(TYPE1(SGGC_DATA(cptr))->y))) return;
+  { if (!sggc_look_at (TYPE1(cptr)->x)) return;
+    if (!sggc_look_at (TYPE1(cptr)->y)) return;
   }
+}
+
+char *sggc_aux1_ro (sggc_kind_t kind)
+{
+  static const sggc_length_t length0[1] = {0};  /* one value suffices since   */
+  static const sggc_length_t length2[1] = {2};  /*  all segments used are big */
+
+  return kind == 0 ? (char *) length0 : kind == 1 ? (char *) length2 : NULL;
 }
 
 
@@ -129,15 +134,13 @@ static ptr_t alloc (sggc_type_t type, sggc_length_t length)
 
   /* Initialize the object (essential for objects containing pointers). */
 
-  * (sggc_cptr_t *) SGGC_DATA(a) = a;  /* set up self pointer */
-
   switch (type)
   { case 1: 
-    { TYPE1(SGGC_DATA(a))->x = TYPE1(SGGC_DATA(a))->y = nil;
+    { TYPE1(a)->x = TYPE1(a)->y = nil;
       break;
     }
     case 2:
-    { TYPE2(SGGC_DATA(a))->len = length;
+    { LENGTH(a) = length;
       break;
     }
     default:
@@ -146,7 +149,7 @@ static ptr_t alloc (sggc_type_t type, sggc_length_t length)
   }
 
   printf("ALLOC RETURNING %x\n",(unsigned)a);
-  return SGGC_DATA(a);
+  return a;
 }
 
 
@@ -158,6 +161,9 @@ int main (int argc, char **argv)
   int iters = argc<3 ? 15 : atoi(argv[2]);
 
 # include "test-common.h"
+
+  printf("\nFINAL LENGTHS:  nil %u, a %u, b %u, c %u, d %u, e %u\n",
+         LENGTH(nil), LENGTH(a), LENGTH(b), LENGTH(c), LENGTH(d), LENGTH(e));
 
   return 0;
 }

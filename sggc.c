@@ -306,6 +306,9 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
 #     endif
       if (aux1 == NULL)
       { aux1 = malloc ((size_t) SGGC_AUX1_SIZE * SGGC_CHUNKS_IN_SMALL_SEGMENT);
+        if (SGGC_DEBUG)
+        { printf("sggc_alloc: called malloc for aux1 for %x: %p\n", v, aux1);
+        }
         if (aux1 == NULL)
         { goto fail;
         }
@@ -319,6 +322,9 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
 #     endif
       if (aux2 == NULL)
       { aux2 = malloc ((size_t) SGGC_AUX2_SIZE * SGGC_CHUNKS_IN_SMALL_SEGMENT);
+        if (SGGC_DEBUG)
+        { printf("sggc_alloc: called malloc for aux2 for %x: %p\n", v, aux2);
+        }
         if (aux2 == NULL)
         { goto fail;
         }
@@ -374,7 +380,7 @@ fail: /* segment obtained, but couldn't allocate data / aux info for segment */
       sggc_aux1[index] = NULL;
     }
 # endif
-# ifdef SGGC_AUX1_SIZE
+# ifdef SGGC_AUX2_SIZE
     if (sggc_aux2[index] != NULL && sggc_aux2_ro(kind) == NULL) 
     { free(sggc_aux2[index]);
       sggc_aux2[index] = NULL;
@@ -590,11 +596,11 @@ void sggc_collect (int level)
         free (sggc_data[index]);
         sggc_data [index] = NULL;
 #       ifdef SGGC_AUX1_SIZE
-          free (sggc_aux1[index]);
+          if (!sggc_aux1_ro(k)) free (sggc_aux1[index]);
           sggc_aux1 [index] = NULL;
 #       endif
 #       ifdef SGGC_AUX2_SIZE
-          free (sggc_aux2[index]);
+          if (!sggc_aux2_ro(k)) free (sggc_aux2[index]);
           sggc_aux2 [index] = NULL;
 #       endif
         if (SGGC_DEBUG) 

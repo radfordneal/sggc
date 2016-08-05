@@ -52,6 +52,8 @@ struct type2 { sggc_length_t len; int32_t data[]; };
 #define TYPE1(v) ((struct type1 *) SGGC_DATA(v))
 #define TYPE2(v) ((struct type2 *) SGGC_DATA(v))
 
+#define LENGTH(v) (TYPE2(v)->len)  /* only works for type 2 */
+
 
 /* VARIABLES THAT ARE ROOTS FOR THE GARBAGE COLLECTOR. */
 
