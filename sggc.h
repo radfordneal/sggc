@@ -55,12 +55,12 @@ char **sggc_data;                  /* Pointer to array of pointers to arrays of
 #define SGGC_DATA(cptr) \
   (sggc_data [SET_VAL_INDEX(cptr)] + SGGC_CHUNK_SIZE * SET_VAL_OFFSET(cptr))
 
-#if SGGC_AUX_ITEMS >= 1
+#ifdef SGGC_AUX1_SIZE
 char **sggc_aux1;                  /* Pointer to array of pointers to arrays of 
                                       auxiliary info for objects in segments */
 #endif
 
-#if SGGC_AUX_ITEMS >= 2
+#ifdef SGGC_AUX2_SIZE
 char **sggc_aux2;                  /* Pointer to array of pointers to arrays of 
                                       auxiliary info for objects in segments */
 #endif
@@ -102,16 +102,21 @@ sggc_kind_t sggc_kind (sggc_type_t type, sggc_length_t length);
 sggc_nchunks_t sggc_nchunks (sggc_type_t type, sggc_length_t length);
 void sggc_find_root_ptrs (void);
 void sggc_find_object_ptrs (sggc_cptr_t cptr);
-char *sggc_alloc_segment_aux1 (sggc_kind_t kind);
-char *sggc_alloc_segment_aux2 (sggc_kind_t kind);
-void sggc_free_segment_aux1 (sggc_kind_t kind, char *);
-void sggc_free_segment_aux2 (sggc_kind_t kind, char *);
-void sggc_after_collect (int phase);  /* only if SGGC_AFTER_COLLECT defined */
 
+#ifdef SGGC_AUX1_RO
+char *sggc_aux1_ro (sggc_kind_t kind);
+#endif
+#ifdef SGGC_AUX1_RO
+char *sggc_aux2_ro (sggc_kind_t kind);
+#endif
+
+#ifdef SGGC_AFTER_COLLECT
+void sggc_after_collect (int level, int rep);
+#endif
 
 /* FUNCTIONS USED BY THE APPLICATION. */
 
-int sggc_init (int n_segments);
+int sggc_init (int max_segments);
 sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length);
 void sggc_collect (int level);
 int sggc_look_at (sggc_cptr_t cptr);

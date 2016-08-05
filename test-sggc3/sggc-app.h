@@ -19,7 +19,6 @@
 
 
 #define SGGC_CHUNK_SIZE 16      /* Number of bytes in a data chunk */
-#define SGGC_AUX_ITEMS 0        /* Number of auxiliary data items for objects */
 
 #define SGGC_N_TYPES 3          /* Number of object types */
 

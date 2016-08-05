@@ -304,11 +304,13 @@ static inline void remove_empty (struct set *set)
    non-zero, the element returned is also removed from 'set'.
 
    The linked list of segments for this set is first trimmed of any at 
-   the front that have no elements set, to save time in any future searches. */
+   the front that have no elements set, to save time in any future searches.
+   This is also done after removing the first element.  */
 
 set_value_t set_first (struct set *set, int remove)
 { 
   struct set_segment *seg;
+  set_value_t first;
   set_bits_t b;
   int o;
 
@@ -325,15 +327,17 @@ set_value_t set_first (struct set *set, int remove)
 
   b = seg->bits[set->chain];
   o = first_bit_pos(b);
+  first = SET_VAL (set->first, o);
 
   if (remove) 
   { seg->bits[set->chain] &= ~ ((set_bits_t)1 << o);
     set->n_elements -= 1;
+    remove_empty(set);
   }
 
   CHK_SET(set);
 
-  return SET_VAL (set->first, o);
+  return first;
 }
 
 

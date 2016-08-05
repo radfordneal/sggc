@@ -65,7 +65,7 @@ typedef uint32_t set_value_t;
 /* SPECIAL NULL VALUE.  Uses all 1s in the index and offset.  This value must 
    not be used for an actual object. */
 
-#define SET_NO_VALUE SET_VAL(~0,(1<<SET_OFFSET_BITS)-1)
+#define SET_NO_VALUE (~(set_value_t)0)
 
 
 /* SPECIAL INDEXES USED IN CHAINS.  These are not used in real (index, offset)

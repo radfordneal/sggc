@@ -43,10 +43,6 @@
 
 #define SGGC_CHUNK_BITS 31 /* Bits used to record the number of chunks */
 
-#ifndef SGGC_EXTRA_INFO    /* Extra info for small segments possibly defined */
-#define SGGC_EXTRA_INFO    /*  the application.  Should be bit fields with   */
-#endif                     /*  total of no more than 7 bits.                 */
-
 #define SET_EXTRA_INFO \
   union \
   { struct                 /* For big segments... */ \
@@ -55,7 +51,7 @@
     } big;                                  /*  allocated; 0 if size fixed  */ \
     struct                 /* For small segments... */ \
     { unsigned big : 1;       /* 0 for a segment with several small objects */ \
-      SGGC_EXTRA_INFO         /* Extra app information for small segments   */ \
+      unsigned unused : 7;    /* Bits not currently in use                  */ \
       unsigned char phase1;   /* Phase of storage for aux1 information      */ \
       unsigned char phase2;   /* Phase of storage for aux2 information      */ \
       unsigned char kind;     /* The kind of segment (equal to type if big) */ \
@@ -63,7 +59,7 @@
   } x;
 
 
-/* INCLUDE THE NON-APPLICATION-SPECIFIC HEADER. */
+/* INCLUDE THE NON-APPLICATION-SPECIFIC HEADER FOR THE SET MODULE. */
 
 #include "set.h"
 
