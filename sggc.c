@@ -182,12 +182,13 @@ int sggc_init (int n_segments)
 
 /* ALLOCATE AN OBJECT OF SPECIFIED TYPE AND LENGTH.  The length is
    (possibly) used in determining the kind for the object, as
-   determined by the application's sggc_kind function, and is also
-   needed if the application's sggc_alloc_big_segment_data or
-   sggc_alloc_big_segment_aux functions are used.  The value returned
-   is SGGC_NO_OBJECT if allocation fails, but note that it might
-   succeed if retried after garbage collection is done (but this is
-   left to the application to do if it wants to). */
+   determined by the application's sggc_kind function, and the number
+   of chunks of storage it requires, as determined by the
+   application's sggc_nchunks function.  
+
+   The value returned is SGGC_NO_OBJECT if allocation fails, but note
+   that it might succeed if retried after garbage collection is done
+   (but this is left to the application to do if it wants to). */
 
 sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
 {
@@ -244,10 +245,11 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
 
   if (sggc_data[SET_VAL_INDEX(v)] == NULL)
   {
-    struct set_segment *seg = SET_SEGMENT(SET_VAL_INDEX(v));
-    char *data;
+    int index = SET_VAL_INDEX(v);
+    struct set_segment *seg = SET_SEGMENT(index);
+    char *data, *aux1, *aux2;
 
-    sggc_type[SET_VAL_INDEX(v)] = type;
+    sggc_type[index] = type;
 
     if (kind_chunks[kind] == 0) /* big segment */
     { 
@@ -261,16 +263,7 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
       { printf ("sggc_alloc: called malloc for %x (big %d, %d chunks): %p\n", 
                  v, kind, (int)nch, data);
       }
-
-      sggc_data [SET_VAL_INDEX(v)] = data;
-
-      if (data == NULL) 
-      { return SGGC_NO_OBJECT;
-      }
-  
-      set_add (&free_or_new[kind], v);
     }
-
     else /* small segment */
     { 
       seg->x.small.big = 0;
@@ -281,13 +274,36 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
       { printf ("sggc_alloc: called malloc for %x (small %d, %d chunks): %p\n", 
                  v, kind, (int)SGGC_CHUNKS_IN_SMALL_SEGMENT, data);
       }
-  
-      sggc_data [SET_VAL_INDEX(v)] = data;
-  
-      if (data == NULL) 
+    }
+
+    sggc_data[index] = data;
+
+    if (data == NULL) 
+    { return SGGC_NO_OBJECT;
+    }
+
+#   if SGGC_AUX_ITEMS >= 1
+      aux1 = sggc_alloc_segment_aux1 (kind);
+      if (aux1 == NULL)
       { return SGGC_NO_OBJECT;
       }
-  
+      sggc_aux1[index] = aux1;
+#   endif
+
+#   if SGGC_AUX_ITEMS >= 2
+      aux2 = sggc_alloc_segment_aux2 (kind);
+      if (aux2 == NULL)
+      { return SGGC_NO_OBJECT;
+      }
+      sggc_aux2[index] = aux2;
+#   endif
+
+    if (kind_chunks[kind] == 0) /* big segment */
+    {
+      set_add (&free_or_new[kind], v);
+    }
+    else /* small segment */
+    { 
       int none_free = next_free[kind] == end_free[kind];
 
       if (none_free) 
