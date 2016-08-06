@@ -18,8 +18,8 @@
    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
 
-/* This test program uses compressed pointers, small segments (except
-   for nil), and no auxiliary data.  Optional garbage collections are
+/* This test program uses compressed pointers, both big and small
+   segments, and no auxiliary data.  Optional garbage collections are
    done according to a simple scheme based just on number of
    allocations done.  It is run with its first program argument giving
    the maximum number of segments (default 5, the minimum for not
@@ -32,7 +32,7 @@
 #include "sggc-app.h"
 
 
-/* TYPE OF A POINTER USED IN THIS APPLICATION.  Uses compressed pointers. 
+/* TYPE OF A POINTER USED IN THIS APPLICATION.  Uses compressed pointers.
    The OLD_TO_NEW_CHECK macro can therefore just call sggc_old_to_new,
    and TYPE is just SGGC_TYPE. */
 

@@ -19,12 +19,12 @@
 
 
 /* This test program uses compressed pointers, big segments only, and
-   no auxiliary data.  Optional garbage collections are done according
-   to a simple scheme based just on number of allocations done.  It is
-   run with its first program argument giving the maximum number of
-   segments (default 11, the minimum for not running out of space),
-   and its second giving the number of iterations of the test loop
-   (default 15). */
+   auxiliary data recording object length (constant for types 1 and 2).
+   Optional garbage collections are done according to a simple scheme
+   based just on number of allocations done.  It is run with its first
+   program argument giving the maximum number of segments (default 11,
+   the minimum for not running out of space), and its second giving
+   the number of iterations of the test loop (default 15). */
 
 
 #include <stdlib.h>

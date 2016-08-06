@@ -127,9 +127,11 @@ static ptr_t alloc (sggc_type_t type, sggc_length_t length)
     }
   }
 
-  /* Initialize the object (essential for objects containing pointers). */
+  /* Set up the self pointer. */
 
-  * (sggc_cptr_t *) SGGC_DATA(a) = a;  /* set up self pointer */
+  * (sggc_cptr_t *) SGGC_DATA(a) = a;  
+
+  /* Initialize the object (essential for objects containing pointers). */
 
   switch (type)
   { case 1: 
