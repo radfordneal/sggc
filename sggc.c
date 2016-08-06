@@ -596,11 +596,23 @@ void sggc_collect (int level)
         free (sggc_data[index]);
         sggc_data [index] = NULL;
 #       ifdef SGGC_AUX1_SIZE
-          if (!sggc_aux1_ro(k)) free (sggc_aux1[index]);
+          if (!sggc_aux1_ro(k)) 
+          { if (SGGC_DEBUG) 
+            { printf("sggc_collect: calling free for aux1 of %x: %p\n",
+                     v, sggc_aux1[index]);
+            }
+            free (sggc_aux1[index]);
+          }
           sggc_aux1 [index] = NULL;
 #       endif
 #       ifdef SGGC_AUX2_SIZE
-          if (!sggc_aux2_ro(k)) free (sggc_aux2[index]);
+          if (!sggc_aux2_ro(k)) 
+          { if (SGGC_DEBUG) 
+            { printf("sggc_collect: calling free for aux2 of %x: %p\n",
+                     v, sggc_aux2[index]);
+            }
+            free (sggc_aux2[index]);
+          }
           sggc_aux2 [index] = NULL;
 #       endif
         if (SGGC_DEBUG) 
