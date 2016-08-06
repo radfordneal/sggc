@@ -89,7 +89,7 @@ void sggc_find_object_ptrs (sggc_cptr_t cptr)
   }
 }
 
-char *sggc_aux1_ro (sggc_kind_t kind)
+char *sggc_aux1_read_only (sggc_kind_t kind)
 {
   static const sggc_length_t length0[1] = {0};  /* one value suffices since   */
   static const sggc_length_t length2[1] = {2};  /*  all segments used are big */

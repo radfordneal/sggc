@@ -40,6 +40,18 @@
 static int kind_chunks[SGGC_N_KINDS] = SGGC_KIND_CHUNKS;
 
 
+/* READ-ONLY AUXILIARY INFORMATION.  Filled in at initialization by calling
+   the application's sggc_aux1_read_only and sggc_aux2_read_only functions. */
+
+#ifdef SGGC_AUX1_READ_ONLY
+static char *kind_aux1_read_only[SGGC_N_KINDS];
+#endif
+
+#ifdef SGGC_AUX2_READ_ONLY
+static char *kind_aux2_read_only[SGGC_N_KINDS];
+#endif
+
+
 /* BIT VECTORS FOR FULL SEGMENTS.  Computed at initialization from kind_chunks
    and SET_OFFSET_BITS. */
 
@@ -137,6 +149,20 @@ int sggc_init (int max_segments)
       }
     }
   }
+
+  /* Initialize tables of read-only auxiliary information. */
+
+# ifdef SGGC_AUX1_READ_ONLY
+    for (k = 0; k < SGGC_N_KINDS; k++)
+    { kind_aux1_read_only[k] = sggc_aux1_read_only(k);
+    }
+# endif
+
+# ifdef SGGC_AUX2_READ_ONLY
+    for (k = 0; k < SGGC_N_KINDS; k++)
+    { kind_aux2_read_only[k] = sggc_aux2_read_only(k);
+    }
+# endif
 
   /* Initialize sets of objects, as empty. */
 
@@ -301,8 +327,11 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
     }
 
 #   ifdef SGGC_AUX1_SIZE
-#     ifdef SGGC_AUX1_RO
-        aux1 = sggc_aux1_ro (kind);
+#     ifdef SGGC_AUX1_READ_ONLY
+        aux1 = kind_aux1_read_only[kind];
+        if (SGGC_DEBUG)
+        { if (aux1!=NULL) printf("sggc_alloc: used read-only aux1 for %x\n", v);
+        }
 #     endif
       if (aux1 == NULL)
       { aux1 = malloc ((size_t) SGGC_AUX1_SIZE * SGGC_CHUNKS_IN_SMALL_SEGMENT);
@@ -317,8 +346,11 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
 #   endif
 
 #   ifdef SGGC_AUX2_SIZE
-#     ifdef SGGC_AUX2_RO
-        aux2 = sggc_aux2_ro (kind);
+#     ifdef SGGC_AUX2_READ_ONLY
+        aux2 = kind_aux2_read_only[kind];
+        if (SGGC_DEBUG)
+        { if (aux2!=NULL) printf("sggc_alloc: used read-only aux2 for %x\n", v);
+        }
 #     endif
       if (aux2 == NULL)
       { aux2 = malloc ((size_t) SGGC_AUX2_SIZE * SGGC_CHUNKS_IN_SMALL_SEGMENT);
@@ -375,15 +407,25 @@ fail: /* segment obtained, but couldn't allocate data / aux info for segment */
     sggc_data[index] = NULL;
   }
 # ifdef SGGC_AUX1_SIZE
-    if (sggc_aux1[index] != NULL && sggc_aux1_ro(kind) == NULL) 
-    { free(sggc_aux1[index]);
-      sggc_aux1[index] = NULL;
+    if (sggc_aux1[index] != NULL)
+    {
+#     ifdef SGGC_AUX1_READ_ONLY
+      if (sggc_aux1[index] != kind_aux1_read_only[kind])
+#     endif
+      { free(sggc_aux1[index]);
+        sggc_aux1[index] = NULL;
+      }
     }
 # endif
 # ifdef SGGC_AUX2_SIZE
-    if (sggc_aux2[index] != NULL && sggc_aux2_ro(kind) == NULL) 
-    { free(sggc_aux2[index]);
-      sggc_aux2[index] = NULL;
+    if (sggc_aux2[index] != NULL)
+    {
+#     ifdef SGGC_AUX2_READ_ONLY
+      if (sggc_aux2[index] != kind_aux2_read_only[kind])
+#     endif
+      { free(sggc_aux2[index]);
+        sggc_aux2[index] = NULL;
+      }
     }
 # endif
 
@@ -596,7 +638,9 @@ void sggc_collect (int level)
         free (sggc_data[index]);
         sggc_data [index] = NULL;
 #       ifdef SGGC_AUX1_SIZE
-          if (!sggc_aux1_ro(k)) 
+#         ifdef SGGC_AUX1_READ_ONLY
+          if (!kind_aux1_read_only[k]) 
+#         endif
           { if (SGGC_DEBUG) 
             { printf("sggc_collect: calling free for aux1 of %x: %p\n",
                      v, sggc_aux1[index]);
@@ -606,7 +650,9 @@ void sggc_collect (int level)
           sggc_aux1 [index] = NULL;
 #       endif
 #       ifdef SGGC_AUX2_SIZE
-          if (!sggc_aux2_ro(k)) 
+#         ifdef SGGC_AUX2_READ_ONLY
+          if (!kind_aux2_read_only[k]) 
+#         endif
           { if (SGGC_DEBUG) 
             { printf("sggc_collect: calling free for aux2 of %x: %p\n",
                      v, sggc_aux2[index]);

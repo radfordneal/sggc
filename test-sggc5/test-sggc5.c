@@ -96,7 +96,7 @@ void sggc_find_object_ptrs (sggc_cptr_t cptr)
   }
 }
 
-char *sggc_aux1_ro (sggc_kind_t kind)
+char *sggc_aux1_read_only (sggc_kind_t kind)
 {
   static const sggc_length_t length0[SGGC_CHUNKS_IN_SMALL_SEGMENT];
   static const sggc_length_t length2[SGGC_CHUNKS_IN_SMALL_SEGMENT] = 

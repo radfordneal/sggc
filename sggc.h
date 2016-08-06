@@ -103,11 +103,11 @@ sggc_nchunks_t sggc_nchunks (sggc_type_t type, sggc_length_t length);
 void sggc_find_root_ptrs (void);
 void sggc_find_object_ptrs (sggc_cptr_t cptr);
 
-#ifdef SGGC_AUX1_RO
-char *sggc_aux1_ro (sggc_kind_t kind);
+#ifdef SGGC_AUX1_READ_ONLY
+char *sggc_aux1_read_only (sggc_kind_t kind);
 #endif
-#ifdef SGGC_AUX1_RO
-char *sggc_aux2_ro (sggc_kind_t kind);
+#ifdef SGGC_AUX1_READ_ONLY
+char *sggc_aux2_read_only (sggc_kind_t kind);
 #endif
 
 #ifdef SGGC_AFTER_COLLECT

@@ -26,9 +26,11 @@ typedef unsigned sggc_length_t; /* Type for holding an object length */
 typedef unsigned sggc_nchunks_t;/* Type for how many chunks are in a segment */
 
 #define SGGC_N_KINDS 3          /* Number of kinds of segments */
-#define SGGC_KIND_CHUNKS { 0, 0, 0 } 
+
+#define SGGC_KIND_CHUNKS { 0, 0, 0 }  /* Sizes of chunks by kind, 0 for 'big' */
 
 #define SGGC_AUX1_SIZE 4        /* Size of auxiliary information */
-#define SGGC_AUX1_RO            /* Auxiliary information may be read-only */
+
+#define SGGC_AUX1_READ_ONLY     /* Some auxiliary information is read-only */
 
 #include "sggc.h"
