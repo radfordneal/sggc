@@ -18,7 +18,7 @@
    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
 
-/* This test program uses regular (uncompressed pointers), big
+/* This test program uses regular (uncompressed) pointers, big
    segments only, and no auxiliary data.  Optional garbage collections
    are done according to a simple scheme based just on number of
    allocations done.  It is run with its first program argument giving

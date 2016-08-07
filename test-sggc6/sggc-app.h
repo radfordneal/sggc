@@ -30,9 +30,10 @@ typedef unsigned sggc_nchunks_t;/* Type for how many chunks are in a segment */
 #define SGGC_KIND_CHUNKS { 0, 1, 0, 1, 2, 3 } 
 
 #define SGGC_AUX1_SIZE 4        /* Size of auxiliary information 1 */
-
+#define SGGC_AUX1_BLOCK_SIZE 4  /* Number of blocks in aux1 allocations */
 #define SGGC_AUX1_READ_ONLY     /* Some auxiliary information 1 is read-only */
 
-#define SGGC_AUX2_SIZE 2        /* Size of auxiliary information 2 */
+#define SGGC_AUX2_SIZE 8        /* Size of auxiliary information 2 */
+#define SGGC_AUX2_BLOCK_SIZE 2  /* Number of blocks in aux2 allocations */
 
 #include "sggc.h"

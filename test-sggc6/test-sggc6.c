@@ -55,7 +55,7 @@ struct type2 { int32_t data[1]; };
 #define TYPE2(v) ((struct type2 *) SGGC_DATA(v))
 
 #define LENGTH(v) (* (sggc_length_t *) SGGC_AUX1(v))
-#define SEQNUM(v) (* (uint16_t *) SGGC_AUX2(v))
+#define SEQNUM(v) (* (uint64_t *) SGGC_AUX2(v))
 
 
 /* VARIABLES THAT ARE ROOTS FOR THE GARBAGE COLLECTOR. */
@@ -148,7 +148,7 @@ static ptr_t alloc (sggc_type_t type, sggc_length_t length)
 
   /* Initialize the object (essential for objects containing pointers). */
 
-  static uint16_t seqnum = 0;
+  static uint64_t seqnum = 0;
   SEQNUM(a) = seqnum++;
 
   switch (type)
@@ -182,8 +182,9 @@ int main (int argc, char **argv)
   printf("\nFINAL LENGTHS:  nil %3u, a %3u, b %3u, c %3u, d %3u, e %3u\n",
          LENGTH(nil), LENGTH(a), LENGTH(b), LENGTH(c), LENGTH(d), LENGTH(e));
 
-  printf("FINAL SEQNUMS:  nil %3u, a %3u, b %3u, c %3u, d %3u, e %3u\n",
-         SEQNUM(nil), SEQNUM(a), SEQNUM(b), SEQNUM(c), SEQNUM(d), SEQNUM(e));
+  printf(
+   "FINAL SEQNUMS:  nil %3llu, a %3llu, b %3llu, c %3llu, d %3llu, e %3llu\n",
+    SEQNUM(nil), SEQNUM(a), SEQNUM(b), SEQNUM(c), SEQNUM(d), SEQNUM(e));
 
   return 0;
 }
