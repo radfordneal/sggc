@@ -119,7 +119,7 @@ int sggc_init (int max_segments)
 # endif
 
 # ifdef SGGC_AUX2_SIZE
-    sggc_aux2 = malloc (max_segments * sizeof *sggc_aux1);
+    sggc_aux2 = malloc (max_segments * sizeof *sggc_aux2);
     if (sggc_aux2 == NULL)
     { return 4;
     }
@@ -332,6 +332,8 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
         if (SGGC_DEBUG)
         { if (aux1!=NULL) printf("sggc_alloc: used read-only aux1 for %x\n", v);
         }
+#     else
+        aux1 = NULL;
 #     endif
       if (aux1 == NULL)
       { aux1 = malloc ((size_t) SGGC_AUX1_SIZE * SGGC_CHUNKS_IN_SMALL_SEGMENT);
@@ -351,6 +353,8 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
         if (SGGC_DEBUG)
         { if (aux2!=NULL) printf("sggc_alloc: used read-only aux2 for %x\n", v);
         }
+#     else
+        aux2 = NULL;
 #     endif
       if (aux2 == NULL)
       { aux2 = malloc ((size_t) SGGC_AUX2_SIZE * SGGC_CHUNKS_IN_SMALL_SEGMENT);
