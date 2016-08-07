@@ -35,11 +35,12 @@
 
 /* TYPE OF A POINTER USED IN THIS APPLICATION.  Uses compressed pointers.
    The OLD_TO_NEW_CHECK macro can therefore just call sggc_old_to_new,
-   and TYPE is just SGGC_TYPE. */
+   YOUNGEST just calls sggc_youngest_generation, and TYPE is just SGGC_TYPE. */
 
 typedef sggc_cptr_t ptr_t;
 
 #define OLD_TO_NEW_CHECK(old,new) sggc_old_to_new_check(old,new)
+#define YOUNGEST(v) sggc_youngest_generation(v)
 #define TYPE(v) SGGC_TYPE(v)
 
 

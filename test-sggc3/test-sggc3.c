@@ -34,13 +34,14 @@
 
 /* TYPE OF A POINTER USED IN THIS APPLICATION.  Uses regular, uncompressed 
    pointers.  CPTR converts to a compressed pointer.  The OLD_TO_NEW_CHECK
-   macro also has to convert, as does TYPE. */
+   and YOUNGEST macros also have to convert, as does TYPE. */
 
 typedef char *ptr_t;
 
 #define CPTR(p) (* (sggc_cptr_t *) (p))
 
 #define OLD_TO_NEW_CHECK(old,new) sggc_old_to_new_check(CPTR(old),CPTR(new))
+#define YOUNGEST(p) sggc_youngest_generation(CPTR(p))
 #define TYPE(p) SGGC_TYPE(CPTR(p))
 
 

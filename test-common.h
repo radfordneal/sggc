@@ -110,4 +110,8 @@
   }
 
   printf("DONE TESTING\n");
+
+  printf("\nFINAL YOUNGEST:  nil %d, a %d, b %d, c %d, d %d, e %d\n",
+         YOUNGEST(nil), YOUNGEST(a), YOUNGEST(b), 
+         YOUNGEST(c), YOUNGEST(d), YOUNGEST(e));
 }

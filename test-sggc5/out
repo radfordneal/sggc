@@ -5,7 +5,7 @@ DONE sggc_init
 ALLOCATING nil
 sggc_alloc: type 0, length 0
 sggc_alloc: created 0 in new segment
-sggc_alloc: called malloc for 0 (big 0, 1 chunks):: 0x7ff2a34032d0
+sggc_alloc: called malloc for 0 (big 0, 1 chunks):: 0x7fdfe2c032d0
 sggc_alloc: used read-only aux1 for 0
 ALLOC RETURNING 0
 
@@ -13,15 +13,15 @@ ITERATION 1
 ALLOCATING a, leaving contents as nil
 sggc_alloc: type 1, length 1
 sggc_alloc: created 40 in new segment
-sggc_alloc: called malloc for 40 (small 1, 64 chunks):: 0x7ff2a3800600
+sggc_alloc: called malloc for 40 (small 1, 64 chunks):: 0x7fdfe3000600
 sggc_alloc: used read-only aux1 for 40
 sggc_alloc: new segment has bits ffffffffffffffff
 ALLOC RETURNING 40
 ALLOCATING b, setting contents to 100*i .. 100*i+9
 sggc_alloc: type 2, length 10
 sggc_alloc: created 80 in new segment
-sggc_alloc: called malloc for 80 (small 5, 64 chunks):: 0x7ff2a3800a00
-sggc_alloc: called malloc for aux1 for 80:: 0x7ff2a3403370
+sggc_alloc: called malloc for 80 (small 5, 64 chunks):: 0x7fdfe3000a00
+sggc_alloc: called malloc for aux1 for 80:: 0x7fdfe2c03370
 sggc_alloc: new segment has bits 1249249249249249
 ALLOC RETURNING 80
 ALLOCATING c, setting its contents to a and b
@@ -31,8 +31,8 @@ ALLOC RETURNING 41
 ALLOCATING d, setting contents to 7777
 sggc_alloc: type 2, length 1
 sggc_alloc: created c0 in new segment
-sggc_alloc: called malloc for c0 (small 3, 64 chunks):: 0x7ff2a3803600
-sggc_alloc: called malloc for aux1 for c0:: 0x7ff2a34034b0
+sggc_alloc: called malloc for c0 (small 3, 64 chunks):: 0x7fdfe3003600
+sggc_alloc: called malloc for aux1 for c0:: 0x7fdfe2c034b0
 sggc_alloc: new segment has bits ffffffffffffffff
 ALLOC RETURNING c0
 ALLOCATING a AGAIN, leaving contents as nil
@@ -2710,5 +2710,7 @@ sggc_alloc: found 45 in next_free
 ALLOC RETURNING 45
 CHECKING CONTENTS
 DONE TESTING
+
+FINAL YOUNGEST:  nil 0, a 1, b 1, c 1, d 1, e 0
 
 FINAL LENGTHS:  nil 0, a 2, b 10, c 2, d 1, e 2
