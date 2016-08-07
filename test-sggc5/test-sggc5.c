@@ -99,7 +99,6 @@ void sggc_find_object_ptrs (sggc_cptr_t cptr)
 
 char *sggc_aux1_read_only (sggc_kind_t kind)
 {
-  static const sggc_length_t length0[SGGC_CHUNKS_IN_SMALL_SEGMENT];
   static const sggc_length_t length2[SGGC_CHUNKS_IN_SMALL_SEGMENT] = 
   { 2, 2, 2, 2, 2, 2, 2, 2,  2, 2, 2, 2, 2, 2, 2, 2,
     2, 2, 2, 2, 2, 2, 2, 2,  2, 2, 2, 2, 2, 2, 2, 2,
@@ -107,7 +106,7 @@ char *sggc_aux1_read_only (sggc_kind_t kind)
     2, 2, 2, 2, 2, 2, 2, 2,  2, 2, 2, 2, 2, 2, 2, 2
   };
 
-  return kind == 0 ? (char *) length0 : kind == 1 ? (char *) length2 : NULL;
+  return kind == 1 ? (char *) length2 : NULL;
 }
 
 
@@ -148,8 +147,14 @@ static ptr_t alloc (sggc_type_t type, sggc_length_t length)
   /* Initialize the object (essential for objects containing pointers). */
 
   switch (type)
-  { case 1: 
+  { 
+    case 0:
+    { LENGTH(a) = 0;
+      break;
+    }
+    case 1: 
     { TYPE1(a)->x = TYPE1(a)->y = nil;
+      /* Note: LENGTH is set to read-only constant */
       break;
     }
     case 2:
@@ -157,7 +162,7 @@ static ptr_t alloc (sggc_type_t type, sggc_length_t length)
       break;
     }
     default:
-    { break;
+    { abort();
     }
   }
 

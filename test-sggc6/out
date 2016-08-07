@@ -5,26 +5,26 @@ DONE sggc_init
 ALLOCATING nil
 sggc_alloc: type 0, length 0
 sggc_alloc: created 0 in new segment
-sggc_alloc: called malloc for 0 (big 0, 1 chunks):: 0x7fddb24032c0
-sggc_alloc: used read-only aux1 for 0
-sggc_alloc: called malloc for aux2 for 0:: 0x7fddb2403330
+sggc_alloc: called malloc for 0 (big 0, 1 chunks):: 0x7fc458c032c0
+sggc_alloc: called malloc for aux1 for 0:: 0x7fc458c03330
+sggc_alloc: called malloc for aux2 for 0:: 0x7fc458c03430
 ALLOC RETURNING 0
 
 ITERATION 1
 ALLOCATING a, leaving contents as nil
 sggc_alloc: type 1, length 1
 sggc_alloc: created 40 in new segment
-sggc_alloc: called malloc for 40 (small 1, 64 chunks):: 0x7fddb2800600
+sggc_alloc: called malloc for 40 (small 1, 64 chunks):: 0x7fc459005e00
 sggc_alloc: used read-only aux1 for 40
-sggc_alloc: called malloc for aux2 for 40:: 0x7fddb24033f0
+sggc_alloc: called malloc for aux2 for 40:: 0x7fc458c03670
 sggc_alloc: new segment has bits ffffffffffffffff
 ALLOC RETURNING 40
 ALLOCATING b, setting contents to 100*i .. 100*i+9
 sggc_alloc: type 2, length 10
 sggc_alloc: created 80 in new segment
-sggc_alloc: called malloc for 80 (small 5, 64 chunks):: 0x7fddb2800a00
-sggc_alloc: called malloc for aux1 for 80:: 0x7fddb24034b0
-sggc_alloc: called malloc for aux2 for 80:: 0x7fddb24035b0
+sggc_alloc: called malloc for 80 (small 5, 64 chunks):: 0x7fc459006200
+sggc_alloc: called malloc for aux1 for 80:: 0x7fc458c038b0
+sggc_alloc: called malloc for aux2 for 80:: 0x7fc458c039b0
 sggc_alloc: new segment has bits 1249249249249249
 ALLOC RETURNING 80
 ALLOCATING c, setting its contents to a and b
@@ -34,9 +34,9 @@ ALLOC RETURNING 41
 ALLOCATING d, setting contents to 7777
 sggc_alloc: type 2, length 1
 sggc_alloc: created c0 in new segment
-sggc_alloc: called malloc for c0 (small 3, 64 chunks):: 0x7fddb2803600
-sggc_alloc: called malloc for aux1 for c0:: 0x7fddb2403670
-sggc_alloc: called malloc for aux2 for c0:: 0x7fddb2403770
+sggc_alloc: called malloc for c0 (small 3, 64 chunks):: 0x7fc459006600
+sggc_alloc: called malloc for aux1 for c0:: 0x7fc458c03bf0
+sggc_alloc: called malloc for aux2 for c0:: 0x7fc458c03cf0
 sggc_alloc: new segment has bits ffffffffffffffff
 ALLOC RETURNING c0
 ALLOCATING a AGAIN, leaving contents as nil

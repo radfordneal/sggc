@@ -5,40 +5,40 @@ DONE sggc_init
 ALLOCATING nil
 sggc_alloc: type 0, length 0
 sggc_alloc: created 0 in new segment
-sggc_alloc: called malloc for 0 (big 0, 1 chunks):: 0x7fd933c032c0
-sggc_alloc: used read-only aux1 for 0
+sggc_alloc: called malloc for 0 (big 0, 1 chunks):: 0x7fef38c032c0
+sggc_alloc: called malloc for aux1 for 0:: 0x7fef38c03390
 ALLOC RETURNING 0
 
 ITERATION 1
 ALLOCATING a, leaving contents as nil
 sggc_alloc: type 1, length 1
 sggc_alloc: created 40 in new segment
-sggc_alloc: called malloc for 40 (big 1, 1 chunks):: 0x7fd933c032d0
-sggc_alloc: used read-only aux1 for 40
+sggc_alloc: called malloc for 40 (big 1, 1 chunks):: 0x7fef38c032d0
+sggc_alloc: called malloc for aux1 for 40:: 0x7fef38c034d0
 ALLOC RETURNING 40
 ALLOCATING b, setting contents to 100*i .. 100*i+9
 sggc_alloc: type 2, length 10
 sggc_alloc: created 80 in new segment
-sggc_alloc: called malloc for 80 (big 2, 3 chunks):: 0x7fd933c03410
-sggc_alloc: called malloc for aux1 for 80:: 0x7fd933c03440
+sggc_alloc: called malloc for 80 (big 2, 3 chunks):: 0x7fef38c03610
+sggc_alloc: called malloc for aux1 for 80:: 0x7fef38c03640
 ALLOC RETURNING 80
 ALLOCATING c, setting its contents to a and b
 sggc_alloc: type 1, length 1
 sggc_alloc: created c0 in new segment
-sggc_alloc: called malloc for c0 (big 1, 1 chunks):: 0x7fd933c032e0
-sggc_alloc: used read-only aux1 for c0
+sggc_alloc: called malloc for c0 (big 1, 1 chunks):: 0x7fef38c032e0
+sggc_alloc: called malloc for aux1 for c0:: 0x7fef38c03780
 ALLOC RETURNING c0
 ALLOCATING d, setting contents to 7777
 sggc_alloc: type 2, length 1
 sggc_alloc: created 100 in new segment
-sggc_alloc: called malloc for 100 (big 2, 1 chunks):: 0x7fd933c035c0
-sggc_alloc: called malloc for aux1 for 100:: 0x7fd933c035d0
+sggc_alloc: called malloc for 100 (big 2, 1 chunks):: 0x7fef38c038c0
+sggc_alloc: called malloc for aux1 for 100:: 0x7fef38c038d0
 ALLOC RETURNING 100
 ALLOCATING a AGAIN, leaving contents as nil
 sggc_alloc: type 1, length 1
 sggc_alloc: created 140 in new segment
-sggc_alloc: called malloc for 140 (big 1, 1 chunks):: 0x7fd933c03710
-sggc_alloc: used read-only aux1 for 140
+sggc_alloc: called malloc for 140 (big 1, 1 chunks):: 0x7fef38c03a10
+sggc_alloc: called malloc for aux1 for 140:: 0x7fef38c03a20
 ALLOC RETURNING 140
 CHECKING CONTENTS
 
@@ -46,8 +46,8 @@ ITERATION 2
 ALLOCATING a, leaving contents as nil
 sggc_alloc: type 1, length 1
 sggc_alloc: created 180 in new segment
-sggc_alloc: called malloc for 180 (big 1, 1 chunks):: 0x7fd933c03760
-sggc_alloc: used read-only aux1 for 180
+sggc_alloc: called malloc for 180 (big 1, 1 chunks):: 0x7fef38c03b60
+sggc_alloc: called malloc for aux1 for 180:: 0x7fef38c03b70
 ALLOC RETURNING 180
 ALLOCATING b, setting contents to 100*i .. 100*i+9
 ABOUT TO CALL sggc_collect IN ALLOC DUE TO 8 ALLOCATIONS
@@ -86,7 +86,8 @@ sggc_look_at: 0 0
 sggc_look_at: 0 0
 sggc_collect: looking at 0
 sggc_collect: 0 now old_gen1
-sggc_collect: calling free for 140:: 0x7fd933c03710
+sggc_collect: calling free for 140:: 0x7fef38c03a10
+sggc_collect: retaining aux1 for 140:: 0x7fef38c03a20
 sggc_collect: putting 140 in unused
 sggc_collect: done
   unused: 1, old_gen1: 6, old_gen2: 0, old_to_new: 0, to_look_at: 0
@@ -95,27 +96,26 @@ sggc_collect: done
      end_free [0]: ---  [1]: ---  [2]: --- 
 sggc_alloc: type 2, length 10
 sggc_alloc: found 140 in unused
-sggc_alloc: called malloc for 140 (big 2, 3 chunks):: 0x7fd933c03770
-sggc_alloc: called malloc for aux1 for 140:: 0x7fd933c037a0
+sggc_alloc: called malloc for 140 (big 2, 3 chunks):: 0x7fef38c03c70
 ALLOC RETURNING 140
 ALLOCATING c, setting its contents to a and b
 sggc_alloc: type 1, length 1
 sggc_alloc: created 1c0 in new segment
-sggc_alloc: called malloc for 1c0 (big 1, 1 chunks):: 0x7fd933c03710
-sggc_alloc: used read-only aux1 for 1c0
+sggc_alloc: called malloc for 1c0 (big 1, 1 chunks):: 0x7fef38c03a10
+sggc_alloc: called malloc for aux1 for 1c0:: 0x7fef38c03ce0
 ALLOC RETURNING 1c0
 ALLOCATING d, setting contents to 7777
 sggc_alloc: type 2, length 1
 sggc_alloc: created 200 in new segment
-sggc_alloc: called malloc for 200 (big 2, 1 chunks):: 0x7fd933c03920
-sggc_alloc: called malloc for aux1 for 200:: 0x7fd933c03930
+sggc_alloc: called malloc for 200 (big 2, 1 chunks):: 0x7fef38c03e20
+sggc_alloc: called malloc for aux1 for 200:: 0x7fef38c03e30
 ALLOC RETURNING 200
 ALLOCATING a AGAIN, leaving contents as nil
 BUT KEEPING REFERENCE TO OLD a IN e
 sggc_alloc: type 1, length 1
 sggc_alloc: created 240 in new segment
-sggc_alloc: called malloc for 240 (big 1, 1 chunks):: 0x7fd933c03a70
-sggc_alloc: used read-only aux1 for 240
+sggc_alloc: called malloc for 240 (big 1, 1 chunks):: 0x7fef38c03f70
+sggc_alloc: called malloc for aux1 for 240:: 0x7fef38c03f80
 ALLOC RETURNING 240
 CHECKING CONTENTS
 
@@ -123,8 +123,8 @@ ITERATION 3
 ALLOCATING a, leaving contents as nil
 sggc_alloc: type 1, length 1
 sggc_alloc: created 280 in new segment
-sggc_alloc: called malloc for 280 (big 1, 1 chunks):: 0x7fd933c03ac0
-sggc_alloc: used read-only aux1 for 280
+sggc_alloc: called malloc for 280 (big 1, 1 chunks):: 0x7fef38c040c0
+sggc_alloc: called malloc for aux1 for 280:: 0x7fef38c040d0
 ALLOC RETURNING 280
 ALLOCATING b, setting contents to 100*i .. 100*i+9
 sggc_alloc: type 2, length 10
@@ -174,15 +174,20 @@ sggc_collect: 80 in old_gen1 now free
 sggc_collect: 40 in old_gen1 now free
 sggc_collect: c0 in old_gen1 now free
 sggc_collect: 100 in old_gen1 now free
-sggc_collect: calling free for c0:: 0x7fd933c032e0
+sggc_collect: calling free for c0:: 0x7fef38c032e0
+sggc_collect: retaining aux1 for c0:: 0x7fef38c03780
 sggc_collect: putting c0 in unused
-sggc_collect: calling free for 40:: 0x7fd933c032d0
+sggc_collect: calling free for 40:: 0x7fef38c032d0
+sggc_collect: retaining aux1 for 40:: 0x7fef38c034d0
 sggc_collect: putting 40 in unused
-sggc_collect: calling free for 240:: 0x7fd933c03a70
+sggc_collect: calling free for 240:: 0x7fef38c03f70
+sggc_collect: retaining aux1 for 240:: 0x7fef38c03f80
 sggc_collect: putting 240 in unused
-sggc_collect: calling free for 100:: 0x7fd933c035c0
+sggc_collect: calling free for 100:: 0x7fef38c038c0
+sggc_collect: retaining aux1 for 100:: 0x7fef38c038d0
 sggc_collect: putting 100 in unused
-sggc_collect: calling free for 80:: 0x7fd933c03410
+sggc_collect: calling free for 80:: 0x7fef38c03610
+sggc_collect: retaining aux1 for 80:: 0x7fef38c03640
 sggc_collect: putting 80 in unused
 sggc_collect: done
   unused: 5, old_gen1: 4, old_gen2: 2, old_to_new: 0, to_look_at: 0
@@ -191,20 +196,17 @@ sggc_collect: done
      end_free [0]: ---  [1]: ---  [2]: --- 
 sggc_alloc: type 2, length 10
 sggc_alloc: found 80 in unused
-sggc_alloc: called malloc for 80 (big 2, 3 chunks):: 0x7fd933c03410
-sggc_alloc: called malloc for aux1 for 80:: 0x7fd933c03ad0
+sggc_alloc: called malloc for 80 (big 2, 3 chunks):: 0x7fef38c03610
 ALLOC RETURNING 80
 ALLOCATING c, setting its contents to a and b
 sggc_alloc: type 1, length 1
 sggc_alloc: found 100 in unused
-sggc_alloc: called malloc for 100 (big 1, 1 chunks):: 0x7fd933c035c0
-sggc_alloc: used read-only aux1 for 100
+sggc_alloc: called malloc for 100 (big 1, 1 chunks):: 0x7fef38c038c0
 ALLOC RETURNING 100
 ALLOCATING d, setting contents to 7777
 sggc_alloc: type 2, length 1
 sggc_alloc: found 240 in unused
-sggc_alloc: called malloc for 240 (big 2, 1 chunks):: 0x7fd933c03a70
-sggc_alloc: called malloc for aux1 for 240:: 0x7fd933c03bd0
+sggc_alloc: called malloc for 240 (big 2, 1 chunks):: 0x7fef38c03f70
 ALLOC RETURNING 240
 ALLOCATING a AGAIN, leaving contents as nil
 ABOUT TO CALL sggc_collect IN ALLOC DUE TO 16 ALLOCATIONS
@@ -237,8 +239,7 @@ sggc_collect: done
      end_free [0]: ---  [1]: ---  [2]: --- 
 sggc_alloc: type 1, length 1
 sggc_alloc: found 40 in unused
-sggc_alloc: called malloc for 40 (big 1, 1 chunks):: 0x7fd933c032d0
-sggc_alloc: used read-only aux1 for 40
+sggc_alloc: called malloc for 40 (big 1, 1 chunks):: 0x7fef38c032d0
 ALLOC RETURNING 40
 CHECKING CONTENTS
 
@@ -246,8 +247,7 @@ ITERATION 4
 ALLOCATING a, leaving contents as nil
 sggc_alloc: type 1, length 1
 sggc_alloc: found c0 in unused
-sggc_alloc: called malloc for c0 (big 1, 1 chunks):: 0x7fd933c032e0
-sggc_alloc: used read-only aux1 for c0
+sggc_alloc: called malloc for c0 (big 1, 1 chunks):: 0x7fef38c032e0
 ALLOC RETURNING c0
 ALLOCATING b, setting contents to 100*i .. 100*i+9
 sggc_alloc: type 2, length 10
@@ -302,13 +302,17 @@ sggc_collect: looking at 0
 sggc_collect: 140 in old_gen1 now free
 sggc_collect: 1c0 in old_gen1 now free
 sggc_collect: 200 in old_gen1 now free
-sggc_collect: calling free for 1c0:: 0x7fd933c03710
+sggc_collect: calling free for 1c0:: 0x7fef38c03a10
+sggc_collect: retaining aux1 for 1c0:: 0x7fef38c03ce0
 sggc_collect: putting 1c0 in unused
-sggc_collect: calling free for 40:: 0x7fd933c032d0
+sggc_collect: calling free for 40:: 0x7fef38c032d0
+sggc_collect: retaining aux1 for 40:: 0x7fef38c034d0
 sggc_collect: putting 40 in unused
-sggc_collect: calling free for 200:: 0x7fd933c03920
+sggc_collect: calling free for 200:: 0x7fef38c03e20
+sggc_collect: retaining aux1 for 200:: 0x7fef38c03e30
 sggc_collect: putting 200 in unused
-sggc_collect: calling free for 140:: 0x7fd933c03770
+sggc_collect: calling free for 140:: 0x7fef38c03c70
+sggc_collect: retaining aux1 for 140:: 0x7fef38c03a20
 sggc_collect: putting 140 in unused
 sggc_collect: done
   unused: 4, old_gen1: 1, old_gen2: 6, old_to_new: 0, to_look_at: 0
@@ -317,26 +321,22 @@ sggc_collect: done
      end_free [0]: ---  [1]: ---  [2]: --- 
 sggc_alloc: type 2, length 10
 sggc_alloc: found 140 in unused
-sggc_alloc: called malloc for 140 (big 2, 3 chunks):: 0x7fd933c03770
-sggc_alloc: called malloc for aux1 for 140:: 0x7fd933c03cd0
+sggc_alloc: called malloc for 140 (big 2, 3 chunks):: 0x7fef38c03c70
 ALLOC RETURNING 140
 ALLOCATING c, setting its contents to a and b
 sggc_alloc: type 1, length 1
 sggc_alloc: found 200 in unused
-sggc_alloc: called malloc for 200 (big 1, 1 chunks):: 0x7fd933c03920
-sggc_alloc: used read-only aux1 for 200
+sggc_alloc: called malloc for 200 (big 1, 1 chunks):: 0x7fef38c03e20
 ALLOC RETURNING 200
 ALLOCATING d, setting contents to 7777
 sggc_alloc: type 2, length 1
 sggc_alloc: found 40 in unused
-sggc_alloc: called malloc for 40 (big 2, 1 chunks):: 0x7fd933c032d0
-sggc_alloc: called malloc for aux1 for 40:: 0x7fd933c03dd0
+sggc_alloc: called malloc for 40 (big 2, 1 chunks):: 0x7fef38c032d0
 ALLOC RETURNING 40
 ALLOCATING a AGAIN, leaving contents as nil
 sggc_alloc: type 1, length 1
 sggc_alloc: found 1c0 in unused
-sggc_alloc: called malloc for 1c0 (big 1, 1 chunks):: 0x7fd933c03710
-sggc_alloc: used read-only aux1 for 1c0
+sggc_alloc: called malloc for 1c0 (big 1, 1 chunks):: 0x7fef38c03a10
 ALLOC RETURNING 1c0
 CHECKING CONTENTS
 
@@ -393,13 +393,17 @@ sggc_collect: 80 in old_gen2 now free
 sggc_collect: 280 in old_gen2 now free
 sggc_collect: 100 in old_gen2 now free
 sggc_collect: 240 in old_gen2 now free
-sggc_collect: calling free for 100:: 0x7fd933c035c0
+sggc_collect: calling free for 100:: 0x7fef38c038c0
+sggc_collect: retaining aux1 for 100:: 0x7fef38c038d0
 sggc_collect: putting 100 in unused
-sggc_collect: calling free for 280:: 0x7fd933c03ac0
+sggc_collect: calling free for 280:: 0x7fef38c040c0
+sggc_collect: retaining aux1 for 280:: 0x7fef38c040d0
 sggc_collect: putting 280 in unused
-sggc_collect: calling free for 240:: 0x7fd933c03a70
+sggc_collect: calling free for 240:: 0x7fef38c03f70
+sggc_collect: retaining aux1 for 240:: 0x7fef38c03f80
 sggc_collect: putting 240 in unused
-sggc_collect: calling free for 80:: 0x7fd933c03410
+sggc_collect: calling free for 80:: 0x7fef38c03610
+sggc_collect: retaining aux1 for 80:: 0x7fef38c03640
 sggc_collect: putting 80 in unused
 sggc_collect: done
   unused: 4, old_gen1: 4, old_gen2: 3, old_to_new: 0, to_look_at: 0
@@ -408,14 +412,12 @@ sggc_collect: done
      end_free [0]: ---  [1]: ---  [2]: --- 
 sggc_alloc: type 1, length 1
 sggc_alloc: found 80 in unused
-sggc_alloc: called malloc for 80 (big 1, 1 chunks):: 0x7fd933c03a70
-sggc_alloc: used read-only aux1 for 80
+sggc_alloc: called malloc for 80 (big 1, 1 chunks):: 0x7fef38c03f70
 ALLOC RETURNING 80
 ALLOCATING b, setting contents to 100*i .. 100*i+9
 sggc_alloc: type 2, length 10
 sggc_alloc: found 240 in unused
-sggc_alloc: called malloc for 240 (big 2, 3 chunks):: 0x7fd933c03410
-sggc_alloc: called malloc for aux1 for 240:: 0x7fd933c03ed0
+sggc_alloc: called malloc for 240 (big 2, 3 chunks):: 0x7fef38c03610
 ALLOC RETURNING 240
 ALLOCATING c, setting its contents to a and b
 ABOUT TO CALL sggc_collect IN ALLOC DUE TO 24 ALLOCATIONS
@@ -454,7 +456,8 @@ sggc_collect: 80 now old_gen1
 sggc_look_at: 0 0
 sggc_look_at: 0 0
 sggc_collect: 1c0 in old_gen1 now free
-sggc_collect: calling free for 1c0:: 0x7fd933c03710
+sggc_collect: calling free for 1c0:: 0x7fef38c03a10
+sggc_collect: retaining aux1 for 1c0:: 0x7fef38c03ce0
 sggc_collect: putting 1c0 in unused
 sggc_collect: done
   unused: 3, old_gen1: 2, old_gen2: 6, old_to_new: 0, to_look_at: 0
@@ -463,20 +466,17 @@ sggc_collect: done
      end_free [0]: ---  [1]: ---  [2]: --- 
 sggc_alloc: type 1, length 1
 sggc_alloc: found 1c0 in unused
-sggc_alloc: called malloc for 1c0 (big 1, 1 chunks):: 0x7fd933c03710
-sggc_alloc: used read-only aux1 for 1c0
+sggc_alloc: called malloc for 1c0 (big 1, 1 chunks):: 0x7fef38c03a10
 ALLOC RETURNING 1c0
 ALLOCATING d, setting contents to 7777
 sggc_alloc: type 2, length 1
 sggc_alloc: found 280 in unused
-sggc_alloc: called malloc for 280 (big 2, 1 chunks):: 0x7fd933c03ac0
-sggc_alloc: called malloc for aux1 for 280:: 0x7fd933c03fd0
+sggc_alloc: called malloc for 280 (big 2, 1 chunks):: 0x7fef38c040c0
 ALLOC RETURNING 280
 ALLOCATING a AGAIN, leaving contents as nil
 sggc_alloc: type 1, length 1
 sggc_alloc: found 100 in unused
-sggc_alloc: called malloc for 100 (big 1, 1 chunks):: 0x7fd933c035c0
-sggc_alloc: used read-only aux1 for 100
+sggc_alloc: called malloc for 100 (big 1, 1 chunks):: 0x7fef38c038c0
 ALLOC RETURNING 100
 CHECKING CONTENTS
 
@@ -534,13 +534,17 @@ sggc_collect: 140 in old_gen2 now free
 sggc_collect: 200 in old_gen2 now free
 sggc_collect: 40 in old_gen2 now free
 sggc_collect: c0 in old_gen2 now free
-sggc_collect: calling free for c0:: 0x7fd933c032e0
+sggc_collect: calling free for c0:: 0x7fef38c032e0
+sggc_collect: retaining aux1 for c0:: 0x7fef38c03780
 sggc_collect: putting c0 in unused
-sggc_collect: calling free for 200:: 0x7fd933c03920
+sggc_collect: calling free for 200:: 0x7fef38c03e20
+sggc_collect: retaining aux1 for 200:: 0x7fef38c03e30
 sggc_collect: putting 200 in unused
-sggc_collect: calling free for 40:: 0x7fd933c032d0
+sggc_collect: calling free for 40:: 0x7fef38c032d0
+sggc_collect: retaining aux1 for 40:: 0x7fef38c034d0
 sggc_collect: putting 40 in unused
-sggc_collect: calling free for 140:: 0x7fd933c03770
+sggc_collect: calling free for 140:: 0x7fef38c03c70
+sggc_collect: retaining aux1 for 140:: 0x7fef38c03a20
 sggc_collect: putting 140 in unused
 sggc_collect: done
   unused: 4, old_gen1: 3, old_gen2: 4, old_to_new: 0, to_look_at: 0
@@ -549,26 +553,22 @@ sggc_collect: done
      end_free [0]: ---  [1]: ---  [2]: --- 
 sggc_alloc: type 1, length 1
 sggc_alloc: found 140 in unused
-sggc_alloc: called malloc for 140 (big 1, 1 chunks):: 0x7fd933c03920
-sggc_alloc: used read-only aux1 for 140
+sggc_alloc: called malloc for 140 (big 1, 1 chunks):: 0x7fef38c03e20
 ALLOC RETURNING 140
 ALLOCATING b, setting contents to 100*i .. 100*i+9
 sggc_alloc: type 2, length 10
 sggc_alloc: found 40 in unused
-sggc_alloc: called malloc for 40 (big 2, 3 chunks):: 0x7fd933c03770
-sggc_alloc: called malloc for aux1 for 40:: 0x7fd933c040d0
+sggc_alloc: called malloc for 40 (big 2, 3 chunks):: 0x7fef38c03c70
 ALLOC RETURNING 40
 ALLOCATING c, setting its contents to a and b
 sggc_alloc: type 1, length 1
 sggc_alloc: found 200 in unused
-sggc_alloc: called malloc for 200 (big 1, 1 chunks):: 0x7fd933c032d0
-sggc_alloc: used read-only aux1 for 200
+sggc_alloc: called malloc for 200 (big 1, 1 chunks):: 0x7fef38c032d0
 ALLOC RETURNING 200
 ALLOCATING d, setting contents to 7777
 sggc_alloc: type 2, length 1
 sggc_alloc: found c0 in unused
-sggc_alloc: called malloc for c0 (big 2, 1 chunks):: 0x7fd933c032e0
-sggc_alloc: called malloc for aux1 for c0:: 0x7fd933c041d0
+sggc_alloc: called malloc for c0 (big 2, 1 chunks):: 0x7fef38c032e0
 ALLOC RETURNING c0
 ALLOCATING a AGAIN, leaving contents as nil
 BUT KEEPING REFERENCES TO OLD a IN e->x AND TO b IN e->y
@@ -622,15 +622,20 @@ sggc_collect: 80 in old_gen2 now free
 sggc_collect: 100 in old_gen1 now free
 sggc_collect: 1c0 in old_gen1 now free
 sggc_collect: 280 in old_gen1 now free
-sggc_collect: calling free for 1c0:: 0x7fd933c03710
+sggc_collect: calling free for 1c0:: 0x7fef38c03a10
+sggc_collect: retaining aux1 for 1c0:: 0x7fef38c03ce0
 sggc_collect: putting 1c0 in unused
-sggc_collect: calling free for 100:: 0x7fd933c035c0
+sggc_collect: calling free for 100:: 0x7fef38c038c0
+sggc_collect: retaining aux1 for 100:: 0x7fef38c038d0
 sggc_collect: putting 100 in unused
-sggc_collect: calling free for 80:: 0x7fd933c03a70
+sggc_collect: calling free for 80:: 0x7fef38c03f70
+sggc_collect: retaining aux1 for 80:: 0x7fef38c03640
 sggc_collect: putting 80 in unused
-sggc_collect: calling free for 280:: 0x7fd933c03ac0
+sggc_collect: calling free for 280:: 0x7fef38c040c0
+sggc_collect: retaining aux1 for 280:: 0x7fef38c040d0
 sggc_collect: putting 280 in unused
-sggc_collect: calling free for 240:: 0x7fd933c03410
+sggc_collect: calling free for 240:: 0x7fef38c03610
+sggc_collect: retaining aux1 for 240:: 0x7fef38c03f80
 sggc_collect: putting 240 in unused
 sggc_collect: done
   unused: 5, old_gen1: 4, old_gen2: 2, old_to_new: 1, to_look_at: 0
@@ -639,8 +644,7 @@ sggc_collect: done
      end_free [0]: ---  [1]: ---  [2]: --- 
 sggc_alloc: type 1, length 1
 sggc_alloc: found 240 in unused
-sggc_alloc: called malloc for 240 (big 1, 1 chunks):: 0x7fd933c03ac0
-sggc_alloc: used read-only aux1 for 240
+sggc_alloc: called malloc for 240 (big 1, 1 chunks):: 0x7fef38c040c0
 ALLOC RETURNING 240
 CHECKING CONTENTS
 
@@ -674,26 +678,22 @@ sggc_collect: done
      end_free [0]: ---  [1]: ---  [2]: --- 
 sggc_alloc: type 1, length 1
 sggc_alloc: found 280 in unused
-sggc_alloc: called malloc for 280 (big 1, 1 chunks):: 0x7fd933c03a70
-sggc_alloc: used read-only aux1 for 280
+sggc_alloc: called malloc for 280 (big 1, 1 chunks):: 0x7fef38c03f70
 ALLOC RETURNING 280
 ALLOCATING b, setting contents to 100*i .. 100*i+9
 sggc_alloc: type 2, length 10
 sggc_alloc: found 80 in unused
-sggc_alloc: called malloc for 80 (big 2, 3 chunks):: 0x7fd933c03410
-sggc_alloc: called malloc for aux1 for 80:: 0x7fd933c042d0
+sggc_alloc: called malloc for 80 (big 2, 3 chunks):: 0x7fef38c03610
 ALLOC RETURNING 80
 ALLOCATING c, setting its contents to a and b
 sggc_alloc: type 1, length 1
 sggc_alloc: found 100 in unused
-sggc_alloc: called malloc for 100 (big 1, 1 chunks):: 0x7fd933c035c0
-sggc_alloc: used read-only aux1 for 100
+sggc_alloc: called malloc for 100 (big 1, 1 chunks):: 0x7fef38c038c0
 ALLOC RETURNING 100
 ALLOCATING d, setting contents to 7777
 sggc_alloc: type 2, length 1
 sggc_alloc: found 1c0 in unused
-sggc_alloc: called malloc for 1c0 (big 2, 1 chunks):: 0x7fd933c03710
-sggc_alloc: called malloc for aux1 for 1c0:: 0x7fd933c043d0
+sggc_alloc: called malloc for 1c0 (big 2, 1 chunks):: 0x7fef38c03a10
 ALLOC RETURNING 1c0
 ALLOCATING a AGAIN, leaving contents as nil
 sggc_alloc: type 1, length 1
@@ -752,11 +752,14 @@ sggc_collect: looking at 0
 sggc_collect: 240 in old_gen1 now free
 sggc_collect: 200 in old_gen1 now free
 sggc_collect: c0 in old_gen1 now free
-sggc_collect: calling free for 200:: 0x7fd933c032d0
+sggc_collect: calling free for 200:: 0x7fef38c032d0
+sggc_collect: retaining aux1 for 200:: 0x7fef38c03e30
 sggc_collect: putting 200 in unused
-sggc_collect: calling free for 240:: 0x7fd933c03ac0
+sggc_collect: calling free for 240:: 0x7fef38c040c0
+sggc_collect: retaining aux1 for 240:: 0x7fef38c03f80
 sggc_collect: putting 240 in unused
-sggc_collect: calling free for c0:: 0x7fd933c032e0
+sggc_collect: calling free for c0:: 0x7fef38c032e0
+sggc_collect: retaining aux1 for c0:: 0x7fef38c03780
 sggc_collect: putting c0 in unused
 sggc_collect: done
   unused: 3, old_gen1: 4, old_gen2: 4, old_to_new: 1, to_look_at: 0
@@ -765,8 +768,7 @@ sggc_collect: done
      end_free [0]: ---  [1]: ---  [2]: --- 
 sggc_alloc: type 1, length 1
 sggc_alloc: found c0 in unused
-sggc_alloc: called malloc for c0 (big 1, 1 chunks):: 0x7fd933c032e0
-sggc_alloc: used read-only aux1 for c0
+sggc_alloc: called malloc for c0 (big 1, 1 chunks):: 0x7fef38c032e0
 ALLOC RETURNING c0
 CHECKING CONTENTS
 
@@ -774,14 +776,12 @@ ITERATION 8
 ALLOCATING a, leaving contents as nil
 sggc_alloc: type 1, length 1
 sggc_alloc: found 240 in unused
-sggc_alloc: called malloc for 240 (big 1, 1 chunks):: 0x7fd933c03ac0
-sggc_alloc: used read-only aux1 for 240
+sggc_alloc: called malloc for 240 (big 1, 1 chunks):: 0x7fef38c040c0
 ALLOC RETURNING 240
 ALLOCATING b, setting contents to 100*i .. 100*i+9
 sggc_alloc: type 2, length 10
 sggc_alloc: found 200 in unused
-sggc_alloc: called malloc for 200 (big 2, 3 chunks):: 0x7fd933c044d0
-sggc_alloc: called malloc for aux1 for 200:: 0x7fd933c04500
+sggc_alloc: called malloc for 200 (big 2, 3 chunks):: 0x7fef38c041d0
 ALLOC RETURNING 200
 ALLOCATING c, setting its contents to a and b
 sggc_alloc: type 1, length 1
@@ -844,7 +844,8 @@ sggc_collect: 240 now old_gen1
 sggc_look_at: 0 0
 sggc_look_at: 0 0
 sggc_collect: looking at 0
-sggc_collect: calling free for c0:: 0x7fd933c032e0
+sggc_collect: calling free for c0:: 0x7fef38c032e0
+sggc_collect: retaining aux1 for c0:: 0x7fef38c03780
 sggc_collect: putting c0 in unused
 sggc_collect: done
   unused: 1, old_gen1: 2, old_gen2: 8, old_to_new: 1, to_look_at: 0
@@ -853,8 +854,7 @@ sggc_collect: done
      end_free [0]: ---  [1]: ---  [2]: --- 
 sggc_alloc: type 1, length 1
 sggc_alloc: found c0 in unused
-sggc_alloc: called malloc for c0 (big 1, 1 chunks):: 0x7fd933c032e0
-sggc_alloc: used read-only aux1 for c0
+sggc_alloc: called malloc for c0 (big 1, 1 chunks):: 0x7fef38d00000
 ALLOC RETURNING c0
 ALLOCATING d, setting contents to 7777
 ABOUT TO CALL sggc_collect IN ALLOC DUE TO 40 ALLOCATIONS
@@ -937,11 +937,14 @@ sggc_collect: looking at 0
 sggc_collect: 280 in old_gen2 now free
 sggc_collect: 80 in old_gen2 now free
 sggc_collect: 100 in old_gen2 now free
-sggc_collect: calling free for 100:: 0x7fd933c035c0
+sggc_collect: calling free for 100:: 0x7fef38c038c0
+sggc_collect: retaining aux1 for 100:: 0x7fef38c038d0
 sggc_collect: putting 100 in unused
-sggc_collect: calling free for 280:: 0x7fd933c03a70
+sggc_collect: calling free for 280:: 0x7fef38c03f70
+sggc_collect: retaining aux1 for 280:: 0x7fef38c040d0
 sggc_collect: putting 280 in unused
-sggc_collect: calling free for 80:: 0x7fd933c03410
+sggc_collect: calling free for 80:: 0x7fef38c03610
+sggc_collect: retaining aux1 for 80:: 0x7fef38c03640
 sggc_collect: putting 80 in unused
 sggc_collect: done
   unused: 3, old_gen1: 0, old_gen2: 8, old_to_new: 0, to_look_at: 0
@@ -950,14 +953,12 @@ sggc_collect: done
      end_free [0]: ---  [1]: ---  [2]: --- 
 sggc_alloc: type 2, length 1
 sggc_alloc: found 80 in unused
-sggc_alloc: called malloc for 80 (big 2, 1 chunks):: 0x7fd933c03a70
-sggc_alloc: called malloc for aux1 for 80:: 0x7fd933c04600
+sggc_alloc: called malloc for 80 (big 2, 1 chunks):: 0x7fef38d00010
 ALLOC RETURNING 80
 ALLOCATING a AGAIN, leaving contents as nil
 sggc_alloc: type 1, length 1
 sggc_alloc: found 280 in unused
-sggc_alloc: called malloc for 280 (big 1, 1 chunks):: 0x7fd933c035c0
-sggc_alloc: used read-only aux1 for 280
+sggc_alloc: called malloc for 280 (big 1, 1 chunks):: 0x7fef38d00020
 ALLOC RETURNING 280
 AND KEEP REFERENCE TO NEW a IN e->x
 CHECKING CONTENTS
@@ -966,8 +967,7 @@ ITERATION 9
 ALLOCATING a, leaving contents as nil
 sggc_alloc: type 1, length 1
 sggc_alloc: found 100 in unused
-sggc_alloc: called malloc for 100 (big 1, 1 chunks):: 0x7fd933c032d0
-sggc_alloc: used read-only aux1 for 100
+sggc_alloc: called malloc for 100 (big 1, 1 chunks):: 0x7fef38d00030
 ALLOC RETURNING 100
 ALLOCATING b, setting contents to 100*i .. 100*i+9
 sggc_alloc: type 2, length 10
@@ -1027,9 +1027,11 @@ sggc_look_at: 0 0
 sggc_collect: looking at 0
 sggc_collect: 1c0 in old_gen2 now free
 sggc_collect: 140 in old_gen2 now free
-sggc_collect: calling free for 140:: 0x7fd933c03920
+sggc_collect: calling free for 140:: 0x7fef38c03e20
+sggc_collect: retaining aux1 for 140:: 0x7fef38c03a20
 sggc_collect: putting 140 in unused
-sggc_collect: calling free for 1c0:: 0x7fd933c03710
+sggc_collect: calling free for 1c0:: 0x7fef38c03a10
+sggc_collect: retaining aux1 for 1c0:: 0x7fef38c03ce0
 sggc_collect: putting 1c0 in unused
 sggc_collect: done
   unused: 2, old_gen1: 3, old_gen2: 6, old_to_new: 1, to_look_at: 0
@@ -1038,14 +1040,12 @@ sggc_collect: done
      end_free [0]: ---  [1]: ---  [2]: --- 
 sggc_alloc: type 2, length 10
 sggc_alloc: found 1c0 in unused
-sggc_alloc: called malloc for 1c0 (big 2, 3 chunks):: 0x7fd933c03410
-sggc_alloc: called malloc for aux1 for 1c0:: 0x7fd933c04700
+sggc_alloc: called malloc for 1c0 (big 2, 3 chunks):: 0x7fef38d00040
 ALLOC RETURNING 1c0
 ALLOCATING c, setting its contents to a and b
 sggc_alloc: type 1, length 1
 sggc_alloc: found 140 in unused
-sggc_alloc: called malloc for 140 (big 1, 1 chunks):: 0x7fd933c03710
-sggc_alloc: used read-only aux1 for 140
+sggc_alloc: called malloc for 140 (big 1, 1 chunks):: 0x7fef38d00070
 ALLOC RETURNING 140
 ALLOCATING d, setting contents to 7777
 sggc_alloc: type 2, length 1
@@ -1105,11 +1105,14 @@ sggc_collect: looking at 0
 sggc_collect: 240 in old_gen2 now free
 sggc_collect: 200 in old_gen2 now free
 sggc_collect: c0 in old_gen2 now free
-sggc_collect: calling free for c0:: 0x7fd933c032e0
+sggc_collect: calling free for c0:: 0x7fef38d00000
+sggc_collect: retaining aux1 for c0:: 0x7fef38c03780
 sggc_collect: putting c0 in unused
-sggc_collect: calling free for 240:: 0x7fd933c03ac0
+sggc_collect: calling free for 240:: 0x7fef38c040c0
+sggc_collect: retaining aux1 for 240:: 0x7fef38c03f80
 sggc_collect: putting 240 in unused
-sggc_collect: calling free for 200:: 0x7fd933c044d0
+sggc_collect: calling free for 200:: 0x7fef38c041d0
+sggc_collect: retaining aux1 for 200:: 0x7fef38c03e30
 sggc_collect: putting 200 in unused
 sggc_collect: done
   unused: 3, old_gen1: 2, old_gen2: 6, old_to_new: 1, to_look_at: 0
@@ -1118,14 +1121,12 @@ sggc_collect: done
      end_free [0]: ---  [1]: ---  [2]: --- 
 sggc_alloc: type 2, length 1
 sggc_alloc: found 200 in unused
-sggc_alloc: called malloc for 200 (big 2, 1 chunks):: 0x7fd933c03ac0
-sggc_alloc: called malloc for aux1 for 200:: 0x7fd933c04800
+sggc_alloc: called malloc for 200 (big 2, 1 chunks):: 0x7fef38d00000
 ALLOC RETURNING 200
 ALLOCATING a AGAIN, leaving contents as nil
 sggc_alloc: type 1, length 1
 sggc_alloc: found 240 in unused
-sggc_alloc: called malloc for 240 (big 1, 1 chunks):: 0x7fd933c032e0
-sggc_alloc: used read-only aux1 for 240
+sggc_alloc: called malloc for 240 (big 1, 1 chunks):: 0x7fef38d00080
 ALLOC RETURNING 240
 CHECKING CONTENTS
 
@@ -1133,8 +1134,7 @@ ITERATION 10
 ALLOCATING a, leaving contents as nil
 sggc_alloc: type 1, length 1
 sggc_alloc: found c0 in unused
-sggc_alloc: called malloc for c0 (big 1, 1 chunks):: 0x7fd933c03920
-sggc_alloc: used read-only aux1 for c0
+sggc_alloc: called malloc for c0 (big 1, 1 chunks):: 0x7fef38d00090
 ALLOC RETURNING c0
 ALLOCATING b, setting contents to 100*i .. 100*i+9
 ABOUT TO CALL sggc_collect IN ALLOC DUE TO 48 ALLOCATIONS
@@ -1193,9 +1193,11 @@ sggc_look_at: 0 0
 sggc_look_at: 0 0
 sggc_collect: looking at 0
 sggc_collect: 80 in old_gen2 now free
-sggc_collect: calling free for 240:: 0x7fd933c032e0
+sggc_collect: calling free for 240:: 0x7fef38d00080
+sggc_collect: retaining aux1 for 240:: 0x7fef38c03f80
 sggc_collect: putting 240 in unused
-sggc_collect: calling free for 80:: 0x7fd933c03a70
+sggc_collect: calling free for 80:: 0x7fef38d00010
+sggc_collect: retaining aux1 for 80:: 0x7fef38c03640
 sggc_collect: putting 80 in unused
 sggc_collect: done
   unused: 2, old_gen1: 2, old_gen2: 7, old_to_new: 1, to_look_at: 0
@@ -1204,14 +1206,12 @@ sggc_collect: done
      end_free [0]: ---  [1]: ---  [2]: --- 
 sggc_alloc: type 2, length 10
 sggc_alloc: found 80 in unused
-sggc_alloc: called malloc for 80 (big 2, 3 chunks):: 0x7fd933c044d0
-sggc_alloc: called malloc for aux1 for 80:: 0x7fd933c04900
+sggc_alloc: called malloc for 80 (big 2, 3 chunks):: 0x7fef38d000a0
 ALLOC RETURNING 80
 ALLOCATING c, setting its contents to a and b
 sggc_alloc: type 1, length 1
 sggc_alloc: found 240 in unused
-sggc_alloc: called malloc for 240 (big 1, 1 chunks):: 0x7fd933c03a70
-sggc_alloc: used read-only aux1 for 240
+sggc_alloc: called malloc for 240 (big 1, 1 chunks):: 0x7fef38d00010
 ALLOC RETURNING 240
 ALLOCATING d, setting contents to 7777
 sggc_alloc: type 2, length 1
@@ -1270,11 +1270,14 @@ sggc_collect: looking at 0
 sggc_collect: 1c0 in old_gen2 now free
 sggc_collect: 140 in old_gen2 now free
 sggc_collect: 100 in old_gen2 now free
-sggc_collect: calling free for 100:: 0x7fd933c032d0
+sggc_collect: calling free for 100:: 0x7fef38d00030
+sggc_collect: retaining aux1 for 100:: 0x7fef38c038d0
 sggc_collect: putting 100 in unused
-sggc_collect: calling free for 140:: 0x7fd933c03710
+sggc_collect: calling free for 140:: 0x7fef38d00070
+sggc_collect: retaining aux1 for 140:: 0x7fef38c03a20
 sggc_collect: putting 140 in unused
-sggc_collect: calling free for 1c0:: 0x7fd933c03410
+sggc_collect: calling free for 1c0:: 0x7fef38d00040
+sggc_collect: retaining aux1 for 1c0:: 0x7fef38c03ce0
 sggc_collect: putting 1c0 in unused
 sggc_collect: done
   unused: 3, old_gen1: 2, old_gen2: 6, old_to_new: 1, to_look_at: 0
@@ -1283,14 +1286,12 @@ sggc_collect: done
      end_free [0]: ---  [1]: ---  [2]: --- 
 sggc_alloc: type 2, length 1
 sggc_alloc: found 1c0 in unused
-sggc_alloc: called malloc for 1c0 (big 2, 1 chunks):: 0x7fd933c03710
-sggc_alloc: called malloc for aux1 for 1c0:: 0x7fd933c04a00
+sggc_alloc: called malloc for 1c0 (big 2, 1 chunks):: 0x7fef38d00030
 ALLOC RETURNING 1c0
 ALLOCATING a AGAIN, leaving contents as nil
 sggc_alloc: type 1, length 1
 sggc_alloc: found 140 in unused
-sggc_alloc: called malloc for 140 (big 1, 1 chunks):: 0x7fd933c032d0
-sggc_alloc: used read-only aux1 for 140
+sggc_alloc: called malloc for 140 (big 1, 1 chunks):: 0x7fef38d00070
 ALLOC RETURNING 140
 CHECKING CONTENTS
 
@@ -1298,8 +1299,7 @@ ITERATION 11
 ALLOCATING a, leaving contents as nil
 sggc_alloc: type 1, length 1
 sggc_alloc: found 100 in unused
-sggc_alloc: called malloc for 100 (big 1, 1 chunks):: 0x7fd933c032e0
-sggc_alloc: used read-only aux1 for 100
+sggc_alloc: called malloc for 100 (big 1, 1 chunks):: 0x7fef38d00080
 ALLOC RETURNING 100
 ALLOCATING b, setting contents to 100*i .. 100*i+9
 sggc_alloc: type 2, length 10
@@ -1359,9 +1359,11 @@ sggc_look_at: 0 0
 sggc_look_at: 0 0
 sggc_collect: looking at 0
 sggc_collect: 200 in old_gen2 now free
-sggc_collect: calling free for 140:: 0x7fd933c032d0
+sggc_collect: calling free for 140:: 0x7fef38d00070
+sggc_collect: retaining aux1 for 140:: 0x7fef38c03a20
 sggc_collect: putting 140 in unused
-sggc_collect: calling free for 200:: 0x7fd933c03ac0
+sggc_collect: calling free for 200:: 0x7fef38d00000
+sggc_collect: retaining aux1 for 200:: 0x7fef38c03e30
 sggc_collect: putting 200 in unused
 sggc_collect: done
   unused: 2, old_gen1: 2, old_gen2: 7, old_to_new: 1, to_look_at: 0
@@ -1370,14 +1372,12 @@ sggc_collect: done
      end_free [0]: ---  [1]: ---  [2]: --- 
 sggc_alloc: type 2, length 10
 sggc_alloc: found 200 in unused
-sggc_alloc: called malloc for 200 (big 2, 3 chunks):: 0x7fd933c03410
-sggc_alloc: called malloc for aux1 for 200:: 0x7fd933c04b00
+sggc_alloc: called malloc for 200 (big 2, 3 chunks):: 0x7fef38d00040
 ALLOC RETURNING 200
 ALLOCATING c, setting its contents to a and b
 sggc_alloc: type 1, length 1
 sggc_alloc: found 140 in unused
-sggc_alloc: called malloc for 140 (big 1, 1 chunks):: 0x7fd933c03ac0
-sggc_alloc: used read-only aux1 for 140
+sggc_alloc: called malloc for 140 (big 1, 1 chunks):: 0x7fef38d00000
 ALLOC RETURNING 140
 ALLOCATING d, setting contents to 7777
 sggc_alloc: type 2, length 1
@@ -1436,11 +1436,14 @@ sggc_collect: looking at 0
 sggc_collect: 80 in old_gen2 now free
 sggc_collect: 240 in old_gen2 now free
 sggc_collect: c0 in old_gen2 now free
-sggc_collect: calling free for c0:: 0x7fd933c03920
+sggc_collect: calling free for c0:: 0x7fef38d00090
+sggc_collect: retaining aux1 for c0:: 0x7fef38c03780
 sggc_collect: putting c0 in unused
-sggc_collect: calling free for 240:: 0x7fd933c03a70
+sggc_collect: calling free for 240:: 0x7fef38d00010
+sggc_collect: retaining aux1 for 240:: 0x7fef38c03f80
 sggc_collect: putting 240 in unused
-sggc_collect: calling free for 80:: 0x7fd933c044d0
+sggc_collect: calling free for 80:: 0x7fef38d000a0
+sggc_collect: retaining aux1 for 80:: 0x7fef38c03640
 sggc_collect: putting 80 in unused
 sggc_collect: done
   unused: 3, old_gen1: 2, old_gen2: 6, old_to_new: 1, to_look_at: 0
@@ -1449,8 +1452,7 @@ sggc_collect: done
      end_free [0]: ---  [1]: ---  [2]: --- 
 sggc_alloc: type 2, length 1
 sggc_alloc: found 80 in unused
-sggc_alloc: called malloc for 80 (big 2, 1 chunks):: 0x7fd933c03a70
-sggc_alloc: called malloc for aux1 for 80:: 0x7fd933c04c00
+sggc_alloc: called malloc for 80 (big 2, 1 chunks):: 0x7fef38d00010
 ALLOC RETURNING 80
 ALLOCATING a AGAIN, leaving contents as nil
 ABOUT TO CALL sggc_collect IN ALLOC DUE TO 56 ALLOCATIONS
@@ -1479,8 +1481,7 @@ sggc_collect: done
      end_free [0]: ---  [1]: ---  [2]: --- 
 sggc_alloc: type 1, length 1
 sggc_alloc: found 240 in unused
-sggc_alloc: called malloc for 240 (big 1, 1 chunks):: 0x7fd933c03920
-sggc_alloc: used read-only aux1 for 240
+sggc_alloc: called malloc for 240 (big 1, 1 chunks):: 0x7fef38d00090
 ALLOC RETURNING 240
 CHECKING CONTENTS
 
@@ -1488,8 +1489,7 @@ ITERATION 12
 ALLOCATING a, leaving contents as nil
 sggc_alloc: type 1, length 1
 sggc_alloc: found c0 in unused
-sggc_alloc: called malloc for c0 (big 1, 1 chunks):: 0x7fd933c032d0
-sggc_alloc: used read-only aux1 for c0
+sggc_alloc: called malloc for c0 (big 1, 1 chunks):: 0x7fef38d00070
 ALLOC RETURNING c0
 ALLOCATING b, setting contents to 100*i .. 100*i+9
 sggc_alloc: type 2, length 10
@@ -1547,9 +1547,11 @@ sggc_look_at: 0 0
 sggc_look_at: 0 0
 sggc_collect: looking at 0
 sggc_collect: 1c0 in old_gen2 now free
-sggc_collect: calling free for 240:: 0x7fd933c03920
+sggc_collect: calling free for 240:: 0x7fef38d00090
+sggc_collect: retaining aux1 for 240:: 0x7fef38c03f80
 sggc_collect: putting 240 in unused
-sggc_collect: calling free for 1c0:: 0x7fd933c03710
+sggc_collect: calling free for 1c0:: 0x7fef38d00030
+sggc_collect: retaining aux1 for 1c0:: 0x7fef38c03ce0
 sggc_collect: putting 1c0 in unused
 sggc_collect: done
   unused: 2, old_gen1: 1, old_gen2: 8, old_to_new: 0, to_look_at: 0
@@ -1558,14 +1560,12 @@ sggc_collect: done
      end_free [0]: ---  [1]: ---  [2]: --- 
 sggc_alloc: type 2, length 10
 sggc_alloc: found 1c0 in unused
-sggc_alloc: called malloc for 1c0 (big 2, 3 chunks):: 0x7fd933c044d0
-sggc_alloc: called malloc for aux1 for 1c0:: 0x7fd933c04d00
+sggc_alloc: called malloc for 1c0 (big 2, 3 chunks):: 0x7fef38d00090
 ALLOC RETURNING 1c0
 ALLOCATING c, setting its contents to a and b
 sggc_alloc: type 1, length 1
 sggc_alloc: found 240 in unused
-sggc_alloc: called malloc for 240 (big 1, 1 chunks):: 0x7fd933c03710
-sggc_alloc: used read-only aux1 for 240
+sggc_alloc: called malloc for 240 (big 1, 1 chunks):: 0x7fef38d00030
 ALLOC RETURNING 240
 ALLOCATING d, setting contents to 7777
 sggc_alloc: type 2, length 1
@@ -1620,11 +1620,14 @@ sggc_collect: looking at 0
 sggc_collect: 200 in old_gen2 now free
 sggc_collect: 140 in old_gen2 now free
 sggc_collect: 100 in old_gen2 now free
-sggc_collect: calling free for 100:: 0x7fd933c032e0
+sggc_collect: calling free for 100:: 0x7fef38d00080
+sggc_collect: retaining aux1 for 100:: 0x7fef38c038d0
 sggc_collect: putting 100 in unused
-sggc_collect: calling free for 140:: 0x7fd933c03ac0
+sggc_collect: calling free for 140:: 0x7fef38d00000
+sggc_collect: retaining aux1 for 140:: 0x7fef38c03a20
 sggc_collect: putting 140 in unused
-sggc_collect: calling free for 200:: 0x7fd933c03410
+sggc_collect: calling free for 200:: 0x7fef38d00040
+sggc_collect: retaining aux1 for 200:: 0x7fef38c03e30
 sggc_collect: putting 200 in unused
 sggc_collect: done
   unused: 3, old_gen1: 2, old_gen2: 6, old_to_new: 0, to_look_at: 0
@@ -1633,14 +1636,12 @@ sggc_collect: done
      end_free [0]: ---  [1]: ---  [2]: --- 
 sggc_alloc: type 2, length 1
 sggc_alloc: found 200 in unused
-sggc_alloc: called malloc for 200 (big 2, 1 chunks):: 0x7fd933c03ac0
-sggc_alloc: called malloc for aux1 for 200:: 0x7fd933c04e00
+sggc_alloc: called malloc for 200 (big 2, 1 chunks):: 0x7fef38d00000
 ALLOC RETURNING 200
 ALLOCATING a AGAIN, leaving contents as nil
 sggc_alloc: type 1, length 1
 sggc_alloc: found 140 in unused
-sggc_alloc: called malloc for 140 (big 1, 1 chunks):: 0x7fd933c032e0
-sggc_alloc: used read-only aux1 for 140
+sggc_alloc: called malloc for 140 (big 1, 1 chunks):: 0x7fef38d00080
 ALLOC RETURNING 140
 CHECKING CONTENTS
 
@@ -1648,8 +1649,7 @@ ITERATION 13
 ALLOCATING a, leaving contents as nil
 sggc_alloc: type 1, length 1
 sggc_alloc: found 100 in unused
-sggc_alloc: called malloc for 100 (big 1, 1 chunks):: 0x7fd933c03920
-sggc_alloc: used read-only aux1 for 100
+sggc_alloc: called malloc for 100 (big 1, 1 chunks):: 0x7fef38d000c0
 ALLOC RETURNING 100
 ALLOCATING b, setting contents to 100*i .. 100*i+9
 sggc_alloc: type 2, length 10
@@ -1706,9 +1706,11 @@ sggc_look_at: 0 0
 sggc_look_at: 0 0
 sggc_collect: looking at 0
 sggc_collect: 80 in old_gen2 now free
-sggc_collect: calling free for 140:: 0x7fd933c032e0
+sggc_collect: calling free for 140:: 0x7fef38d00080
+sggc_collect: retaining aux1 for 140:: 0x7fef38c03a20
 sggc_collect: putting 140 in unused
-sggc_collect: calling free for 80:: 0x7fd933c03a70
+sggc_collect: calling free for 80:: 0x7fef38d00010
+sggc_collect: retaining aux1 for 80:: 0x7fef38c03640
 sggc_collect: putting 80 in unused
 sggc_collect: done
   unused: 2, old_gen1: 2, old_gen2: 7, old_to_new: 0, to_look_at: 0
@@ -1717,8 +1719,7 @@ sggc_collect: done
      end_free [0]: ---  [1]: ---  [2]: --- 
 sggc_alloc: type 2, length 10
 sggc_alloc: found 80 in unused
-sggc_alloc: called malloc for 80 (big 2, 3 chunks):: 0x7fd933c03410
-sggc_alloc: called malloc for aux1 for 80:: 0x7fd933c04f00
+sggc_alloc: called malloc for 80 (big 2, 3 chunks):: 0x7fef38d00040
 ALLOC RETURNING 80
 ALLOCATING c, setting its contents to a and b
 ABOUT TO CALL sggc_collect IN ALLOC DUE TO 64 ALLOCATIONS
@@ -1743,8 +1744,7 @@ sggc_collect: done
      end_free [0]: ---  [1]: ---  [2]: --- 
 sggc_alloc: type 1, length 1
 sggc_alloc: found 140 in unused
-sggc_alloc: called malloc for 140 (big 1, 1 chunks):: 0x7fd933c03a70
-sggc_alloc: used read-only aux1 for 140
+sggc_alloc: called malloc for 140 (big 1, 1 chunks):: 0x7fef38d00010
 ALLOC RETURNING 140
 ALLOCATING d, setting contents to 7777
 sggc_alloc: type 2, length 1
@@ -1801,11 +1801,14 @@ sggc_collect: looking at 0
 sggc_collect: 1c0 in old_gen2 now free
 sggc_collect: 240 in old_gen2 now free
 sggc_collect: c0 in old_gen2 now free
-sggc_collect: calling free for c0:: 0x7fd933c032d0
+sggc_collect: calling free for c0:: 0x7fef38d00070
+sggc_collect: retaining aux1 for c0:: 0x7fef38c03780
 sggc_collect: putting c0 in unused
-sggc_collect: calling free for 240:: 0x7fd933c03710
+sggc_collect: calling free for 240:: 0x7fef38d00030
+sggc_collect: retaining aux1 for 240:: 0x7fef38c03f80
 sggc_collect: putting 240 in unused
-sggc_collect: calling free for 1c0:: 0x7fd933c044d0
+sggc_collect: calling free for 1c0:: 0x7fef38d00090
+sggc_collect: retaining aux1 for 1c0:: 0x7fef38c03ce0
 sggc_collect: putting 1c0 in unused
 sggc_collect: done
   unused: 3, old_gen1: 1, old_gen2: 7, old_to_new: 0, to_look_at: 0
@@ -1814,14 +1817,12 @@ sggc_collect: done
      end_free [0]: ---  [1]: ---  [2]: --- 
 sggc_alloc: type 2, length 1
 sggc_alloc: found 1c0 in unused
-sggc_alloc: called malloc for 1c0 (big 2, 1 chunks):: 0x7fd933c03710
-sggc_alloc: called malloc for aux1 for 1c0:: 0x7fd933c05000
+sggc_alloc: called malloc for 1c0 (big 2, 1 chunks):: 0x7fef38d00030
 ALLOC RETURNING 1c0
 ALLOCATING a AGAIN, leaving contents as nil
 sggc_alloc: type 1, length 1
 sggc_alloc: found 240 in unused
-sggc_alloc: called malloc for 240 (big 1, 1 chunks):: 0x7fd933c032d0
-sggc_alloc: used read-only aux1 for 240
+sggc_alloc: called malloc for 240 (big 1, 1 chunks):: 0x7fef38d00070
 ALLOC RETURNING 240
 CHECKING CONTENTS
 
@@ -1829,8 +1830,7 @@ ITERATION 14
 ALLOCATING a, leaving contents as nil
 sggc_alloc: type 1, length 1
 sggc_alloc: found c0 in unused
-sggc_alloc: called malloc for c0 (big 1, 1 chunks):: 0x7fd933c032e0
-sggc_alloc: used read-only aux1 for c0
+sggc_alloc: called malloc for c0 (big 1, 1 chunks):: 0x7fef38d00080
 ALLOC RETURNING c0
 ALLOCATING b, setting contents to 100*i .. 100*i+9
 sggc_alloc: type 2, length 10
@@ -1886,9 +1886,11 @@ sggc_look_at: 0 0
 sggc_look_at: 0 0
 sggc_collect: looking at 0
 sggc_collect: 200 in old_gen2 now free
-sggc_collect: calling free for 240:: 0x7fd933c032d0
+sggc_collect: calling free for 240:: 0x7fef38d00070
+sggc_collect: retaining aux1 for 240:: 0x7fef38c03f80
 sggc_collect: putting 240 in unused
-sggc_collect: calling free for 200:: 0x7fd933c03ac0
+sggc_collect: calling free for 200:: 0x7fef38d00000
+sggc_collect: retaining aux1 for 200:: 0x7fef38c03e30
 sggc_collect: putting 200 in unused
 sggc_collect: done
   unused: 2, old_gen1: 2, old_gen2: 7, old_to_new: 0, to_look_at: 0
@@ -1897,14 +1899,12 @@ sggc_collect: done
      end_free [0]: ---  [1]: ---  [2]: --- 
 sggc_alloc: type 2, length 10
 sggc_alloc: found 200 in unused
-sggc_alloc: called malloc for 200 (big 2, 3 chunks):: 0x7fd933c044d0
-sggc_alloc: called malloc for aux1 for 200:: 0x7fd933c05100
+sggc_alloc: called malloc for 200 (big 2, 3 chunks):: 0x7fef38d00090
 ALLOC RETURNING 200
 ALLOCATING c, setting its contents to a and b
 sggc_alloc: type 1, length 1
 sggc_alloc: found 240 in unused
-sggc_alloc: called malloc for 240 (big 1, 1 chunks):: 0x7fd933c03ac0
-sggc_alloc: used read-only aux1 for 240
+sggc_alloc: called malloc for 240 (big 1, 1 chunks):: 0x7fef38d00000
 ALLOC RETURNING 240
 ALLOCATING d, setting contents to 7777
 sggc_alloc: type 2, length 1
@@ -1960,11 +1960,14 @@ sggc_collect: looking at 0
 sggc_collect: 140 in old_gen2 now free
 sggc_collect: 100 in old_gen2 now free
 sggc_collect: 80 in old_gen2 now free
-sggc_collect: calling free for 100:: 0x7fd933c03920
+sggc_collect: calling free for 100:: 0x7fef38d000c0
+sggc_collect: retaining aux1 for 100:: 0x7fef38c038d0
 sggc_collect: putting 100 in unused
-sggc_collect: calling free for 140:: 0x7fd933c03a70
+sggc_collect: calling free for 140:: 0x7fef38d00010
+sggc_collect: retaining aux1 for 140:: 0x7fef38c03a20
 sggc_collect: putting 140 in unused
-sggc_collect: calling free for 80:: 0x7fd933c03410
+sggc_collect: calling free for 80:: 0x7fef38d00040
+sggc_collect: retaining aux1 for 80:: 0x7fef38c03640
 sggc_collect: putting 80 in unused
 sggc_collect: done
   unused: 3, old_gen1: 2, old_gen2: 6, old_to_new: 0, to_look_at: 0
@@ -1973,14 +1976,12 @@ sggc_collect: done
      end_free [0]: ---  [1]: ---  [2]: --- 
 sggc_alloc: type 2, length 1
 sggc_alloc: found 80 in unused
-sggc_alloc: called malloc for 80 (big 2, 1 chunks):: 0x7fd933c03a70
-sggc_alloc: called malloc for aux1 for 80:: 0x7fd933c05200
+sggc_alloc: called malloc for 80 (big 2, 1 chunks):: 0x7fef38d00010
 ALLOC RETURNING 80
 ALLOCATING a AGAIN, leaving contents as nil
 sggc_alloc: type 1, length 1
 sggc_alloc: found 140 in unused
-sggc_alloc: called malloc for 140 (big 1, 1 chunks):: 0x7fd933c03920
-sggc_alloc: used read-only aux1 for 140
+sggc_alloc: called malloc for 140 (big 1, 1 chunks):: 0x7fef38d000c0
 ALLOC RETURNING 140
 CHECKING CONTENTS
 
@@ -2023,8 +2024,7 @@ sggc_collect: done
      end_free [0]: ---  [1]: ---  [2]: --- 
 sggc_alloc: type 1, length 1
 sggc_alloc: found 100 in unused
-sggc_alloc: called malloc for 100 (big 1, 1 chunks):: 0x7fd933c032d0
-sggc_alloc: used read-only aux1 for 100
+sggc_alloc: called malloc for 100 (big 1, 1 chunks):: 0x7fef38d00070
 ALLOC RETURNING 100
 ALLOCATING b, setting contents to 100*i .. 100*i+9
 sggc_alloc: type 2, length 10
@@ -2082,9 +2082,11 @@ sggc_look_at: 0 0
 sggc_collect: looking at 0
 sggc_collect: 1c0 in old_gen2 now free
 sggc_collect: 140 in old_gen1 now free
-sggc_collect: calling free for 140:: 0x7fd933c03920
+sggc_collect: calling free for 140:: 0x7fef38d000c0
+sggc_collect: retaining aux1 for 140:: 0x7fef38c03a20
 sggc_collect: putting 140 in unused
-sggc_collect: calling free for 1c0:: 0x7fd933c03710
+sggc_collect: calling free for 1c0:: 0x7fef38d00030
+sggc_collect: retaining aux1 for 1c0:: 0x7fef38c03ce0
 sggc_collect: putting 1c0 in unused
 sggc_collect: done
   unused: 2, old_gen1: 1, old_gen2: 8, old_to_new: 0, to_look_at: 0
@@ -2093,14 +2095,12 @@ sggc_collect: done
      end_free [0]: ---  [1]: ---  [2]: --- 
 sggc_alloc: type 2, length 10
 sggc_alloc: found 1c0 in unused
-sggc_alloc: called malloc for 1c0 (big 2, 3 chunks):: 0x7fd933c03410
-sggc_alloc: called malloc for aux1 for 1c0:: 0x7fd933c05300
+sggc_alloc: called malloc for 1c0 (big 2, 3 chunks):: 0x7fef38d00040
 ALLOC RETURNING 1c0
 ALLOCATING c, setting its contents to a and b
 sggc_alloc: type 1, length 1
 sggc_alloc: found 140 in unused
-sggc_alloc: called malloc for 140 (big 1, 1 chunks):: 0x7fd933c03710
-sggc_alloc: used read-only aux1 for 140
+sggc_alloc: called malloc for 140 (big 1, 1 chunks):: 0x7fef38d00030
 ALLOC RETURNING 140
 ALLOCATING d, setting contents to 7777
 sggc_alloc: type 2, length 1
@@ -2155,11 +2155,14 @@ sggc_collect: looking at 0
 sggc_collect: 200 in old_gen2 now free
 sggc_collect: 240 in old_gen2 now free
 sggc_collect: c0 in old_gen2 now free
-sggc_collect: calling free for c0:: 0x7fd933c032e0
+sggc_collect: calling free for c0:: 0x7fef38d00080
+sggc_collect: retaining aux1 for c0:: 0x7fef38c03780
 sggc_collect: putting c0 in unused
-sggc_collect: calling free for 240:: 0x7fd933c03ac0
+sggc_collect: calling free for 240:: 0x7fef38d00000
+sggc_collect: retaining aux1 for 240:: 0x7fef38c03f80
 sggc_collect: putting 240 in unused
-sggc_collect: calling free for 200:: 0x7fd933c044d0
+sggc_collect: calling free for 200:: 0x7fef38d00090
+sggc_collect: retaining aux1 for 200:: 0x7fef38c03e30
 sggc_collect: putting 200 in unused
 sggc_collect: done
   unused: 3, old_gen1: 2, old_gen2: 6, old_to_new: 0, to_look_at: 0
@@ -2168,14 +2171,12 @@ sggc_collect: done
      end_free [0]: ---  [1]: ---  [2]: --- 
 sggc_alloc: type 2, length 1
 sggc_alloc: found 200 in unused
-sggc_alloc: called malloc for 200 (big 2, 1 chunks):: 0x7fd933c03ac0
-sggc_alloc: called malloc for aux1 for 200:: 0x7fd933c05400
+sggc_alloc: called malloc for 200 (big 2, 1 chunks):: 0x7fef38d00000
 ALLOC RETURNING 200
 ALLOCATING a AGAIN, leaving contents as nil
 sggc_alloc: type 1, length 1
 sggc_alloc: found 240 in unused
-sggc_alloc: called malloc for 240 (big 1, 1 chunks):: 0x7fd933c032e0
-sggc_alloc: used read-only aux1 for 240
+sggc_alloc: called malloc for 240 (big 1, 1 chunks):: 0x7fef38d00080
 ALLOC RETURNING 240
 CHECKING CONTENTS
 DONE TESTING

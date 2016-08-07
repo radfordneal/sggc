@@ -19,12 +19,12 @@
 
 
 /* This test program uses compressed pointers, big segments only, and
-   auxiliary data recording object length (constant for types 1 and 2).
-   Optional garbage collections are done according to a simple scheme
-   based just on number of allocations done.  It is run with its first
-   program argument giving the maximum number of segments (default 11,
-   the minimum for not running out of space), and its second giving
-   the number of iterations of the test loop (default 15). */
+   auxiliary data recording object length.  Optional garbage
+   collections are done according to a simple scheme based just on
+   number of allocations done.  It is run with its first program
+   argument giving the maximum number of segments (default 11, the
+   minimum for not running out of space), and its second giving the
+   number of iterations of the test loop (default 15). */
 
 
 #include <stdlib.h>
@@ -90,14 +90,6 @@ void sggc_find_object_ptrs (sggc_cptr_t cptr)
   }
 }
 
-char *sggc_aux1_read_only (sggc_kind_t kind)
-{
-  static const sggc_length_t length0[1] = {0};  /* one value suffices since   */
-  static const sggc_length_t length2[1] = {2};  /*  all segments used are big */
-
-  return kind == 0 ? (char *) length0 : kind == 1 ? (char *) length2 : NULL;
-}
-
 
 /* ALLOCATE FUNCTION FOR THIS APPLICATION.  Calls the garbage collector
    when necessary, or otherwise every 8th allocation, with every 24th
@@ -136,8 +128,14 @@ static ptr_t alloc (sggc_type_t type, sggc_length_t length)
   /* Initialize the object (essential for objects containing pointers). */
 
   switch (type)
-  { case 1: 
+  { 
+    case 0:
+    { LENGTH(a) = 0;
+      break;
+    }
+    case 1: 
     { TYPE1(a)->x = TYPE1(a)->y = nil;
+      LENGTH(a) = 2;
       break;
     }
     case 2:
@@ -145,7 +143,7 @@ static ptr_t alloc (sggc_type_t type, sggc_length_t length)
       break;
     }
     default:
-    { break;
+    { abort();
     }
   }
 
