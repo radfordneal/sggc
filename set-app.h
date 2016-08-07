@@ -52,8 +52,8 @@
     struct                 /* For small segments... */ \
     { unsigned big : 1;       /* 0 for a segment with several small objects */ \
       unsigned unused : 7;    /* Bits not currently in use                  */ \
-      unsigned char phase1;   /* Phase of storage for aux1 information      */ \
-      unsigned char phase2;   /* Phase of storage for aux2 information      */ \
+      unsigned char aux1_off; /* Offset of aux1 info from start of block    */ \
+      unsigned char aux2_off; /* Offset of aux2 info from start of block    */ \
       unsigned char kind;     /* The kind of segment (equal to type if big) */ \
     } small; \
   } x;

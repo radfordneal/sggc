@@ -132,12 +132,14 @@ int sggc_init (int max_segments)
   { return 5;
   }
 
-  /* Initialize bit vectors that indicate when segments of different kinds
-     are full.  Also used to initialize segments as full. */
+  /* Initialize bit vectors that indicate when segments of different
+     kinds are full, and are also used to initialize segments as full.
+     Along the way, check that all big kinds correspond to types. */
 
   for (k = 0; k < SGGC_N_KINDS; k++)
   { if (kind_chunks[k] == 0) /* big segment */
-    { kind_full[k] = 1;
+    { if (k >= SGGC_N_TYPES) abort();
+      kind_full[k] = 1;
     }
     else /* small segment */
     { if (kind_chunks[k] > SGGC_CHUNKS_IN_SMALL_SEGMENT) abort();
@@ -308,7 +310,7 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
 
       data = malloc ((size_t) SGGC_CHUNK_SIZE * nch);
       if (SGGC_DEBUG) 
-      { printf ("sggc_alloc: called malloc for %x (big %d, %d chunks): %p\n", 
+      { printf ("sggc_alloc: called malloc for %x (big %d, %d chunks):: %p\n", 
                  v, kind, (int)nch, data);
       }
     }
@@ -316,7 +318,7 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
     { 
       data = malloc ((size_t) SGGC_CHUNK_SIZE * SGGC_CHUNKS_IN_SMALL_SEGMENT);
       if (SGGC_DEBUG) 
-      { printf ("sggc_alloc: called malloc for %x (small %d, %d chunks): %p\n", 
+      { printf ("sggc_alloc: called malloc for %x (small %d, %d chunks):: %p\n",
                  v, kind, (int)SGGC_CHUNKS_IN_SMALL_SEGMENT, data);
       }
     }
@@ -338,7 +340,7 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
       if (aux1 == NULL)
       { aux1 = malloc ((size_t) SGGC_AUX1_SIZE * SGGC_CHUNKS_IN_SMALL_SEGMENT);
         if (SGGC_DEBUG)
-        { printf("sggc_alloc: called malloc for aux1 for %x: %p\n", v, aux1);
+        { printf("sggc_alloc: called malloc for aux1 for %x:: %p\n", v, aux1);
         }
         if (aux1 == NULL)
         { goto fail;
@@ -359,7 +361,7 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
       if (aux2 == NULL)
       { aux2 = malloc ((size_t) SGGC_AUX2_SIZE * SGGC_CHUNKS_IN_SMALL_SEGMENT);
         if (SGGC_DEBUG)
-        { printf("sggc_alloc: called malloc for aux2 for %x: %p\n", v, aux2);
+        { printf("sggc_alloc: called malloc for aux2 for %x:: %p\n", v, aux2);
         }
         if (aux2 == NULL)
         { goto fail;
@@ -628,7 +630,11 @@ void sggc_collect (int level)
     }
   }
 
-  /* Move big segments to the 'unused' set, while freeing their storage. 
+  /* Move big segments to the 'unused' set, while freeing their data
+     storage.  Auxiliary information is not freed, but pointers to
+     read-only information are cleared, since it might not apply when
+     the segment is re-used as a different kind.
+
      Note that all big kinds are equal to their types, so we stop the
      loop at SGGC_N_TYPES. */
 
@@ -637,33 +643,19 @@ void sggc_collect (int level)
     { while ((v = set_first (&free_or_new[k], 1)) != SGGC_NO_OBJECT)
       { set_index_t index = SET_VAL_INDEX(v);
         if (SGGC_DEBUG) 
-        { printf ("sggc_collect: calling free for %x: %p\n", v, SGGC_DATA(v));
+        { printf ("sggc_collect: calling free for %x:: %p\n", v, SGGC_DATA(v));
         }
         free (sggc_data[index]);
         sggc_data [index] = NULL;
-#       ifdef SGGC_AUX1_SIZE
-#         ifdef SGGC_AUX1_READ_ONLY
-          if (!kind_aux1_read_only[k]) 
-#         endif
-          { if (SGGC_DEBUG) 
-            { printf("sggc_collect: calling free for aux1 of %x: %p\n",
-                     v, sggc_aux1[index]);
-            }
-            free (sggc_aux1[index]);
+#       ifdef SGGC_AUX1_READ_ONLY
+          if (kind_aux1_read_only[k])
+          { sggc_aux1[index] = NULL;
           }
-          sggc_aux1 [index] = NULL;
 #       endif
-#       ifdef SGGC_AUX2_SIZE
-#         ifdef SGGC_AUX2_READ_ONLY
-          if (!kind_aux2_read_only[k]) 
-#         endif
-          { if (SGGC_DEBUG) 
-            { printf("sggc_collect: calling free for aux2 of %x: %p\n",
-                     v, sggc_aux2[index]);
-            }
-            free (sggc_aux2[index]);
+#       ifdef SGGC_AUX2_READ_ONLY
+          if (kind_aux2_read_only[k])
+          { sggc_aux2[index] = NULL;
           }
-          sggc_aux2 [index] = NULL;
 #       endif
         if (SGGC_DEBUG) 
         { printf("sggc_collect: putting %x in unused\n",(unsigned)v);
