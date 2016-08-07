@@ -17,6 +17,7 @@
    with this program; if not, write to the Free Software Foundation, Inc.,
    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
+#include <stdlib.h>
 #include <stdio.h>
 #include "set-app.h"
 
@@ -25,9 +26,16 @@ struct set set[N_SET];
 
 int main (void)
 { 
+  FILE *f;
   int i, j, x, o, r;
   char s[1000];
   char c; 
+
+  f = fopen ("script","r");
+  if (f == NULL) 
+  { fprintf(stderr,"No script file\n");
+    exit(1);
+  }
 
   for (j = 0; j<N_SEG; j++)
   { set_segment_init (&segment[j]);
@@ -41,14 +49,14 @@ int main (void)
     printf("> ");
     c = ' ';
     i = x = o = -1;
-    r = scanf(" %c %d %d %d",&c,&i,&x,&o);
+    r = fscanf(f," %c %d %d %d",&c,&i,&x,&o);
     if (r == -1)
     { printf("\n");
       return 0;
     }
 
     s[0] = 0;
-    scanf("%[^\n]",s);
+    fscanf(f,"%[^\n]",s);
 
     if (c == 'm')
     { if (r != 3)
@@ -60,7 +68,7 @@ int main (void)
     { if (r != 4)
       { printf("Wrong number of arguments\n");
       }
-      printf("%c %d %d %d %s\n",c,i,x,o,s);
+      printf("%c %d %d %d%s\n",c,i,x,o,s);
     }
 
     if (i < 0 || i >= N_SET) 
