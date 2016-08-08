@@ -40,6 +40,14 @@
 static int kind_chunks[SGGC_N_KINDS] = SGGC_KIND_CHUNKS;
 
 
+/* NUMBERS OF OBJECTS IN SEGMENTS OF EACH KIND, AND END OF ITS CHUNKS.  
+   Computed at initialization from SGGC_CHUNKS_IN_SMALL_SEGMENT and 
+   kind_chunks. */
+
+static int kind_objects[SGGC_N_KINDS];
+static int kind_chunk_end[SGGC_N_KINDS];
+
+
 /* BLOCKS OF SPACE ALLOCATED FOR AUXILIARY INFORMATION. */
 
 #ifdef SGGC_AUX1_SIZE
@@ -145,7 +153,34 @@ int sggc_init (int max_segments)
   { return 5;
   }
 
-  /* Allocate initial blocks for storing auxiliary information. */
+  /* Compute numbers of objects in segments of each kind, and
+     initialize bit vectors that indicate when segments of different
+     kinds are full, and are also used to initialize segments as full.
+     Along the way, check that all big kinds correspond to types, and
+     that small segments aren't too big. */
+
+  for (k = 0; k < SGGC_N_KINDS; k++)
+  { if (kind_chunks[k] == 0) /* big segment */
+    { if (k >= SGGC_N_TYPES) abort();
+      kind_full[k] = 1;
+      kind_objects[k] = 1;
+      kind_chunk_end[k] = 0;  /* ends when only object ends */
+    }
+    else /* small segment */
+    { if (kind_chunks[k] > SGGC_CHUNKS_IN_SMALL_SEGMENT) abort();
+      kind_full[k] = 0;
+      for (j = 0;
+           j + kind_chunks[k] <= SGGC_CHUNKS_IN_SMALL_SEGMENT; 
+           j += kind_chunks[k])
+      { kind_full[k] |= (set_bits_t)1 << j;
+      }
+      kind_objects[k] = SGGC_CHUNKS_IN_SMALL_SEGMENT / kind_chunks[k];
+      kind_chunk_end[k] = kind_objects[k] * kind_chunks[k];
+    }
+  }
+
+  /* Check for read-only data for big segments, and initialize all aux blocks
+     to NULL. */
 
 # ifdef SGGC_AUX1_SIZE
     for (k = 0; k < SGGC_N_KINDS; k++)
@@ -157,11 +192,7 @@ int sggc_init (int max_segments)
       else
 #     endif
       { /* not read-only */
-        kind_aux1_block[k] = malloc (SGGC_CHUNKS_IN_SMALL_SEGMENT
-                                      * SGGC_AUX1_BLOCK_SIZE * SGGC_AUX1_SIZE);
-        if (kind_aux1_block[k] == NULL)
-        { return 6;
-        }
+        kind_aux1_block[k] = NULL;
         kind_aux1_block_pos[k] = 0;
       }
     }
@@ -177,35 +208,11 @@ int sggc_init (int max_segments)
       else
 #     endif
       { /* not read-only */
-        kind_aux2_block[k] = malloc (SGGC_CHUNKS_IN_SMALL_SEGMENT
-                                      * SGGC_AUX2_BLOCK_SIZE * SGGC_AUX2_SIZE);
-        if (kind_aux2_block[k] == NULL)
-        { return 7;
-        }
+        kind_aux2_block[k] = NULL;
         kind_aux2_block_pos[k] = 0;
       }
     }
 # endif
-
-  /* Initialize bit vectors that indicate when segments of different
-     kinds are full, and are also used to initialize segments as full.
-     Along the way, check that all big kinds correspond to types. */
-
-  for (k = 0; k < SGGC_N_KINDS; k++)
-  { if (kind_chunks[k] == 0) /* big segment */
-    { if (k >= SGGC_N_TYPES) abort();
-      kind_full[k] = 1;
-    }
-    else /* small segment */
-    { if (kind_chunks[k] > SGGC_CHUNKS_IN_SMALL_SEGMENT) abort();
-      kind_full[k] = 0;
-      for (j = 0;
-           j + kind_chunks[k] <= SGGC_CHUNKS_IN_SMALL_SEGMENT; 
-           j += kind_chunks[k])
-      { kind_full[k] |= (set_bits_t)1 << j;
-      }
-    }
-  }
 
   /* Initialize tables of read-only auxiliary information. */
 
@@ -245,6 +252,32 @@ int sggc_init (int max_segments)
   next_segment = 0;
 
   return 0;
+}
+
+
+/* UPDATE POSITION TO USE NEXT IN BLOCK OF AUXILIARY INFORMATION. */
+
+static void next_aux_pos (sggc_kind_t kind, char **block, unsigned char *pos)
+{
+  sggc_nchunks_t nch = kind_chunks[kind];
+  if (nch == 0) 
+  { nch = SGGC_CHUNKS_IN_SMALL_SEGMENT;
+  }
+
+  unsigned mask = SGGC_CHUNKS_IN_SMALL_SEGMENT - 1;
+  if ((*pos & mask) + 1 < nch)
+  { *pos += 1;
+  }
+  else 
+  { int b = (*pos >> SET_OFFSET_BITS) + 1;
+    if (b >= nch)
+    { *block = NULL;
+      *pos = 0;  /* though should be irrelevant */
+    }
+    else
+    { *pos = b << SET_OFFSET_BITS;
+    }
+  }
 }
 
 
@@ -396,15 +429,26 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
         }
 #     endif
       if (sggc_aux1[index] == NULL)
-      { sggc_aux1[index] = malloc ((size_t) SGGC_AUX1_SIZE 
-                                    * SGGC_CHUNKS_IN_SMALL_SEGMENT);
+      { if (kind_aux1_block[kind] == NULL)
+        { kind_aux1_block[kind] = malloc (SGGC_CHUNKS_IN_SMALL_SEGMENT
+                                    * SGGC_AUX1_BLOCK_SIZE * SGGC_AUX1_SIZE);
+          if (SGGC_DEBUG)
+          { printf("sggc_alloc: called malloc for aux1 block (kind %d):: %p\n", 
+                    kind, kind_aux1_block[kind]);
+          }
+          kind_aux1_block_pos[kind] = 0;
+          if (kind_aux1_block[kind] == NULL) 
+          { goto fail;
+          }
+        }
+        sggc_aux1[index] = kind_aux1_block[kind] 
+                            + kind_aux1_block_pos[kind] * SGGC_AUX1_SIZE;
         if (SGGC_DEBUG)
-        { printf("sggc_alloc: called malloc for aux1 for %x:: %p\n", 
-                  v, sggc_aux1[index]);
+        { printf(
+            "sggc_alloc: aux1 block for %x has pos %d in block for kind %d\n",
+             v, kind_aux1_block_pos[kind], kind);
         }
-        if (sggc_aux1[index] == NULL)
-        { goto fail;
-        }
+        next_aux_pos (kind, &kind_aux1_block[kind], &kind_aux1_block_pos[kind]);
       }
     }
 # endif
@@ -421,15 +465,26 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
         }
 #     endif
       if (sggc_aux2[index] == NULL)
-      { sggc_aux2[index] = malloc ((size_t) SGGC_AUX2_SIZE 
-                                    * SGGC_CHUNKS_IN_SMALL_SEGMENT);
+      { if (kind_aux2_block[kind] == NULL)
+        { kind_aux2_block[kind] = malloc (SGGC_CHUNKS_IN_SMALL_SEGMENT
+                                    * SGGC_AUX2_BLOCK_SIZE * SGGC_AUX2_SIZE);
+          if (SGGC_DEBUG)
+          { printf("sggc_alloc: called malloc for aux2 block (kind %d):: %p\n", 
+                    kind, kind_aux2_block[kind]);
+          }
+          kind_aux2_block_pos[kind] = 0;
+          if (kind_aux2_block[kind] == NULL) 
+          { goto fail;
+          }
+        }
+        sggc_aux2[index] = kind_aux2_block[kind] 
+                            + kind_aux2_block_pos[kind] * SGGC_AUX2_SIZE;
         if (SGGC_DEBUG)
-        { printf("sggc_alloc: called malloc for aux2 for %x:: %p\n", 
-                  v, sggc_aux2[index]);
+        { printf(
+            "sggc_alloc: aux2 block for %x has pos %d in block for kind %d\n",
+             v, kind_aux2_block_pos[kind], kind);
         }
-        if (sggc_aux2[index] == NULL)
-        { goto fail;
-        }
+        next_aux_pos (kind, &kind_aux2_block[kind], &kind_aux2_block_pos[kind]);
       }
     }
 # endif
