@@ -305,7 +305,9 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
   /* Look for an existing segment for this object to go in (and offset
      within).  For a small segment, the object found will be in
      free_or_new, but will not be between next_free and end_free, and
-     so won't be taken again (at least before the next collection). */
+     so won't be taken again (at least before the next collection). 
+     For a big segment, the segement will be added to free_or_new, 
+     again outside the region being allocated from. */
 
   from_free = 0;
   if (kind_chunks[kind] == 0) /* uses big segments */
@@ -385,34 +387,37 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
     }
   }
 
-  /* Allocate data for the segment, if not already there. */
+  /* Add the object to the free_or_new set.  For small segments not
+     from free_or_new, we also put the segment into free_or_new, and
+     use it as the current set of free objects if there were none
+     before. */
 
-  if (sggc_data[index] == NULL)
+  if (from_free || kind_chunks[kind] == 0) /* big, or already in new_or_free */
   {
-    if (seg->x.big.big) /* big segment */
-    { 
-      sggc_nchunks_t nch = sggc_nchunks (type, length);
-      seg->x.big.max_chunks = (nch >> SGGC_CHUNK_BITS) == 0 ? nch : 0;
+    set_add (&free_or_new[kind], v);
+  }
+  else /* small segment not already in new_or_free */
+  { 
+    if (next_free[kind]!=end_free[kind]) abort(); /* should be none free now */
 
-      sggc_data[index] = malloc ((size_t) SGGC_CHUNK_SIZE * nch);
-      if (SGGC_DEBUG) 
-      { printf ("sggc_alloc: called malloc for %x (big %d, %d chunks):: %p\n", 
-                 v, kind, (int)nch, sggc_data[index]);
-      }
-    }
-    else /* small segment */
-    { 
-      sggc_data[index] = malloc ((size_t) SGGC_CHUNK_SIZE 
-                                  * SGGC_CHUNKS_IN_SMALL_SEGMENT);
-      if (SGGC_DEBUG) 
-      { printf ("sggc_alloc: called malloc for %x (small %d, %d chunks):: %p\n",
-                 v, kind, (int)SGGC_CHUNKS_IN_SMALL_SEGMENT, sggc_data[index]);
-      }
+    end_free[kind] = set_first (&free_or_new[kind], 0);
+
+    set_add (&free_or_new[kind], v);
+  
+    set_assign_segment_bits (&free_or_new[kind], v, kind_full[kind]);
+    if (SGGC_DEBUG)
+    { printf("sggc_alloc: new segment has bits %016llx\n", 
+              (unsigned long long) set_segment_bits (&free_or_new[kind], v));
     }
 
-    if (sggc_data[index] == NULL) 
-    { goto fail;
-    }
+    next_free[kind] = set_next (&free_or_new[kind], v, 0);
+  }
+
+  if (1) /* can be enabled for consistency checks */
+  { if (set_contains (&old_gen1, v)) abort();
+    if (set_contains (&old_gen2, v)) abort();
+    if (set_contains (&old_to_new, v)) abort();
+    if (set_contains (&to_look_at, v)) abort();
   }
 
   /* Allocate auxiliary information for segment, if not already there. */
@@ -489,71 +494,41 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
     }
 # endif
 
-  /* Add the object to the free_or_new set.  For small segments not
-     from free_or_new, we also put the segment into free_or_new, and
-     use if as the current set of free objects if there were none
-     before. */
+  /* Allocate data for the segment, if not already there. */
 
-  if (from_free || kind_chunks[kind] == 0) /* big, or already in new_or_free */
+  if (sggc_data[index] == NULL)
   {
-    set_add (&free_or_new[kind], v);
-  }
-  else /* small segment not already in new_or_free */
-  { 
-    if (next_free[kind]!=end_free[kind]) abort(); /* should be none free now */
+    if (seg->x.big.big) /* big segment */
+    { 
+      sggc_nchunks_t nch = sggc_nchunks (type, length);
+      seg->x.big.max_chunks = (nch >> SGGC_CHUNK_BITS) == 0 ? nch : 0;
 
-    end_free[kind] = set_first (&free_or_new[kind], 0);
-
-    set_add (&free_or_new[kind], v);
-  
-    set_assign_segment_bits (&free_or_new[kind], v, kind_full[kind]);
-    if (SGGC_DEBUG)
-    { printf("sggc_alloc: new segment has bits %016llx\n", 
-              (unsigned long long) set_segment_bits (&free_or_new[kind], v));
+      sggc_data[index] = malloc ((size_t) SGGC_CHUNK_SIZE * nch);
+      if (SGGC_DEBUG) 
+      { printf ("sggc_alloc: called malloc for %x (big %d, %d chunks):: %p\n", 
+                 v, kind, (int)nch, sggc_data[index]);
+      }
+    }
+    else /* small segment */
+    { 
+      sggc_data[index] = malloc ((size_t) SGGC_CHUNK_SIZE 
+                                  * SGGC_CHUNKS_IN_SMALL_SEGMENT);
+      if (SGGC_DEBUG) 
+      { printf ("sggc_alloc: called malloc for %x (small %d, %d chunks):: %p\n",
+                 v, kind, (int)SGGC_CHUNKS_IN_SMALL_SEGMENT, sggc_data[index]);
+      }
     }
 
-    next_free[kind] = set_next (&free_or_new[kind], v, 0);
-  }
-
-  if (1) /* can be enabled for consistency checks */
-  { if (set_contains (&old_gen1, v)) abort();
-    if (set_contains (&old_gen2, v)) abort();
-    if (set_contains (&old_to_new, v)) abort();
-    if (set_contains (&to_look_at, v)) abort();
+    if (sggc_data[index] == NULL) 
+    { goto fail;
+    }
   }
 
   return v;
 
-fail: /* segment obtained, but couldn't allocate data / aux info for segment */
+fail: 
 
-  if (sggc_data[index] != NULL) 
-  { free(sggc_data[index]);
-    sggc_data[index] = NULL;
-  }
-# ifdef SGGC_AUX1_SIZE
-    if (sggc_aux1[index] != NULL)
-    {
-#     ifdef SGGC_AUX1_READ_ONLY
-      if (sggc_aux1[index] != kind_aux1_read_only[kind])
-#     endif
-      { free(sggc_aux1[index]);
-        sggc_aux1[index] = NULL;
-      }
-    }
-# endif
-# ifdef SGGC_AUX2_SIZE
-    if (sggc_aux2[index] != NULL)
-    {
-#     ifdef SGGC_AUX2_READ_ONLY
-      if (sggc_aux2[index] != kind_aux2_read_only[kind])
-#     endif
-      { free(sggc_aux2[index]);
-        sggc_aux2[index] = NULL;
-      }
-    }
-# endif
-
-  set_add (&unused, v);
+  /* Segment obtained, but couldn't allocate aux info or data for segment */
 
   return SGGC_NO_OBJECT;
 }
