@@ -1,5 +1,5 @@
 /* SGGC - A LIBRARY SUPPORTING SEGMENTED GENERATIONAL GARBAGE COLLECTION.
-          Test program #3 - sggc application header file
+          Wrapper for malloc/free for use in test programs
 
    Copyright (c) 2016 Radford M. Neal.
 
@@ -18,20 +18,20 @@
    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
 
-#define SGGC_CHUNK_SIZE 16      /* Number of bytes in a data chunk */
+#include <stdlib.h>
 
-#define SGGC_N_TYPES 3          /* Number of object types */
+void *test_malloc (size_t size)
+{ 
+  size_t i;
+  char *res = malloc (size);
+  for (i = 0; i < size; i++)
+  { res[i] = -123;
+  }
+  return res;
+}
 
-typedef unsigned sggc_length_t; /* Type for holding an object length */
-typedef unsigned sggc_nchunks_t;/* Type for how many chunks are in a segment */
+void test_free (void *ptr)
+{
+  free (ptr);
+}
 
-#define SGGC_N_KINDS 3          /* Number of kinds of segments */
-#define SGGC_KIND_CHUNKS { 0, 0, 0 } 
-
-/* Use special malloc/free for testing, defining sggc_malloc and sggc_free. */
-
-#include "test-malloc.h"
-
-/* Include the generic SGGC header file. */
-
-#include "sggc.h"

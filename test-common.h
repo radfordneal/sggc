@@ -83,12 +83,11 @@
 
     printf("CHECKING CONTENTS\n");
 
-    if (TYPE(a) != 1 || TYPE1(a)->x != nil || TYPE1(a)->y != nil
-     || TYPE(b) != 2 || LENGTH(b) != 10
-     || TYPE(c) != 1 || TYPE(TYPE1(c)->x) != 1 || TYPE1(c)->y != b
-     || TYPE(d) != 2 || LENGTH(d) != 1 || TYPE2(d)->data[0] != 7777)
-    { abort();
-    }
+    if (TYPE(nil) != 0) abort();
+    if (TYPE(a) != 1 || TYPE1(a)->x != nil || TYPE1(a)->y != nil) abort();
+    if (TYPE(b) != 2 || LENGTH(b) != 10) abort();
+    if (TYPE(c) != 1 || TYPE(TYPE1(c)->x) != 1 || TYPE1(c)->y != b) abort();
+    if (TYPE(d) != 2 || LENGTH(d) != 1 || TYPE2(d)->data[0] != 7777) abort();
 
     if (i < 2)
     { if (e != nil) abort();
