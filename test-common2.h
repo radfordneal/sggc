@@ -81,7 +81,9 @@
     { printf("ALLOCATING e, setting its contents to old e and vec length 20\n");
       e = alloc (1, 2);
       TYPE1(e)->x = old_e;
+      printf("ALLOCATING VECTOR OF LENGTH 20\n");
       TYPE1(e)->y = alloc (2, 20);
+      OLD_TO_NEW_CHECK(e,TYPE1(e)->y);
     }
 
     /* Check that the contents are correct. */
