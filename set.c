@@ -239,7 +239,8 @@ int set_add (struct set *set, set_value_t val)
 
 /* REMOVE A VALUE FROM A SET.  Changes 'set' so that it does not contain
    'val' as an element.  Returns 1 if 'set' had previously contained 'val',
-   0 if not.
+   0 if not.  When set_remove is called, 'val' must either be in 'set' or
+   not be in any set using the same chain as 'set'.
 
    This is implemented by clearing the right bit in the bits for the set's 
    chain, within the segment structure for this value's index.  Removing this
@@ -260,6 +261,8 @@ int set_remove (struct set *set, set_value_t val)
   set_bits_t t = (set_bits_t)1 << offset;
 
   if ((b & t) == 0) return 0;
+
+  CHK_SET_INDEX(set,index);
 
   seg->bits[set->chain] &= ~t;
   if (seg->bits[set->chain] == 0 && set->first == index)
