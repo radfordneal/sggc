@@ -20,9 +20,9 @@
 
 /* This test program uses compressed pointers, both small and big
    segments, and auxiliary data recording object length (constant for
-   types 1 and 2).  Optional garbage collections are done according to
-   a simple scheme based just on number of allocations done.  It is
-   run with its first program argument giving the maximum number of
+   type 1).  Optional garbage collections are done according to a
+   simple scheme based just on number of allocations done.  It is run
+   with its first program argument giving the maximum number of
    segments (default 11, the minimum for not running out of space),
    and its second giving the number of iterations of the test loop
    (default 15). */
@@ -66,10 +66,10 @@ static ptr_t nil, a, b, c, d, e;
 
 sggc_kind_t sggc_kind (sggc_type_t type, sggc_length_t length)
 { 
-  if (type == 2)
-  { if (length <= 3)  return SGGC_N_TYPES+0;
-    if (length <= 7)  return SGGC_N_TYPES+1;
-    if (length <= 11) return SGGC_N_TYPES+2;
+  if (type == 2) /* check if type 2 object fits in one of the small segments */
+  { if (length <= 4)  return SGGC_N_TYPES+0;
+    if (length <= 8)  return SGGC_N_TYPES+1;
+    if (length <= 12) return SGGC_N_TYPES+2;
   }
 
   return type;

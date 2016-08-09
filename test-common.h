@@ -43,7 +43,7 @@
     /* Do some allocations, and set data fields. */
 
     printf("ALLOCATING a, leaving contents as nil\n");
-    a = alloc (1, 1);
+    a = alloc (1, 2);
 
     printf("ALLOCATING b, setting contents to 100*i .. 100*i+9\n");
     b = alloc (2, 10);
@@ -52,7 +52,7 @@
     }
 
     printf("ALLOCATING c, setting its contents to a and b\n");
-    c = alloc (1, 1);
+    c = alloc (1, 2);
     TYPE1(c)->x = a;
     TYPE1(c)->y = b;
 
@@ -72,7 +72,7 @@
       TYPE1(e)->y = b;
       OLD_TO_NEW_CHECK(e,b);
     }
-    a = alloc (1, 1);
+    a = alloc (1, 2);
     if (i == 8)
     { printf("AND KEEP REFERENCE TO NEW a IN e->x\n");
       TYPE1(e)->x = a;
