@@ -187,5 +187,7 @@ int main (int argc, char **argv)
   a = b = c = d = e = nil;
   sggc_collect(2);
 
+  printf("\nEND TESTING\n");
+
   return 0;
 }

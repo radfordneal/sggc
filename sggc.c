@@ -834,12 +834,12 @@ int sggc_look_at (sggc_cptr_t ptr)
         }
       }
       else if (collect_level == 1 && old_to_new_check == 2)
-      { if (set_chain_contains (SET_UNUSED_FREE_NEW, ptr))
+      { if (!set_contains (&old_gen2, ptr) && !set_contains (&old_gen1, ptr))
         { old_to_new_check = 0;
         }
       }
       else
-      { if (set_chain_contains (SET_UNUSED_FREE_NEW, ptr))
+      { if (!set_contains (&old_gen2, ptr) && !set_contains (&old_gen1, ptr))
         { old_to_new_check = 0;
           return 0;
         }

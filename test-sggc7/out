@@ -1,52 +1,52 @@
 STARTING TEST: segs = 100, iters = 50
 
 ABOUT TO CALL sggc_init
-test_malloc: 1 in use after:: 0x7f98c9403390
-test_malloc: 2 in use after:: 0x7f98c94036b0
-test_malloc: 3 in use after:: 0x7f98c94039d0
-test_malloc: 4 in use after:: 0x7f98c9403cf0
-test_malloc: 5 in use after:: 0x7f98c9403290
+test_malloc: 1 in use after:: 0x7ff002403390
+test_malloc: 2 in use after:: 0x7ff0024036b0
+test_malloc: 3 in use after:: 0x7ff0024039d0
+test_malloc: 4 in use after:: 0x7ff002403cf0
+test_malloc: 5 in use after:: 0x7ff002403290
 DONE sggc_init
 ALLOCATING nil
 sggc_alloc: type 0, length 0
-test_malloc: 6 in use after:: 0x7f98c9403300
+test_malloc: 6 in use after:: 0x7ff002403300
 sggc_alloc: created 0 in new segment
-test_malloc: 7 in use after:: 0x7f98c9800600
-sggc_alloc: called malloc for aux1 block (kind 0):: 0x7f98c9800600
+test_malloc: 7 in use after:: 0x7ff002800600
+sggc_alloc: called malloc for aux1 block (kind 0):: 0x7ff002800600
 sggc_alloc: aux1 block for 0 has pos 0 in block for kind 0
-test_malloc: 8 in use after:: 0x7f98c9800a00
-sggc_alloc: called malloc for aux2 block (kind 0):: 0x7f98c9800a00
+test_malloc: 8 in use after:: 0x7ff002800a00
+sggc_alloc: called malloc for aux2 block (kind 0):: 0x7ff002800a00
 sggc_alloc: aux2 block for 0 has pos 0 in block for kind 0
-test_malloc: 9 in use after:: 0x7f98c94000a0
-sggc_alloc: called malloc for 0 (big 0, 1 chunks):: 0x7f98c94000a0
+test_malloc: 9 in use after:: 0x7ff0024000a0
+sggc_alloc: called malloc for 0 (big 0, 1 chunks):: 0x7ff0024000a0
 ALLOC RETURNING 0
 
 ITERATION 1
 ALLOCATING a, leaving contents as nil
 sggc_alloc: type 1, length 2
-test_malloc: 10 in use after:: 0x7f98c9403340
+test_malloc: 10 in use after:: 0x7ff002403340
 sggc_alloc: created 40 in new segment
 sggc_alloc: new segment has bits ffffffffffffffff
 sggc_alloc: used read-only aux1 for 40
-test_malloc: 11 in use after:: 0x7f98c9803600
-sggc_alloc: called malloc for aux2 block (kind 1):: 0x7f98c9803600
+test_malloc: 11 in use after:: 0x7ff002803600
+sggc_alloc: called malloc for aux2 block (kind 1):: 0x7ff002803600
 sggc_alloc: aux2 block for 40 has pos 0 in block for kind 1
-test_malloc: 12 in use after:: 0x7f98c9803a00
-sggc_alloc: called malloc for 40 (small 1, 64 chunks):: 0x7f98c9803a00
+test_malloc: 12 in use after:: 0x7ff002803a00
+sggc_alloc: called malloc for 40 (small 1, 64 chunks):: 0x7ff002803a00
 ALLOC RETURNING 40
 ALLOCATING b, setting contents to 100*i .. 100*i+9
 sggc_alloc: type 2, length 10
-test_malloc: 13 in use after:: 0x7f98c9404010
+test_malloc: 13 in use after:: 0x7ff002404010
 sggc_alloc: created 80 in new segment
 sggc_alloc: new segment has bits 1249249249249249
-test_malloc: 14 in use after:: 0x7f98c9803e00
-sggc_alloc: called malloc for aux1 block (kind 5):: 0x7f98c9803e00
+test_malloc: 14 in use after:: 0x7ff002803e00
+sggc_alloc: called malloc for aux1 block (kind 5):: 0x7ff002803e00
 sggc_alloc: aux1 block for 80 has pos 0 in block for kind 5
-test_malloc: 15 in use after:: 0x7f98c9804200
-sggc_alloc: called malloc for aux2 block (kind 5):: 0x7f98c9804200
+test_malloc: 15 in use after:: 0x7ff002804200
+sggc_alloc: called malloc for aux2 block (kind 5):: 0x7ff002804200
 sggc_alloc: aux2 block for 80 has pos 0 in block for kind 5
-test_malloc: 16 in use after:: 0x7f98c9804600
-sggc_alloc: called malloc for 80 (small 5, 64 chunks):: 0x7f98c9804600
+test_malloc: 16 in use after:: 0x7ff002804600
+sggc_alloc: called malloc for 80 (small 5, 64 chunks):: 0x7ff002804600
 ALLOC RETURNING 80
 ALLOCATING c, setting its contents to a and b
 sggc_alloc: type 1, length 2
@@ -54,17 +54,17 @@ sggc_alloc: found 41 in next_free
 ALLOC RETURNING 41
 ALLOCATING d, setting contents to 7777
 sggc_alloc: type 2, length 1
-test_malloc: 17 in use after:: 0x7f98c9404050
+test_malloc: 17 in use after:: 0x7ff002404050
 sggc_alloc: created c0 in new segment
 sggc_alloc: new segment has bits ffffffffffffffff
-test_malloc: 18 in use after:: 0x7f98c9804a00
-sggc_alloc: called malloc for aux1 block (kind 3):: 0x7f98c9804a00
+test_malloc: 18 in use after:: 0x7ff002804a00
+sggc_alloc: called malloc for aux1 block (kind 3):: 0x7ff002804a00
 sggc_alloc: aux1 block for c0 has pos 0 in block for kind 3
-test_malloc: 19 in use after:: 0x7f98c9804e00
-sggc_alloc: called malloc for aux2 block (kind 3):: 0x7f98c9804e00
+test_malloc: 19 in use after:: 0x7ff002804e00
+sggc_alloc: called malloc for aux2 block (kind 3):: 0x7ff002804e00
 sggc_alloc: aux2 block for c0 has pos 0 in block for kind 3
-test_malloc: 20 in use after:: 0x7f98c9805200
-sggc_alloc: called malloc for c0 (small 3, 64 chunks):: 0x7f98c9805200
+test_malloc: 20 in use after:: 0x7ff002805200
+sggc_alloc: called malloc for c0 (small 3, 64 chunks):: 0x7ff002805200
 ALLOC RETURNING c0
 ALLOCATING a AGAIN, leaving contents as nil
 sggc_alloc: type 1, length 2
@@ -149,16 +149,16 @@ sggc_alloc: found 47 in next_free
 ALLOC RETURNING 47
 ALLOCATING VECTOR OF LENGTH 20
 sggc_alloc: type 2, length 20
-test_malloc: 21 in use after:: 0x7f98c9404090
+test_malloc: 21 in use after:: 0x7ff002404090
 sggc_alloc: created 100 in new segment
-test_malloc: 22 in use after:: 0x7f98c9805600
-sggc_alloc: called malloc for aux1 block (kind 2):: 0x7f98c9805600
+test_malloc: 22 in use after:: 0x7ff002805600
+sggc_alloc: called malloc for aux1 block (kind 2):: 0x7ff002805600
 sggc_alloc: aux1 block for 100 has pos 0 in block for kind 2
-test_malloc: 23 in use after:: 0x7f98c9805a00
-sggc_alloc: called malloc for aux2 block (kind 2):: 0x7f98c9805a00
+test_malloc: 23 in use after:: 0x7ff002805a00
+sggc_alloc: called malloc for aux2 block (kind 2):: 0x7ff002805a00
 sggc_alloc: aux2 block for 100 has pos 0 in block for kind 2
-test_malloc: 24 in use after:: 0x7f98c94040d0
-sggc_alloc: called malloc for 100 (big 2, 5 chunks):: 0x7f98c94040d0
+test_malloc: 24 in use after:: 0x7ff0024040d0
+sggc_alloc: called malloc for 100 (big 2, 5 chunks):: 0x7ff0024040d0
 ALLOC RETURNING 100
 CHECKING CONTENTS
 
@@ -418,12 +418,12 @@ sggc_alloc: found 40 in next_free
 ALLOC RETURNING 40
 ALLOCATING VECTOR OF LENGTH 20
 sggc_alloc: type 2, length 20
-test_malloc: 25 in use after:: 0x7f98c9404120
+test_malloc: 25 in use after:: 0x7ff002404120
 sggc_alloc: created 140 in new segment
 sggc_alloc: aux1 block for 140 has pos 1 in block for kind 2
 sggc_alloc: aux2 block for 140 has pos 1 in block for kind 2
-test_malloc: 26 in use after:: 0x7f98c9404160
-sggc_alloc: called malloc for 140 (big 2, 5 chunks):: 0x7f98c9404160
+test_malloc: 26 in use after:: 0x7ff002404160
+sggc_alloc: called malloc for 140 (big 2, 5 chunks):: 0x7ff002404160
 ALLOC RETURNING 140
 CHECKING CONTENTS
 
@@ -690,12 +690,12 @@ sggc_alloc: found 45 in next_free
 ALLOC RETURNING 45
 ALLOCATING VECTOR OF LENGTH 20
 sggc_alloc: type 2, length 20
-test_malloc: 27 in use after:: 0x7f98c94041b0
+test_malloc: 27 in use after:: 0x7ff0024041b0
 sggc_alloc: created 180 in new segment
 sggc_alloc: aux1 block for 180 has pos 2 in block for kind 2
 sggc_alloc: aux2 block for 180 has pos 2 in block for kind 2
-test_malloc: 28 in use after:: 0x7f98c94041f0
-sggc_alloc: called malloc for 180 (big 2, 5 chunks):: 0x7f98c94041f0
+test_malloc: 28 in use after:: 0x7ff0024041f0
+sggc_alloc: called malloc for 180 (big 2, 5 chunks):: 0x7ff0024041f0
 ALLOC RETURNING 180
 CHECKING CONTENTS
 
@@ -864,12 +864,12 @@ sggc_alloc: found 55 in next_free
 ALLOC RETURNING 55
 ALLOCATING VECTOR OF LENGTH 20
 sggc_alloc: type 2, length 20
-test_malloc: 29 in use after:: 0x7f98c9404240
+test_malloc: 29 in use after:: 0x7ff002404240
 sggc_alloc: created 1c0 in new segment
 sggc_alloc: aux1 block for 1c0 has pos 3 in block for kind 2
 sggc_alloc: aux2 block for 1c0 has pos 3 in block for kind 2
-test_malloc: 30 in use after:: 0x7f98c9404280
-sggc_alloc: called malloc for 1c0 (big 2, 5 chunks):: 0x7f98c9404280
+test_malloc: 30 in use after:: 0x7ff002404280
+sggc_alloc: called malloc for 1c0 (big 2, 5 chunks):: 0x7ff002404280
 ALLOC RETURNING 1c0
 CHECKING CONTENTS
 
@@ -1150,12 +1150,12 @@ sggc_alloc: found 4e in next_free
 ALLOC RETURNING 4e
 ALLOCATING VECTOR OF LENGTH 20
 sggc_alloc: type 2, length 20
-test_malloc: 31 in use after:: 0x7f98c94042d0
+test_malloc: 31 in use after:: 0x7ff0024042d0
 sggc_alloc: created 200 in new segment
 sggc_alloc: aux1 block for 200 has pos 4 in block for kind 2
 sggc_alloc: aux2 block for 200 has pos 4 in block for kind 2
-test_malloc: 32 in use after:: 0x7f98c9404310
-sggc_alloc: called malloc for 200 (big 2, 5 chunks):: 0x7f98c9404310
+test_malloc: 32 in use after:: 0x7ff002404310
+sggc_alloc: called malloc for 200 (big 2, 5 chunks):: 0x7ff002404310
 ALLOC RETURNING 200
 CHECKING CONTENTS
 
@@ -1476,12 +1476,12 @@ sggc_alloc: found 54 in next_free
 ALLOC RETURNING 54
 ALLOCATING VECTOR OF LENGTH 20
 sggc_alloc: type 2, length 20
-test_malloc: 33 in use after:: 0x7f98c9404360
+test_malloc: 33 in use after:: 0x7ff002404360
 sggc_alloc: created 240 in new segment
 sggc_alloc: aux1 block for 240 has pos 5 in block for kind 2
 sggc_alloc: aux2 block for 240 has pos 5 in block for kind 2
-test_malloc: 34 in use after:: 0x7f98c94043a0
-sggc_alloc: called malloc for 240 (big 2, 5 chunks):: 0x7f98c94043a0
+test_malloc: 34 in use after:: 0x7ff0024043a0
+sggc_alloc: called malloc for 240 (big 2, 5 chunks):: 0x7ff0024043a0
 ALLOC RETURNING 240
 CHECKING CONTENTS
 
@@ -1764,12 +1764,12 @@ sggc_collect: done
     next_free [0]: ---  [1]:  48  [2]: ---  [3]:  c7  [4]: ---  [5]:  8f 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
 sggc_alloc: type 2, length 20
-test_malloc: 35 in use after:: 0x7f98c94043f0
+test_malloc: 35 in use after:: 0x7ff0024043f0
 sggc_alloc: created 280 in new segment
 sggc_alloc: aux1 block for 280 has pos 6 in block for kind 2
 sggc_alloc: aux2 block for 280 has pos 6 in block for kind 2
-test_malloc: 36 in use after:: 0x7f98c9404430
-sggc_alloc: called malloc for 280 (big 2, 5 chunks):: 0x7f98c9404430
+test_malloc: 36 in use after:: 0x7ff002404430
+sggc_alloc: called malloc for 280 (big 2, 5 chunks):: 0x7ff002404430
 ALLOC RETURNING 280
 CHECKING CONTENTS
 
@@ -2144,12 +2144,12 @@ sggc_alloc: found 4c in next_free
 ALLOC RETURNING 4c
 ALLOCATING VECTOR OF LENGTH 20
 sggc_alloc: type 2, length 20
-test_malloc: 37 in use after:: 0x7f98c9404480
+test_malloc: 37 in use after:: 0x7ff002404480
 sggc_alloc: created 2c0 in new segment
 sggc_alloc: aux1 block for 2c0 has pos 7 in block for kind 2
 sggc_alloc: aux2 block for 2c0 has pos 7 in block for kind 2
-test_malloc: 38 in use after:: 0x7f98c94044c0
-sggc_alloc: called malloc for 2c0 (big 2, 5 chunks):: 0x7f98c94044c0
+test_malloc: 38 in use after:: 0x7ff0024044c0
+sggc_alloc: called malloc for 2c0 (big 2, 5 chunks):: 0x7ff0024044c0
 ALLOC RETURNING 2c0
 CHECKING CONTENTS
 
@@ -2323,12 +2323,12 @@ sggc_alloc: found 63 in next_free
 ALLOC RETURNING 63
 ALLOCATING VECTOR OF LENGTH 20
 sggc_alloc: type 2, length 20
-test_malloc: 39 in use after:: 0x7f98c9404510
+test_malloc: 39 in use after:: 0x7ff002404510
 sggc_alloc: created 300 in new segment
 sggc_alloc: aux1 block for 300 has pos 8 in block for kind 2
 sggc_alloc: aux2 block for 300 has pos 8 in block for kind 2
-test_malloc: 40 in use after:: 0x7f98c9404550
-sggc_alloc: called malloc for 300 (big 2, 5 chunks):: 0x7f98c9404550
+test_malloc: 40 in use after:: 0x7ff002404550
+sggc_alloc: called malloc for 300 (big 2, 5 chunks):: 0x7ff002404550
 ALLOC RETURNING 300
 CHECKING CONTENTS
 
@@ -2606,12 +2606,12 @@ sggc_alloc: found 52 in next_free
 ALLOC RETURNING 52
 ALLOCATING VECTOR OF LENGTH 20
 sggc_alloc: type 2, length 20
-test_malloc: 41 in use after:: 0x7f98c94045a0
+test_malloc: 41 in use after:: 0x7ff0024045a0
 sggc_alloc: created 340 in new segment
 sggc_alloc: aux1 block for 340 has pos 9 in block for kind 2
 sggc_alloc: aux2 block for 340 has pos 9 in block for kind 2
-test_malloc: 42 in use after:: 0x7f98c94045e0
-sggc_alloc: called malloc for 340 (big 2, 5 chunks):: 0x7f98c94045e0
+test_malloc: 42 in use after:: 0x7ff0024045e0
+sggc_alloc: called malloc for 340 (big 2, 5 chunks):: 0x7ff0024045e0
 ALLOC RETURNING 340
 CHECKING CONTENTS
 
@@ -3054,12 +3054,12 @@ sggc_alloc: found 62 in next_free
 ALLOC RETURNING 62
 ALLOCATING VECTOR OF LENGTH 20
 sggc_alloc: type 2, length 20
-test_malloc: 43 in use after:: 0x7f98c9404630
+test_malloc: 43 in use after:: 0x7ff002404630
 sggc_alloc: created 380 in new segment
 sggc_alloc: aux1 block for 380 has pos 10 in block for kind 2
 sggc_alloc: aux2 block for 380 has pos 10 in block for kind 2
-test_malloc: 44 in use after:: 0x7f98c9404670
-sggc_alloc: called malloc for 380 (big 2, 5 chunks):: 0x7f98c9404670
+test_malloc: 44 in use after:: 0x7ff002404670
+sggc_alloc: called malloc for 380 (big 2, 5 chunks):: 0x7ff002404670
 ALLOC RETURNING 380
 CHECKING CONTENTS
 
@@ -3296,12 +3296,12 @@ sggc_alloc: found 64 in next_free
 ALLOC RETURNING 64
 ALLOCATING VECTOR OF LENGTH 20
 sggc_alloc: type 2, length 20
-test_malloc: 45 in use after:: 0x7f98c94046c0
+test_malloc: 45 in use after:: 0x7ff0024046c0
 sggc_alloc: created 3c0 in new segment
 sggc_alloc: aux1 block for 3c0 has pos 11 in block for kind 2
 sggc_alloc: aux2 block for 3c0 has pos 11 in block for kind 2
-test_malloc: 46 in use after:: 0x7f98c9404700
-sggc_alloc: called malloc for 3c0 (big 2, 5 chunks):: 0x7f98c9404700
+test_malloc: 46 in use after:: 0x7ff002404700
+sggc_alloc: called malloc for 3c0 (big 2, 5 chunks):: 0x7ff002404700
 ALLOC RETURNING 3c0
 CHECKING CONTENTS
 
@@ -3850,12 +3850,12 @@ sggc_alloc: found 5c in next_free
 ALLOC RETURNING 5c
 ALLOCATING VECTOR OF LENGTH 20
 sggc_alloc: type 2, length 20
-test_malloc: 47 in use after:: 0x7f98c9404750
+test_malloc: 47 in use after:: 0x7ff002404750
 sggc_alloc: created 400 in new segment
 sggc_alloc: aux1 block for 400 has pos 12 in block for kind 2
 sggc_alloc: aux2 block for 400 has pos 12 in block for kind 2
-test_malloc: 48 in use after:: 0x7f98c9404790
-sggc_alloc: called malloc for 400 (big 2, 5 chunks):: 0x7f98c9404790
+test_malloc: 48 in use after:: 0x7ff002404790
+sggc_alloc: called malloc for 400 (big 2, 5 chunks):: 0x7ff002404790
 ALLOC RETURNING 400
 CHECKING CONTENTS
 
@@ -4034,12 +4034,12 @@ sggc_alloc: found 72 in next_free
 ALLOC RETURNING 72
 ALLOCATING VECTOR OF LENGTH 20
 sggc_alloc: type 2, length 20
-test_malloc: 49 in use after:: 0x7f98c94047e0
+test_malloc: 49 in use after:: 0x7ff0024047e0
 sggc_alloc: created 440 in new segment
 sggc_alloc: aux1 block for 440 has pos 13 in block for kind 2
 sggc_alloc: aux2 block for 440 has pos 13 in block for kind 2
-test_malloc: 50 in use after:: 0x7f98c9404820
-sggc_alloc: called malloc for 440 (big 2, 5 chunks):: 0x7f98c9404820
+test_malloc: 50 in use after:: 0x7ff002404820
+sggc_alloc: called malloc for 440 (big 2, 5 chunks):: 0x7ff002404820
 ALLOC RETURNING 440
 CHECKING CONTENTS
 
@@ -4322,12 +4322,12 @@ sggc_collect: done
     next_free [0]: ---  [1]:  60  [2]: ---  [3]:  d1  [4]: ---  [5]:  b3 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
 sggc_alloc: type 2, length 20
-test_malloc: 51 in use after:: 0x7f98c9404870
+test_malloc: 51 in use after:: 0x7ff002404870
 sggc_alloc: created 480 in new segment
 sggc_alloc: aux1 block for 480 has pos 14 in block for kind 2
 sggc_alloc: aux2 block for 480 has pos 14 in block for kind 2
-test_malloc: 52 in use after:: 0x7f98c94048b0
-sggc_alloc: called malloc for 480 (big 2, 5 chunks):: 0x7f98c94048b0
+test_malloc: 52 in use after:: 0x7ff0024048b0
+sggc_alloc: called malloc for 480 (big 2, 5 chunks):: 0x7ff0024048b0
 ALLOC RETURNING 480
 CHECKING CONTENTS
 
@@ -4473,6 +4473,7 @@ sggc_collect: put cf from old_gen1 in free
 sggc_collect: put d0 from old_gen1 in free
 sggc_collect: old->new for 74 (gen1)
 sggc_look_at: 65 1
+sggc_look_at: 480 1
 sggc_collect: old->new for 74 still needed
 sggc_look_at: 0 0
 sggc_look_at: will look at 0
@@ -4888,12 +4889,12 @@ sggc_alloc: found 6a in next_free
 ALLOC RETURNING 6a
 ALLOCATING VECTOR OF LENGTH 20
 sggc_alloc: type 2, length 20
-test_malloc: 53 in use after:: 0x7f98c9404900
+test_malloc: 53 in use after:: 0x7ff002404900
 sggc_alloc: created 4c0 in new segment
 sggc_alloc: aux1 block for 4c0 has pos 15 in block for kind 2
 sggc_alloc: aux2 block for 4c0 has pos 15 in block for kind 2
-test_malloc: 54 in use after:: 0x7f98c9404940
-sggc_alloc: called malloc for 4c0 (big 2, 5 chunks):: 0x7f98c9404940
+test_malloc: 54 in use after:: 0x7ff002404940
+sggc_alloc: called malloc for 4c0 (big 2, 5 chunks):: 0x7ff002404940
 ALLOC RETURNING 4c0
 CHECKING CONTENTS
 
@@ -5026,7 +5027,7 @@ sggc_collect: old->new for 74 (gen2)
 sggc_look_at: 65 2
 sggc_look_at: 480 2
 sggc_look_at: will look at 480
-sggc_collect: old->new for 74 still needed
+sggc_collect: old->new for 74 no longer needed
 sggc_look_at: 0 0
 sggc_look_at: 7a 0
 sggc_look_at: will look at 7a
@@ -5104,7 +5105,7 @@ sggc_collect: aa in old_gen1 now free
 sggc_collect: d1 in old_gen1 now free
 sggc_collect: d2 in old_gen1 now free
 sggc_collect: done
-  unused: 0, old_gen1: 7, old_gen2: 96, old_to_new: 1, to_look_at: 0
+  unused: 0, old_gen1: 7, old_gen2: 96, old_to_new: 0, to_look_at: 0
   free_or_new [0]:   0  [1]:  12  [2]:   0  [3]:  47  [4]:   0  [5]:   4 
     next_free [0]: ---  [1]:  60  [2]: ---  [3]:  d1  [4]: ---  [5]:  aa 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -5133,12 +5134,12 @@ sggc_alloc: found 6e in next_free
 ALLOC RETURNING 6e
 ALLOCATING VECTOR OF LENGTH 20
 sggc_alloc: type 2, length 20
-test_malloc: 55 in use after:: 0x7f98c9404990
+test_malloc: 55 in use after:: 0x7ff002404990
 sggc_alloc: created 500 in new segment
 sggc_alloc: aux1 block for 500 has pos 16 in block for kind 2
 sggc_alloc: aux2 block for 500 has pos 16 in block for kind 2
-test_malloc: 56 in use after:: 0x7f98c94049d0
-sggc_alloc: called malloc for 500 (big 2, 5 chunks):: 0x7f98c94049d0
+test_malloc: 56 in use after:: 0x7ff0024049d0
+sggc_alloc: called malloc for 500 (big 2, 5 chunks):: 0x7ff0024049d0
 ALLOC RETURNING 500
 CHECKING CONTENTS
 DONE TESTING
@@ -5147,3 +5148,316 @@ FINAL YOUNGEST:  nil 0, a 1, b 1, c 1, d 1, e 1
 
 FINAL LENGTHS:  nil   0, a   2, b  10, c   2, d   1, e   2
 FINAL SEQNUMS:  nil   0, a 315, b 312, c 313, d 314, e 316
+
+COLLECTING EVERYTHING EXCEPT nil
+
+sggc_collect: level 2
+  unused: 0, old_gen1: 7, old_gen2: 96, old_to_new: 0, to_look_at: 0
+  free_or_new [0]:   0  [1]:  12  [2]:   1  [3]:  47  [4]:   0  [5]:   4 
+    next_free [0]: ---  [1]:  70  [2]: ---  [3]:  d2  [4]: ---  [5]:  b6 
+     end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
+sggc_collect: put 480 from old_gen2 in free
+sggc_collect: put 4c0 from old_gen2 in free
+sggc_collect: put 440 from old_gen2 in free
+sggc_collect: put 400 from old_gen2 in free
+sggc_collect: put 3c0 from old_gen2 in free
+sggc_collect: put 340 from old_gen2 in free
+sggc_collect: put 380 from old_gen2 in free
+sggc_collect: put 300 from old_gen2 in free
+sggc_collect: put 2c0 from old_gen2 in free
+sggc_collect: put 280 from old_gen2 in free
+sggc_collect: put 200 from old_gen2 in free
+sggc_collect: put 240 from old_gen2 in free
+sggc_collect: put 1c0 from old_gen2 in free
+sggc_collect: put 180 from old_gen2 in free
+sggc_collect: put 140 from old_gen2 in free
+sggc_collect: put 80 from old_gen2 in free
+sggc_collect: put 83 from old_gen2 in free
+sggc_collect: put 86 from old_gen2 in free
+sggc_collect: put 89 from old_gen2 in free
+sggc_collect: put 8c from old_gen2 in free
+sggc_collect: put 8f from old_gen2 in free
+sggc_collect: put 92 from old_gen2 in free
+sggc_collect: put 95 from old_gen2 in free
+sggc_collect: put 98 from old_gen2 in free
+sggc_collect: put 9b from old_gen2 in free
+sggc_collect: put 9e from old_gen2 in free
+sggc_collect: put a1 from old_gen2 in free
+sggc_collect: put a4 from old_gen2 in free
+sggc_collect: put a7 from old_gen2 in free
+sggc_collect: put b0 from old_gen2 in free
+sggc_collect: put b3 from old_gen2 in free
+sggc_collect: put 0 from old_gen2 in free
+sggc_collect: put c0 from old_gen2 in free
+sggc_collect: put c1 from old_gen2 in free
+sggc_collect: put c2 from old_gen2 in free
+sggc_collect: put c3 from old_gen2 in free
+sggc_collect: put c4 from old_gen2 in free
+sggc_collect: put c5 from old_gen2 in free
+sggc_collect: put c6 from old_gen2 in free
+sggc_collect: put c7 from old_gen2 in free
+sggc_collect: put c8 from old_gen2 in free
+sggc_collect: put c9 from old_gen2 in free
+sggc_collect: put ca from old_gen2 in free
+sggc_collect: put cb from old_gen2 in free
+sggc_collect: put cc from old_gen2 in free
+sggc_collect: put cd from old_gen2 in free
+sggc_collect: put ce from old_gen2 in free
+sggc_collect: put cf from old_gen2 in free
+sggc_collect: put 100 from old_gen2 in free
+sggc_collect: put 40 from old_gen2 in free
+sggc_collect: put 41 from old_gen2 in free
+sggc_collect: put 42 from old_gen2 in free
+sggc_collect: put 43 from old_gen2 in free
+sggc_collect: put 44 from old_gen2 in free
+sggc_collect: put 45 from old_gen2 in free
+sggc_collect: put 46 from old_gen2 in free
+sggc_collect: put 47 from old_gen2 in free
+sggc_collect: put 48 from old_gen2 in free
+sggc_collect: put 49 from old_gen2 in free
+sggc_collect: put 4a from old_gen2 in free
+sggc_collect: put 4b from old_gen2 in free
+sggc_collect: put 4c from old_gen2 in free
+sggc_collect: put 4d from old_gen2 in free
+sggc_collect: put 4e from old_gen2 in free
+sggc_collect: put 4f from old_gen2 in free
+sggc_collect: put 50 from old_gen2 in free
+sggc_collect: put 51 from old_gen2 in free
+sggc_collect: put 52 from old_gen2 in free
+sggc_collect: put 53 from old_gen2 in free
+sggc_collect: put 54 from old_gen2 in free
+sggc_collect: put 55 from old_gen2 in free
+sggc_collect: put 56 from old_gen2 in free
+sggc_collect: put 57 from old_gen2 in free
+sggc_collect: put 58 from old_gen2 in free
+sggc_collect: put 59 from old_gen2 in free
+sggc_collect: put 5a from old_gen2 in free
+sggc_collect: put 5b from old_gen2 in free
+sggc_collect: put 5c from old_gen2 in free
+sggc_collect: put 5d from old_gen2 in free
+sggc_collect: put 5e from old_gen2 in free
+sggc_collect: put 5f from old_gen2 in free
+sggc_collect: put 61 from old_gen2 in free
+sggc_collect: put 62 from old_gen2 in free
+sggc_collect: put 63 from old_gen2 in free
+sggc_collect: put 64 from old_gen2 in free
+sggc_collect: put 65 from old_gen2 in free
+sggc_collect: put 66 from old_gen2 in free
+sggc_collect: put 68 from old_gen2 in free
+sggc_collect: put 69 from old_gen2 in free
+sggc_collect: put 6a from old_gen2 in free
+sggc_collect: put 6b from old_gen2 in free
+sggc_collect: put 6c from old_gen2 in free
+sggc_collect: put 6f from old_gen2 in free
+sggc_collect: put 72 from old_gen2 in free
+sggc_collect: put 74 from old_gen2 in free
+sggc_collect: put 77 from old_gen2 in free
+sggc_collect: put 73 from old_gen1 in free
+sggc_collect: put 76 from old_gen1 in free
+sggc_collect: put 79 from old_gen1 in free
+sggc_collect: put 7a from old_gen1 in free
+sggc_collect: put 7b from old_gen1 in free
+sggc_collect: put ad from old_gen1 in free
+sggc_collect: put d0 from old_gen1 in free
+sggc_look_at: 0 0
+sggc_look_at: will look at 0
+sggc_look_at: 0 0
+sggc_look_at: 0 0
+sggc_look_at: 0 0
+sggc_look_at: 0 0
+sggc_look_at: 0 0
+sggc_collect: looking at 0
+sggc_collect: 480 in old_gen2 now free
+sggc_collect: 4c0 in old_gen2 now free
+sggc_collect: 440 in old_gen2 now free
+sggc_collect: 400 in old_gen2 now free
+sggc_collect: 3c0 in old_gen2 now free
+sggc_collect: 340 in old_gen2 now free
+sggc_collect: 380 in old_gen2 now free
+sggc_collect: 300 in old_gen2 now free
+sggc_collect: 2c0 in old_gen2 now free
+sggc_collect: 280 in old_gen2 now free
+sggc_collect: 200 in old_gen2 now free
+sggc_collect: 240 in old_gen2 now free
+sggc_collect: 1c0 in old_gen2 now free
+sggc_collect: 180 in old_gen2 now free
+sggc_collect: 140 in old_gen2 now free
+sggc_collect: 80 in old_gen2 now free
+sggc_collect: 83 in old_gen2 now free
+sggc_collect: 86 in old_gen2 now free
+sggc_collect: 89 in old_gen2 now free
+sggc_collect: 8c in old_gen2 now free
+sggc_collect: 8f in old_gen2 now free
+sggc_collect: 92 in old_gen2 now free
+sggc_collect: 95 in old_gen2 now free
+sggc_collect: 98 in old_gen2 now free
+sggc_collect: 9b in old_gen2 now free
+sggc_collect: 9e in old_gen2 now free
+sggc_collect: a1 in old_gen2 now free
+sggc_collect: a4 in old_gen2 now free
+sggc_collect: a7 in old_gen2 now free
+sggc_collect: b0 in old_gen2 now free
+sggc_collect: b3 in old_gen2 now free
+sggc_collect: c0 in old_gen2 now free
+sggc_collect: c1 in old_gen2 now free
+sggc_collect: c2 in old_gen2 now free
+sggc_collect: c3 in old_gen2 now free
+sggc_collect: c4 in old_gen2 now free
+sggc_collect: c5 in old_gen2 now free
+sggc_collect: c6 in old_gen2 now free
+sggc_collect: c7 in old_gen2 now free
+sggc_collect: c8 in old_gen2 now free
+sggc_collect: c9 in old_gen2 now free
+sggc_collect: ca in old_gen2 now free
+sggc_collect: cb in old_gen2 now free
+sggc_collect: cc in old_gen2 now free
+sggc_collect: cd in old_gen2 now free
+sggc_collect: ce in old_gen2 now free
+sggc_collect: cf in old_gen2 now free
+sggc_collect: 100 in old_gen2 now free
+sggc_collect: 40 in old_gen2 now free
+sggc_collect: 41 in old_gen2 now free
+sggc_collect: 42 in old_gen2 now free
+sggc_collect: 43 in old_gen2 now free
+sggc_collect: 44 in old_gen2 now free
+sggc_collect: 45 in old_gen2 now free
+sggc_collect: 46 in old_gen2 now free
+sggc_collect: 47 in old_gen2 now free
+sggc_collect: 48 in old_gen2 now free
+sggc_collect: 49 in old_gen2 now free
+sggc_collect: 4a in old_gen2 now free
+sggc_collect: 4b in old_gen2 now free
+sggc_collect: 4c in old_gen2 now free
+sggc_collect: 4d in old_gen2 now free
+sggc_collect: 4e in old_gen2 now free
+sggc_collect: 4f in old_gen2 now free
+sggc_collect: 50 in old_gen2 now free
+sggc_collect: 51 in old_gen2 now free
+sggc_collect: 52 in old_gen2 now free
+sggc_collect: 53 in old_gen2 now free
+sggc_collect: 54 in old_gen2 now free
+sggc_collect: 55 in old_gen2 now free
+sggc_collect: 56 in old_gen2 now free
+sggc_collect: 57 in old_gen2 now free
+sggc_collect: 58 in old_gen2 now free
+sggc_collect: 59 in old_gen2 now free
+sggc_collect: 5a in old_gen2 now free
+sggc_collect: 5b in old_gen2 now free
+sggc_collect: 5c in old_gen2 now free
+sggc_collect: 5d in old_gen2 now free
+sggc_collect: 5e in old_gen2 now free
+sggc_collect: 5f in old_gen2 now free
+sggc_collect: 61 in old_gen2 now free
+sggc_collect: 62 in old_gen2 now free
+sggc_collect: 63 in old_gen2 now free
+sggc_collect: 64 in old_gen2 now free
+sggc_collect: 65 in old_gen2 now free
+sggc_collect: 66 in old_gen2 now free
+sggc_collect: 68 in old_gen2 now free
+sggc_collect: 69 in old_gen2 now free
+sggc_collect: 6a in old_gen2 now free
+sggc_collect: 6b in old_gen2 now free
+sggc_collect: 6c in old_gen2 now free
+sggc_collect: 6f in old_gen2 now free
+sggc_collect: 72 in old_gen2 now free
+sggc_collect: 74 in old_gen2 now free
+sggc_collect: 77 in old_gen2 now free
+sggc_collect: 73 in old_gen1 now free
+sggc_collect: 76 in old_gen1 now free
+sggc_collect: 79 in old_gen1 now free
+sggc_collect: 7a in old_gen1 now free
+sggc_collect: 7b in old_gen1 now free
+sggc_collect: ad in old_gen1 now free
+sggc_collect: d0 in old_gen1 now free
+sggc_collect: calling free for 100:: 0x7ff0024040d0
+test_free: 55 in use after:: 0x7ff0024040d0
+sggc_collect: retaining aux1 for 100:: 0x7ff002805600
+sggc_collect: retaining aux2 for 100:: 0x7ff002805a00
+sggc_collect: putting 100 in unused
+sggc_collect: calling free for 140:: 0x7ff002404160
+test_free: 54 in use after:: 0x7ff002404160
+sggc_collect: retaining aux1 for 140:: 0x7ff002805604
+sggc_collect: retaining aux2 for 140:: 0x7ff002805a08
+sggc_collect: putting 140 in unused
+sggc_collect: calling free for 180:: 0x7ff0024041f0
+test_free: 53 in use after:: 0x7ff0024041f0
+sggc_collect: retaining aux1 for 180:: 0x7ff002805608
+sggc_collect: retaining aux2 for 180:: 0x7ff002805a10
+sggc_collect: putting 180 in unused
+sggc_collect: calling free for 1c0:: 0x7ff002404280
+test_free: 52 in use after:: 0x7ff002404280
+sggc_collect: retaining aux1 for 1c0:: 0x7ff00280560c
+sggc_collect: retaining aux2 for 1c0:: 0x7ff002805a18
+sggc_collect: putting 1c0 in unused
+sggc_collect: calling free for 240:: 0x7ff0024043a0
+test_free: 51 in use after:: 0x7ff0024043a0
+sggc_collect: retaining aux1 for 240:: 0x7ff002805614
+sggc_collect: retaining aux2 for 240:: 0x7ff002805a28
+sggc_collect: putting 240 in unused
+sggc_collect: calling free for 200:: 0x7ff002404310
+test_free: 50 in use after:: 0x7ff002404310
+sggc_collect: retaining aux1 for 200:: 0x7ff002805610
+sggc_collect: retaining aux2 for 200:: 0x7ff002805a20
+sggc_collect: putting 200 in unused
+sggc_collect: calling free for 280:: 0x7ff002404430
+test_free: 49 in use after:: 0x7ff002404430
+sggc_collect: retaining aux1 for 280:: 0x7ff002805618
+sggc_collect: retaining aux2 for 280:: 0x7ff002805a30
+sggc_collect: putting 280 in unused
+sggc_collect: calling free for 2c0:: 0x7ff0024044c0
+test_free: 48 in use after:: 0x7ff0024044c0
+sggc_collect: retaining aux1 for 2c0:: 0x7ff00280561c
+sggc_collect: retaining aux2 for 2c0:: 0x7ff002805a38
+sggc_collect: putting 2c0 in unused
+sggc_collect: calling free for 300:: 0x7ff002404550
+test_free: 47 in use after:: 0x7ff002404550
+sggc_collect: retaining aux1 for 300:: 0x7ff002805620
+sggc_collect: retaining aux2 for 300:: 0x7ff002805a40
+sggc_collect: putting 300 in unused
+sggc_collect: calling free for 380:: 0x7ff002404670
+test_free: 46 in use after:: 0x7ff002404670
+sggc_collect: retaining aux1 for 380:: 0x7ff002805628
+sggc_collect: retaining aux2 for 380:: 0x7ff002805a50
+sggc_collect: putting 380 in unused
+sggc_collect: calling free for 340:: 0x7ff0024045e0
+test_free: 45 in use after:: 0x7ff0024045e0
+sggc_collect: retaining aux1 for 340:: 0x7ff002805624
+sggc_collect: retaining aux2 for 340:: 0x7ff002805a48
+sggc_collect: putting 340 in unused
+sggc_collect: calling free for 3c0:: 0x7ff002404700
+test_free: 44 in use after:: 0x7ff002404700
+sggc_collect: retaining aux1 for 3c0:: 0x7ff00280562c
+sggc_collect: retaining aux2 for 3c0:: 0x7ff002805a58
+sggc_collect: putting 3c0 in unused
+sggc_collect: calling free for 400:: 0x7ff002404790
+test_free: 43 in use after:: 0x7ff002404790
+sggc_collect: retaining aux1 for 400:: 0x7ff002805630
+sggc_collect: retaining aux2 for 400:: 0x7ff002805a60
+sggc_collect: putting 400 in unused
+sggc_collect: calling free for 440:: 0x7ff002404820
+test_free: 42 in use after:: 0x7ff002404820
+sggc_collect: retaining aux1 for 440:: 0x7ff002805634
+sggc_collect: retaining aux2 for 440:: 0x7ff002805a68
+sggc_collect: putting 440 in unused
+sggc_collect: calling free for 4c0:: 0x7ff002404940
+test_free: 41 in use after:: 0x7ff002404940
+sggc_collect: retaining aux1 for 4c0:: 0x7ff00280563c
+sggc_collect: retaining aux2 for 4c0:: 0x7ff002805a78
+sggc_collect: putting 4c0 in unused
+sggc_collect: calling free for 480:: 0x7ff0024048b0
+test_free: 40 in use after:: 0x7ff0024048b0
+sggc_collect: retaining aux1 for 480:: 0x7ff002805638
+sggc_collect: retaining aux2 for 480:: 0x7ff002805a70
+sggc_collect: putting 480 in unused
+sggc_collect: calling free for 500:: 0x7ff0024049d0
+test_free: 39 in use after:: 0x7ff0024049d0
+sggc_collect: retaining aux1 for 500:: 0x7ff002805640
+sggc_collect: retaining aux2 for 500:: 0x7ff002805a80
+sggc_collect: putting 500 in unused
+sggc_collect: done
+  unused: 17, old_gen1: 0, old_gen2: 1, old_to_new: 0, to_look_at: 0
+  free_or_new [0]:   0  [1]:  64  [2]:   0  [3]:  64  [4]:   0  [5]:  21 
+    next_free [0]: ---  [1]:  40  [2]: ---  [3]:  c0  [4]: ---  [5]:  80 
+     end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
+
+END TESTING
