@@ -155,5 +155,9 @@ int main (int argc, char **argv)
 
 # include "test-common.h"
 
+  printf("\nCOLLECTING EVERYTHING EXCEPT nil\n\n");
+  a = b = c = d = e = nil;
+  sggc_collect(2);
+
   return 0;
 }

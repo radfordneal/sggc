@@ -19,19 +19,50 @@
 
 
 #include <stdlib.h>
+#include <stdio.h>
+
+
+/* NUMBER OF STORAGE BLOCKS ALLOCATED AND NOT YET FREED. */
+
+static int in_use = 0;
+
+
+/* WRAPPER FOR MALLOC FOR USE IN TESTING.  Displays the address allocated,
+   and the number of storage blocks in use after this allocation. */
 
 void *test_malloc (size_t size)
 { 
+  char *res;
   size_t i;
-  char *res = malloc (size);
+
+  res = malloc (size);
+  if (res == NULL)
+  { printf ("test_malloc: %d in use, malloc failed\n", in_use);
+    return res;
+  }
+
   for (i = 0; i < size; i++)
   { res[i] = -123;
   }
+
+  in_use += 1;
+
+  printf ("test_malloc: %d in use after:: %p\n", in_use, res);
   return res;
 }
 
+
+/* WRAPPER FOR FREE FOR USE IN TESTING.  Checks that the pointer being
+   freed is not NULL, and that the in use count is not already zero,
+   and displays the pointer freed and the in use count afterwards. */
+
 void test_free (void *ptr)
 {
-  free (ptr);
-}
+  if (ptr == NULL) abort();
+  if (in_use == 0) abort();
 
+  free (ptr);
+  in_use -= 1;
+
+  printf ("test_free: %d in use after:: %p\n", in_use, ptr);
+}

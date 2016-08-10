@@ -191,5 +191,9 @@ int main (int argc, char **argv)
    "FINAL SEQNUMS:  nil %3llu, a %3llu, b %3llu, c %3llu, d %3llu, e %3llu\n",
     SEQNUM(nil), SEQNUM(a), SEQNUM(b), SEQNUM(c), SEQNUM(d), SEQNUM(e));
 
+  printf("\nCOLLECTING EVERYTHING EXCEPT nil\n\n");
+  a = b = c = d = e = nil;
+  sggc_collect(2);
+
   return 0;
 }
