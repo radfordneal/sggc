@@ -19,6 +19,7 @@
 
 
 #include <stdlib.h>
+#include <string.h>
 #include <stdio.h>
 #include "sggc-app.h"
 
@@ -102,12 +103,39 @@ struct type_binding { ptr_t value, next; };  /* Binding, symbol is in aux1 */
 #define LIST(v) ((struct type_list *) SGGC_DATA(v))
 #define SYMBOL(v) ((struct type_symbol *) SGGC_DATA(v))
 #define BINDING(v) ((struct type_binding *) SGGC_DATA(v))
-#define BOUND_SYMBOL(v) ((char *) SGGC_AUX1(v))
+#define BOUND_SYMBOL(v) (* (char *) SGGC_AUX1(v))
+
+
+/* VALID SYMBOLS. */
+
+static const char symbol_chars[SGGC_CHUNKS_IN_SMALL_SEGMENT] =
+  "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'?@%$=.:&+*^";
 
 
 /* GLOBAL VARIABLES. */
 
-ptr_t nil;
+static ptr_t nil;       /* The nil object, () */
+static ptr_t bindings;  /* Current bindings of symbols with values */
+
+
+/* SCHEME FOR PROTECTING POINTERS FROM GARBAGE COLLECTION. */
+
+static struct ptr_var { ptr_t *var; struct ptr_var *next; } *first_ptr_var;
+
+#define PROT1(v) \
+  struct ptr_var *saved_first_ptr_var = first_ptr_var; \
+  struct ptr_var prot1 = { .var = &v, .next = first_ptr_var }; \
+  first_ptr_var = &prot1;
+
+#define PROT2(v) \
+  struct ptr_var prot2 = { .var = &v, .next = first_ptr_var }; \
+  first_ptr_var = &prot2;
+
+#define PROT3(v) \
+  struct ptr_var prot3 = { .var = &v, .next = first_ptr_var }; \
+  first_ptr_var = &prot3;
+
+#define END_PROT (first_ptr_var = saved_first_ptr_var)
 
 
 /* FUNCTIONS THAT THE APPLICATION NEEDS TO PROVIDE TO THE SGGC MODULE. */
@@ -132,6 +160,14 @@ char *sggc_aux1_read_only (sggc_kind_t kind)
 
 void sggc_find_root_ptrs (void)
 { 
+  (void) sggc_look_at (nil);  
+
+  struct ptr_var *p;
+  for (p = first_ptr_var; p != NULL; p = p->next)
+  { (void) sggc_look_at (*p->var);
+  }
+
+  (void) sggc_look_at (bindings);  
 }
 
 void sggc_find_object_ptrs (sggc_cptr_t cptr)
@@ -194,7 +230,111 @@ static ptr_t alloc (sggc_type_t type)
 }
 
 
+/* PRINT AN OBJECT.  Bindings are not normally printed, but are handled
+   here for debugging purposes. */
+
+static void print (ptr_t a)
+{
+  switch (TYPE(a))
+  { case TYPE_NIL:
+    { printf ("()");
+      break;
+    }
+    case TYPE_SYMBOL:
+    { printf ("%c", SYMBOL(a)->symbol);
+      break;
+    }
+    case TYPE_LIST:
+    { ptr_t p;
+      printf ("(");
+      print (LIST(a)->head);
+      for (p = LIST(a)->tail; p != nil; p = LIST(p)->tail)
+      { printf (" ");
+        print (LIST(p)->head);
+      }
+      printf (")");
+    }
+    case TYPE_BINDING:
+    { ptr_t p;
+      printf ("[");
+      printf ("%c=", BOUND_SYMBOL(a));
+      print (BINDING(a)->value);
+      for (p = BINDING(a)->next; p != nil; p = BINDING(p)->next)
+      { printf (" %c=", BOUND_SYMBOL(p));
+        print (BINDING(p)->value);
+      }
+      printf ("]");
+    }
+  }
+}
+
+
+/* READ A CHARACTER.  Skips white space and comments.  Exits on EOF. */
+
+static char read_char (void)
+{
+  char c;
+
+  for (;;)
+  {
+    if (scanf(" %c",&c) != 1) 
+    { exit(0);
+    }
+
+    if (c != '#')
+    { return c;
+    }
+
+    scanf ("%*[^\n]");
+  }
+}
+
+
+/* READ AN OBJECT.  Passed the next character of input; reads more if
+   appropriate, but doesn't read past end of expression.  Prints an
+   error message and exits if there is a syntax error.  Exits without
+   an error if end-of-file is encountered at the beginning. */
+
+static ptr_t read (char c)
+{
+  if (strchr(symbol_chars,c))
+  { ptr_t p = alloc (TYPE_SYMBOL);
+    SYMBOL(p)->symbol = c;
+    return p;
+  }
+
+  if (c == '(')
+  {
+    c = read_char();
+
+    if (c == ')')
+    { return nil;
+    }
+
+    abort();
+  }
+
+  printf ("Syntax error (2)\n");
+  exit(1);
+}
+
+
+/* MAIN PROGRAM. */
+
 int main (void)
 {
+  sggc_init (10000);
+
+  nil = alloc (TYPE_NIL);
+
+  ptr_t expr = nil;
+  PROT1(expr);
+
+  for (;;)
+  { expr = read(read_char());
+    print(expr);
+    printf("\n");
+  }
+
   return 0;
 }
