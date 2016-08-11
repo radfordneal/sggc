@@ -34,7 +34,7 @@
      (a b (x y) c)  list of a, b, (x y), and c
 
      a, b, c, ...   Symbols: which are a single character from the set 
-                      a-z, A-Z, ', ?, @, %, $, =, ., :, &, +, *, ^
+                      a-z, A-Z, ', ?, !, @, %, $, =, ., :, &, `, +
 
      # comment      Rest of line from # on is a comment
        
@@ -56,11 +56,17 @@
      (% (v1 v2 ...) e1 e2 ...)  Creates bindings for v1, v2, ... (initially ());
                                 evaluates e1, e2, ...; returns the last of them
 
-     (' a)          Returns a unevaluated
-
-     (? w a b)      Conditional expression, evaluates w, then returns result of
+     (? w a b)       Conditional expression, evaluates w, then returns result of
                        evaluating a if w is a list (not () or a symbol), and
                        otherwise returns result of evaluing b (default ())
+
+     (! w e1 e2 ...) Looping expression, evaluates w, then if it is a list
+                     (not () or a symbol), e1, e2, ..., then does it again,
+                     repeating until w is () or a symbol, returning ().
+
+     (' a)          Returns a unevaluated
+
+     (` a)          Evaluates a, then returns the result of evaluating that
 
      (@ v e)        Assignment expression, evaluates e, then changes the most
                        recent binding of symbol v to be the value of e; value
@@ -116,8 +122,8 @@ struct type_binding { ptr_t value, next; };  /* Binding, symbol is in aux1 */
 
 /* VALID SYMBOLS. */
 
-static const char symbol_chars[SGGC_CHUNKS_IN_SMALL_SEGMENT] =
-  "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'?@%$=.:&+*^";
+static const char symbol_chars[SGGC_CHUNKS_IN_SMALL_SEGMENT+1] =
+  "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'`?!@%$=.:&+";
 
 static ptr_t symbols[SGGC_CHUNKS_IN_SMALL_SEGMENT];
 
@@ -436,9 +442,57 @@ static ptr_t eval (ptr_t e, ptr_t b)
         { r = e;
           goto done;
         }
+        case '%':
+        { if (a1 == nil) error(__LINE__);
+          ptr_t a = LIST(a1) -> head;
+          if (a != nil && TYPE(a) != TYPE_LIST) error(__LINE__);
+          ptr_t old_b = b;
+          while (a != nil)
+          { if (TYPE (LIST(a)->head) != TYPE_SYMBOL) error(__LINE__);
+            ptr_t n = alloc (TYPE_BINDING);
+            BINDING(n) -> next = b;  /* old-to-new check not needed */
+            BOUND_SYMBOL(n) = SYMBOL(LIST(a)->head) -> symbol;
+            b = n;
+            a = LIST(a) -> tail;
+          }
+          r = nil;
+          ptr_t t;
+          for (t = a2; t != nil; t = LIST(t)->tail)
+          { r = nil;  /* free memory now */
+            r = eval (LIST(t)->head, b);
+          }
+          goto done;
+        }
+        case '?':
+        { if (a1 == nil || a2 == nil || a4 != nil) error(__LINE__);
+          if (TYPE(eval(LIST(a1)->head,b)) == TYPE_LIST)
+          { r = eval (LIST(a2)->head, b);
+          }
+          else
+          { r = a3 == nil ? nil : eval (LIST(a3)->head, b);
+          }
+          goto done;
+        }
+        case '!':
+        { if (a1 == nil) error(__LINE__);
+          while (TYPE(eval(LIST(a1)->head,b)) == TYPE_LIST)
+          { ptr_t s = a2;
+            while (s != nil)
+            { (void) eval (LIST(s)->head, b);
+              s = LIST(s) -> tail;
+            }
+          }
+          r = nil;
+          goto done;
+        }
         case '\'':
         { if (a1 == nil) error(__LINE__);
           r = LIST(a1) -> head;
+          goto done;
+        }
+        case '`':
+        { if (a1 == nil) error(__LINE__);
+          r = eval (eval (LIST(a1)->head, b), b);
           goto done;
         }
         case '@':
@@ -532,15 +586,14 @@ static ptr_t eval (ptr_t e, ptr_t b)
 
     if (e != nil) error(__LINE__);
 
-    printf("bindings: "); print(b); printf("\n");
+    /* printf("bindings: "); print(b); printf("\n"); */
 
     /* Evaluate expressions in the body of the function, returning last. */
 
     r = nil;
-    t = LIST(t) -> tail;
-    while (t != nil)
-    { r = eval (LIST(t)->head, b);
-      t = LIST(t) -> tail;
+    for (t = LIST(t)->tail; t != nil; t = LIST(t)->tail)
+    { r = nil;  /* free memory now */
+      r = eval (LIST(t)->head, b);
     }
 
     goto done;
@@ -571,8 +624,7 @@ int main (void)
   int i;
 
   for (i = 0; symbol_chars[i]; i++)
-  { printf("CREATING SYMBOL %c (%d)\n",symbol_chars[i],i);
-    symbols[i] = alloc (TYPE_SYMBOL);
+  { symbols[i] = alloc (TYPE_SYMBOL);
     SYMBOL(symbols[i]) -> symbol = symbol_chars[i];
     n = alloc (TYPE_BINDING);
     BOUND_SYMBOL(n) = symbol_chars[i];
