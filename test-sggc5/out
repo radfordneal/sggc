@@ -1,42 +1,42 @@
 STARTING TEST: segs = 5, iters = 50
 
 ABOUT TO CALL sggc_init
-test_malloc: 1 in use after:: 0x7fc0c8403290
-test_malloc: 2 in use after:: 0x7fc0c84032c0
-test_malloc: 3 in use after:: 0x7fc0c84032f0
-test_malloc: 4 in use after:: 0x7fc0c84000a0
+test_malloc: 1 in use after:: 0x7fbc4bc03290
+test_malloc: 2 in use after:: 0x7fbc4bc032c0
+test_malloc: 3 in use after:: 0x7fbc4bc032f0
+test_malloc: 4 in use after:: 0x7fbc4bc000a0
 DONE sggc_init
 ALLOCATING nil
 sggc_alloc: type 0, length 0
-test_malloc: 5 in use after:: 0x7fc0c8403320
+test_malloc: 5 in use after:: 0x7fbc4bc03320
 sggc_alloc: created 0 in new segment
-test_malloc: 6 in use after:: 0x7fc0c8800600
-sggc_alloc: called malloc for aux1 block (kind 0):: 0x7fc0c8800600
+test_malloc: 6 in use after:: 0x7fbc4c000600
+sggc_alloc: called malloc for aux1 block (kind 0):: 0x7fbc4c000600
 sggc_alloc: aux1 block for 0 has pos 0 in block for kind 0
-test_malloc: 7 in use after:: 0x7fc0c8403360
-sggc_alloc: called malloc for 0 (big 0, 1 chunks):: 0x7fc0c8403360
+test_malloc: 7 in use after:: 0x7fbc4bc03360
+sggc_alloc: called malloc for 0 (big 0, 1 chunks):: 0x7fbc4bc03360
 ALLOC RETURNING 0
 
 ITERATION 1
 ALLOCATING a, leaving contents as nil
 sggc_alloc: type 1, length 2
-test_malloc: 8 in use after:: 0x7fc0c8403390
+test_malloc: 8 in use after:: 0x7fbc4bc03390
 sggc_alloc: created 40 in new segment
 sggc_alloc: new segment has bits ffffffffffffffff
 sggc_alloc: used read-only aux1 for 40
-test_malloc: 9 in use after:: 0x7fc0c8800a00
-sggc_alloc: called malloc for 40 (small 1, 64 chunks):: 0x7fc0c8800a00
+test_malloc: 9 in use after:: 0x7fbc4c000a00
+sggc_alloc: called malloc for 40 (small 1, 64 chunks):: 0x7fbc4c000a00
 ALLOC RETURNING 40
 ALLOCATING b, setting contents to 100*i .. 100*i+9
 sggc_alloc: type 2, length 10
-test_malloc: 10 in use after:: 0x7fc0c84033d0
+test_malloc: 10 in use after:: 0x7fbc4bc033d0
 sggc_alloc: created 80 in new segment
 sggc_alloc: new segment has bits 1249249249249249
-test_malloc: 11 in use after:: 0x7fc0c8803600
-sggc_alloc: called malloc for aux1 block (kind 5):: 0x7fc0c8803600
+test_malloc: 11 in use after:: 0x7fbc4c003600
+sggc_alloc: called malloc for aux1 block (kind 5):: 0x7fbc4c003600
 sggc_alloc: aux1 block for 80 has pos 0 in block for kind 5
-test_malloc: 12 in use after:: 0x7fc0c8803a00
-sggc_alloc: called malloc for 80 (small 5, 64 chunks):: 0x7fc0c8803a00
+test_malloc: 12 in use after:: 0x7fbc4c003a00
+sggc_alloc: called malloc for 80 (small 5, 64 chunks):: 0x7fbc4c003a00
 ALLOC RETURNING 80
 ALLOCATING c, setting its contents to a and b
 sggc_alloc: type 1, length 2
@@ -44,14 +44,14 @@ sggc_alloc: found 41 in next_free
 ALLOC RETURNING 41
 ALLOCATING d, setting contents to 7777
 sggc_alloc: type 2, length 1
-test_malloc: 13 in use after:: 0x7fc0c8403410
+test_malloc: 13 in use after:: 0x7fbc4bc03410
 sggc_alloc: created c0 in new segment
 sggc_alloc: new segment has bits ffffffffffffffff
-test_malloc: 14 in use after:: 0x7fc0c8803e00
-sggc_alloc: called malloc for aux1 block (kind 3):: 0x7fc0c8803e00
+test_malloc: 14 in use after:: 0x7fbc4c003e00
+sggc_alloc: called malloc for aux1 block (kind 3):: 0x7fbc4c003e00
 sggc_alloc: aux1 block for c0 has pos 0 in block for kind 3
-test_malloc: 15 in use after:: 0x7fc0c8804200
-sggc_alloc: called malloc for c0 (small 3, 64 chunks):: 0x7fc0c8804200
+test_malloc: 15 in use after:: 0x7fbc4c004200
+sggc_alloc: called malloc for c0 (small 3, 64 chunks):: 0x7fbc4c004200
 ALLOC RETURNING c0
 ALLOCATING a AGAIN, leaving contents as nil
 sggc_alloc: type 1, length 2
@@ -67,7 +67,7 @@ ALLOC RETURNING 43
 ALLOCATING b, setting contents to 100*i .. 100*i+9
 ABOUT TO CALL sggc_collect IN ALLOC DUE TO 8 ALLOCATIONS
 sggc_collect: level 0
-  unused: 0, old_gen1: 0, old_gen2: 0, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 0, old_gen2: 0, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   1  [1]:  64  [2]:   0  [3]:  64  [4]:   0  [5]:  21 
     next_free [0]: ---  [1]:  44  [2]: ---  [3]:  c1  [4]: ---  [5]:  83 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -102,7 +102,7 @@ sggc_look_at: 0 0
 sggc_collect: looking at 0
 sggc_collect: 0 now old_gen1
 sggc_collect: done
-  unused: 0, old_gen1: 6, old_gen2: 0, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 6, old_gen2: 0, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  61  [2]:   0  [3]:  63  [4]:   0  [5]:  20 
     next_free [0]: ---  [1]:  42  [2]: ---  [3]:  c1  [4]: ---  [5]:  83 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -144,7 +144,7 @@ ALLOC RETURNING c2
 ALLOCATING a AGAIN, leaving contents as nil
 ABOUT TO CALL sggc_collect IN ALLOC DUE TO 16 ALLOCATIONS
 sggc_collect: level 0
-  unused: 0, old_gen1: 6, old_gen2: 0, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 6, old_gen2: 0, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  61  [2]:   0  [3]:  63  [4]:   0  [5]:  20 
     next_free [0]: ---  [1]:  47  [2]: ---  [3]:  c3  [4]: ---  [5]:  89 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -171,7 +171,7 @@ sggc_collect: 46 now old_gen1
 sggc_look_at: 45 0
 sggc_look_at: 86 0
 sggc_collect: done
-  unused: 0, old_gen1: 10, old_gen2: 0, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 10, old_gen2: 0, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  59  [2]:   0  [3]:  62  [4]:   0  [5]:  19 
     next_free [0]: ---  [1]:  42  [2]: ---  [3]:  c1  [4]: ---  [5]:  83 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -215,7 +215,7 @@ ALLOC RETURNING 89
 ALLOCATING c, setting its contents to a and b
 ABOUT TO CALL sggc_collect IN ALLOC DUE TO 24 ALLOCATIONS
 sggc_collect: level 1
-  unused: 0, old_gen1: 10, old_gen2: 0, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 10, old_gen2: 0, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  59  [2]:   0  [3]:  62  [4]:   0  [5]:  19 
     next_free [0]: ---  [1]:  4a  [2]: ---  [3]:  c3  [4]: ---  [5]:  8c 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -276,7 +276,7 @@ sggc_collect: 86 in old_gen1 now free
 sggc_collect: c0 in old_gen1 now free
 sggc_collect: c2 in old_gen1 now free
 sggc_collect: done
-  unused: 0, old_gen1: 6, old_gen2: 2, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 6, old_gen2: 2, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  60  [2]:   0  [3]:  63  [4]:   0  [5]:  19 
     next_free [0]: ---  [1]:  40  [2]: ---  [3]:  c0  [4]: ---  [5]:  80 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -321,7 +321,7 @@ ITERATION 7
 ALLOCATING a, leaving contents as nil
 ABOUT TO CALL sggc_collect IN ALLOC DUE TO 32 ALLOCATIONS
 sggc_collect: level 0
-  unused: 0, old_gen1: 6, old_gen2: 2, old_to_new: 1, to_look_at: 0
+  unused: 0, old_gen1: 6, old_gen2: 2, old_to_new: 1, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  60  [2]:   0  [3]:  63  [4]:   0  [5]:  19 
     next_free [0]: ---  [1]:  48  [2]: ---  [3]:  c3  [4]: ---  [5]:  86 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -357,7 +357,7 @@ sggc_collect: 46 now old_gen1
 sggc_look_at: 0 0
 sggc_look_at: 0 0
 sggc_collect: done
-  unused: 0, old_gen1: 11, old_gen2: 2, old_to_new: 1, to_look_at: 0
+  unused: 0, old_gen1: 11, old_gen2: 2, old_to_new: 1, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  57  [2]:   0  [3]:  62  [4]:   0  [5]:  18 
     next_free [0]: ---  [1]:  40  [2]: ---  [3]:  c0  [4]: ---  [5]:  86 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -398,7 +398,7 @@ ALLOC RETURNING 4b
 ALLOCATING d, setting contents to 7777
 ABOUT TO CALL sggc_collect IN ALLOC DUE TO 40 ALLOCATIONS
 sggc_collect: level 0
-  unused: 0, old_gen1: 11, old_gen2: 2, old_to_new: 1, to_look_at: 0
+  unused: 0, old_gen1: 11, old_gen2: 2, old_to_new: 1, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  57  [2]:   0  [3]:  62  [4]:   0  [5]:  18 
     next_free [0]: ---  [1]:  4c  [2]: ---  [3]:  c3  [4]: ---  [5]:  8f 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -429,7 +429,7 @@ sggc_collect: 4b now old_gen1
 sggc_look_at: 4a 0
 sggc_look_at: 8c 0
 sggc_collect: done
-  unused: 0, old_gen1: 15, old_gen2: 2, old_to_new: 1, to_look_at: 0
+  unused: 0, old_gen1: 15, old_gen2: 2, old_to_new: 1, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  55  [2]:   0  [3]:  61  [4]:   0  [5]:  17 
     next_free [0]: ---  [1]:  40  [2]: ---  [3]:  c3  [4]: ---  [5]:  86 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -474,7 +474,7 @@ ALLOC RETURNING 4d
 ALLOCATING b, setting contents to 100*i .. 100*i+9
 ABOUT TO CALL sggc_collect IN ALLOC DUE TO 48 ALLOCATIONS
 sggc_collect: level 2
-  unused: 0, old_gen1: 15, old_gen2: 2, old_to_new: 1, to_look_at: 0
+  unused: 0, old_gen1: 15, old_gen2: 2, old_to_new: 1, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  55  [2]:   0  [3]:  61  [4]:   0  [5]:  17 
     next_free [0]: ---  [1]:  4e  [2]: ---  [3]:  c5  [4]: ---  [5]:  8f 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -554,7 +554,7 @@ sggc_collect: c0 in old_gen1 now free
 sggc_collect: c1 in old_gen1 now free
 sggc_collect: c2 in old_gen1 now free
 sggc_collect: done
-  unused: 0, old_gen1: 6, old_gen2: 3, old_to_new: 1, to_look_at: 0
+  unused: 0, old_gen1: 6, old_gen2: 3, old_to_new: 1, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  59  [2]:   0  [3]:  63  [4]:   0  [5]:  19 
     next_free [0]: ---  [1]:  42  [2]: ---  [3]:  c0  [4]: ---  [5]:  83 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -595,7 +595,7 @@ ALLOC RETURNING c1
 ALLOCATING a AGAIN, leaving contents as nil
 ABOUT TO CALL sggc_collect IN ALLOC DUE TO 56 ALLOCATIONS
 sggc_collect: level 0
-  unused: 0, old_gen1: 6, old_gen2: 3, old_to_new: 1, to_look_at: 0
+  unused: 0, old_gen1: 6, old_gen2: 3, old_to_new: 1, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  59  [2]:   0  [3]:  63  [4]:   0  [5]:  19 
     next_free [0]: ---  [1]:  47  [2]: ---  [3]:  c2  [4]: ---  [5]:  8c 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -626,7 +626,7 @@ sggc_collect: 46 now old_gen1
 sggc_look_at: 45 0
 sggc_look_at: 89 0
 sggc_collect: done
-  unused: 0, old_gen1: 10, old_gen2: 3, old_to_new: 1, to_look_at: 0
+  unused: 0, old_gen1: 10, old_gen2: 3, old_to_new: 1, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  57  [2]:   0  [3]:  62  [4]:   0  [5]:  18 
     next_free [0]: ---  [1]:  42  [2]: ---  [3]:  c0  [4]: ---  [5]:  83 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -670,7 +670,7 @@ ALLOC RETURNING 8c
 ALLOCATING c, setting its contents to a and b
 ABOUT TO CALL sggc_collect IN ALLOC DUE TO 64 ALLOCATIONS
 sggc_collect: level 0
-  unused: 0, old_gen1: 10, old_gen2: 3, old_to_new: 1, to_look_at: 0
+  unused: 0, old_gen1: 10, old_gen2: 3, old_to_new: 1, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  57  [2]:   0  [3]:  62  [4]:   0  [5]:  18 
     next_free [0]: ---  [1]:  4b  [2]: ---  [3]:  c2  [4]: ---  [5]:  8f 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -709,7 +709,7 @@ sggc_collect: 4a now old_gen1
 sggc_look_at: 0 0
 sggc_look_at: 0 0
 sggc_collect: done
-  unused: 0, old_gen1: 16, old_gen2: 3, old_to_new: 1, to_look_at: 0
+  unused: 0, old_gen1: 16, old_gen2: 3, old_to_new: 1, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  54  [2]:   0  [3]:  61  [4]:   0  [5]:  16 
     next_free [0]: ---  [1]:  42  [2]: ---  [3]:  c2  [4]: ---  [5]:  8f 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -753,7 +753,7 @@ ITERATION 15
 ALLOCATING a, leaving contents as nil
 ABOUT TO CALL sggc_collect IN ALLOC DUE TO 72 ALLOCATIONS
 sggc_collect: level 1
-  unused: 0, old_gen1: 16, old_gen2: 3, old_to_new: 1, to_look_at: 0
+  unused: 0, old_gen1: 16, old_gen2: 3, old_to_new: 1, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  54  [2]:   0  [3]:  61  [4]:   0  [5]:  16 
     next_free [0]: ---  [1]:  4f  [2]: ---  [3]:  c5  [4]: ---  [5]:  92 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -825,7 +825,7 @@ sggc_collect: c0 in old_gen1 now free
 sggc_collect: c1 in old_gen1 now free
 sggc_collect: c4 in old_gen1 now free
 sggc_collect: done
-  unused: 0, old_gen1: 5, old_gen2: 4, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 5, old_gen2: 4, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  59  [2]:   0  [3]:  63  [4]:   0  [5]:  19 
     next_free [0]: ---  [1]:  41  [2]: ---  [3]:  c0  [4]: ---  [5]:  83 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -866,7 +866,7 @@ ALLOC RETURNING 46
 ALLOCATING d, setting contents to 7777
 ABOUT TO CALL sggc_collect IN ALLOC DUE TO 80 ALLOCATIONS
 sggc_collect: level 0
-  unused: 0, old_gen1: 5, old_gen2: 4, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 5, old_gen2: 4, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  59  [2]:   0  [3]:  63  [4]:   0  [5]:  19 
     next_free [0]: ---  [1]:  47  [2]: ---  [3]:  c1  [4]: ---  [5]:  89 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -893,7 +893,7 @@ sggc_collect: 46 now old_gen1
 sggc_look_at: 45 0
 sggc_look_at: 86 0
 sggc_collect: done
-  unused: 0, old_gen1: 9, old_gen2: 4, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 9, old_gen2: 4, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  57  [2]:   0  [3]:  62  [4]:   0  [5]:  18 
     next_free [0]: ---  [1]:  41  [2]: ---  [3]:  c1  [4]: ---  [5]:  83 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -937,7 +937,7 @@ ALLOC RETURNING 48
 ALLOCATING b, setting contents to 100*i .. 100*i+9
 ABOUT TO CALL sggc_collect IN ALLOC DUE TO 88 ALLOCATIONS
 sggc_collect: level 0
-  unused: 0, old_gen1: 9, old_gen2: 4, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 9, old_gen2: 4, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  57  [2]:   0  [3]:  62  [4]:   0  [5]:  18 
     next_free [0]: ---  [1]:  49  [2]: ---  [3]:  c4  [4]: ---  [5]:  89 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -969,7 +969,7 @@ sggc_collect: 48 now old_gen1
 sggc_look_at: 0 0
 sggc_look_at: 0 0
 sggc_collect: done
-  unused: 0, old_gen1: 14, old_gen2: 4, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 14, old_gen2: 4, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  54  [2]:   0  [3]:  61  [4]:   0  [5]:  17 
     next_free [0]: ---  [1]:  41  [2]: ---  [3]:  c1  [4]: ---  [5]:  89 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -1010,7 +1010,7 @@ ALLOC RETURNING c4
 ALLOCATING a AGAIN, leaving contents as nil
 ABOUT TO CALL sggc_collect IN ALLOC DUE TO 96 ALLOCATIONS
 sggc_collect: level 2
-  unused: 0, old_gen1: 14, old_gen2: 4, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 14, old_gen2: 4, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  54  [2]:   0  [3]:  61  [4]:   0  [5]:  17 
     next_free [0]: ---  [1]:  4d  [2]: ---  [3]:  c5  [4]: ---  [5]:  92 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -1081,7 +1081,7 @@ sggc_collect: c0 in old_gen1 now free
 sggc_collect: c2 in old_gen1 now free
 sggc_collect: c3 in old_gen1 now free
 sggc_collect: done
-  unused: 0, old_gen1: 4, old_gen2: 4, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 4, old_gen2: 4, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  60  [2]:   0  [3]:  63  [4]:   0  [5]:  19 
     next_free [0]: ---  [1]:  41  [2]: ---  [3]:  c0  [4]: ---  [5]:  83 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -1125,7 +1125,7 @@ ALLOC RETURNING 86
 ALLOCATING c, setting its contents to a and b
 ABOUT TO CALL sggc_collect IN ALLOC DUE TO 104 ALLOCATIONS
 sggc_collect: level 0
-  unused: 0, old_gen1: 4, old_gen2: 4, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 4, old_gen2: 4, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  60  [2]:   0  [3]:  63  [4]:   0  [5]:  19 
     next_free [0]: ---  [1]:  47  [2]: ---  [3]:  c1  [4]: ---  [5]:  89 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -1160,7 +1160,7 @@ sggc_collect: 46 now old_gen1
 sggc_look_at: 0 0
 sggc_look_at: 0 0
 sggc_collect: done
-  unused: 0, old_gen1: 10, old_gen2: 4, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 10, old_gen2: 4, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  57  [2]:   0  [3]:  62  [4]:   0  [5]:  17 
     next_free [0]: ---  [1]:  41  [2]: ---  [3]:  c1  [4]: ---  [5]:  89 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -1204,7 +1204,7 @@ ITERATION 23
 ALLOCATING a, leaving contents as nil
 ABOUT TO CALL sggc_collect IN ALLOC DUE TO 112 ALLOCATIONS
 sggc_collect: level 0
-  unused: 0, old_gen1: 10, old_gen2: 4, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 10, old_gen2: 4, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  57  [2]:   0  [3]:  62  [4]:   0  [5]:  17 
     next_free [0]: ---  [1]:  4c  [2]: ---  [3]:  c3  [4]: ---  [5]:  8f 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -1236,7 +1236,7 @@ sggc_collect: 4b now old_gen1
 sggc_look_at: 0 0
 sggc_look_at: 0 0
 sggc_collect: done
-  unused: 0, old_gen1: 15, old_gen2: 4, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 15, old_gen2: 4, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  54  [2]:   0  [3]:  61  [4]:   0  [5]:  16 
     next_free [0]: ---  [1]:  41  [2]: ---  [3]:  c1  [4]: ---  [5]:  8f 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -1277,7 +1277,7 @@ ALLOC RETURNING 4e
 ALLOCATING d, setting contents to 7777
 ABOUT TO CALL sggc_collect IN ALLOC DUE TO 120 ALLOCATIONS
 sggc_collect: level 1
-  unused: 0, old_gen1: 15, old_gen2: 4, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 15, old_gen2: 4, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  54  [2]:   0  [3]:  61  [4]:   0  [5]:  16 
     next_free [0]: ---  [1]:  4f  [2]: ---  [3]:  c3  [4]: ---  [5]:  95 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -1334,7 +1334,7 @@ sggc_collect: c0 in old_gen1 now free
 sggc_collect: c2 in old_gen1 now free
 sggc_collect: c4 in old_gen1 now free
 sggc_collect: done
-  unused: 0, old_gen1: 4, old_gen2: 4, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 4, old_gen2: 4, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  60  [2]:   0  [3]:  63  [4]:   0  [5]:  19 
     next_free [0]: ---  [1]:  41  [2]: ---  [3]:  c0  [4]: ---  [5]:  83 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -1378,7 +1378,7 @@ ALLOC RETURNING 46
 ALLOCATING b, setting contents to 100*i .. 100*i+9
 ABOUT TO CALL sggc_collect IN ALLOC DUE TO 128 ALLOCATIONS
 sggc_collect: level 0
-  unused: 0, old_gen1: 4, old_gen2: 4, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 4, old_gen2: 4, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  60  [2]:   0  [3]:  63  [4]:   0  [5]:  19 
     next_free [0]: ---  [1]:  47  [2]: ---  [3]:  c3  [4]: ---  [5]:  86 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -1410,7 +1410,7 @@ sggc_collect: 46 now old_gen1
 sggc_look_at: 0 0
 sggc_look_at: 0 0
 sggc_collect: done
-  unused: 0, old_gen1: 9, old_gen2: 4, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 9, old_gen2: 4, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  57  [2]:   0  [3]:  62  [4]:   0  [5]:  18 
     next_free [0]: ---  [1]:  41  [2]: ---  [3]:  c0  [4]: ---  [5]:  86 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -1451,7 +1451,7 @@ ALLOC RETURNING c3
 ALLOCATING a AGAIN, leaving contents as nil
 ABOUT TO CALL sggc_collect IN ALLOC DUE TO 136 ALLOCATIONS
 sggc_collect: level 0
-  unused: 0, old_gen1: 9, old_gen2: 4, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 9, old_gen2: 4, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  57  [2]:   0  [3]:  62  [4]:   0  [5]:  18 
     next_free [0]: ---  [1]:  49  [2]: ---  [3]:  c4  [4]: ---  [5]:  8c 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -1478,7 +1478,7 @@ sggc_collect: 48 now old_gen1
 sggc_look_at: 47 0
 sggc_look_at: 89 0
 sggc_collect: done
-  unused: 0, old_gen1: 13, old_gen2: 4, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 13, old_gen2: 4, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  55  [2]:   0  [3]:  61  [4]:   0  [5]:  17 
     next_free [0]: ---  [1]:  41  [2]: ---  [3]:  c0  [4]: ---  [5]:  86 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -1522,7 +1522,7 @@ ALLOC RETURNING 8c
 ALLOCATING c, setting its contents to a and b
 ABOUT TO CALL sggc_collect IN ALLOC DUE TO 144 ALLOCATIONS
 sggc_collect: level 2
-  unused: 0, old_gen1: 13, old_gen2: 4, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 13, old_gen2: 4, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  55  [2]:   0  [3]:  61  [4]:   0  [5]:  17 
     next_free [0]: ---  [1]:  4c  [2]: ---  [3]:  c4  [4]: ---  [5]:  8f 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -1599,7 +1599,7 @@ sggc_collect: c1 in old_gen1 now free
 sggc_collect: c2 in old_gen1 now free
 sggc_collect: c3 in old_gen1 now free
 sggc_collect: done
-  unused: 0, old_gen1: 6, old_gen2: 4, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 6, old_gen2: 4, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  59  [2]:   0  [3]:  63  [4]:   0  [5]:  18 
     next_free [0]: ---  [1]:  41  [2]: ---  [3]:  c1  [4]: ---  [5]:  83 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -1643,7 +1643,7 @@ ITERATION 31
 ALLOCATING a, leaving contents as nil
 ABOUT TO CALL sggc_collect IN ALLOC DUE TO 152 ALLOCATIONS
 sggc_collect: level 0
-  unused: 0, old_gen1: 6, old_gen2: 4, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 6, old_gen2: 4, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  59  [2]:   0  [3]:  63  [4]:   0  [5]:  18 
     next_free [0]: ---  [1]:  48  [2]: ---  [3]:  c3  [4]: ---  [5]:  89 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -1675,7 +1675,7 @@ sggc_collect: 47 now old_gen1
 sggc_look_at: 0 0
 sggc_look_at: 0 0
 sggc_collect: done
-  unused: 0, old_gen1: 11, old_gen2: 4, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 11, old_gen2: 4, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  56  [2]:   0  [3]:  62  [4]:   0  [5]:  17 
     next_free [0]: ---  [1]:  41  [2]: ---  [3]:  c1  [4]: ---  [5]:  89 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -1716,7 +1716,7 @@ ALLOC RETURNING 4c
 ALLOCATING d, setting contents to 7777
 ABOUT TO CALL sggc_collect IN ALLOC DUE TO 160 ALLOCATIONS
 sggc_collect: level 0
-  unused: 0, old_gen1: 11, old_gen2: 4, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 11, old_gen2: 4, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  56  [2]:   0  [3]:  62  [4]:   0  [5]:  17 
     next_free [0]: ---  [1]:  4d  [2]: ---  [3]:  c3  [4]: ---  [5]:  92 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -1743,7 +1743,7 @@ sggc_collect: 4c now old_gen1
 sggc_look_at: 4a 0
 sggc_look_at: 8f 0
 sggc_collect: done
-  unused: 0, old_gen1: 15, old_gen2: 4, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 15, old_gen2: 4, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  54  [2]:   0  [3]:  61  [4]:   0  [5]:  16 
     next_free [0]: ---  [1]:  41  [2]: ---  [3]:  c3  [4]: ---  [5]:  89 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -1787,7 +1787,7 @@ ALLOC RETURNING 4e
 ALLOCATING b, setting contents to 100*i .. 100*i+9
 ABOUT TO CALL sggc_collect IN ALLOC DUE TO 168 ALLOCATIONS
 sggc_collect: level 1
-  unused: 0, old_gen1: 15, old_gen2: 4, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 15, old_gen2: 4, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  54  [2]:   0  [3]:  61  [4]:   0  [5]:  16 
     next_free [0]: ---  [1]:  4f  [2]: ---  [3]:  c5  [4]: ---  [5]:  92 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -1849,7 +1849,7 @@ sggc_collect: c0 in old_gen1 now free
 sggc_collect: c1 in old_gen1 now free
 sggc_collect: c2 in old_gen1 now free
 sggc_collect: done
-  unused: 0, old_gen1: 5, old_gen2: 4, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 5, old_gen2: 4, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  59  [2]:   0  [3]:  63  [4]:   0  [5]:  19 
     next_free [0]: ---  [1]:  41  [2]: ---  [3]:  c0  [4]: ---  [5]:  83 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -1890,7 +1890,7 @@ ALLOC RETURNING c1
 ALLOCATING a AGAIN, leaving contents as nil
 ABOUT TO CALL sggc_collect IN ALLOC DUE TO 176 ALLOCATIONS
 sggc_collect: level 0
-  unused: 0, old_gen1: 5, old_gen2: 4, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 5, old_gen2: 4, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  59  [2]:   0  [3]:  63  [4]:   0  [5]:  19 
     next_free [0]: ---  [1]:  47  [2]: ---  [3]:  c2  [4]: ---  [5]:  8c 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -1917,7 +1917,7 @@ sggc_collect: 46 now old_gen1
 sggc_look_at: 45 0
 sggc_look_at: 86 0
 sggc_collect: done
-  unused: 0, old_gen1: 9, old_gen2: 4, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 9, old_gen2: 4, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  57  [2]:   0  [3]:  62  [4]:   0  [5]:  18 
     next_free [0]: ---  [1]:  41  [2]: ---  [3]:  c0  [4]: ---  [5]:  83 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -1961,7 +1961,7 @@ ALLOC RETURNING 8c
 ALLOCATING c, setting its contents to a and b
 ABOUT TO CALL sggc_collect IN ALLOC DUE TO 184 ALLOCATIONS
 sggc_collect: level 0
-  unused: 0, old_gen1: 9, old_gen2: 4, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 9, old_gen2: 4, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  57  [2]:   0  [3]:  62  [4]:   0  [5]:  18 
     next_free [0]: ---  [1]:  4b  [2]: ---  [3]:  c2  [4]: ---  [5]:  8f 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -1996,7 +1996,7 @@ sggc_collect: 4a now old_gen1
 sggc_look_at: 0 0
 sggc_look_at: 0 0
 sggc_collect: done
-  unused: 0, old_gen1: 15, old_gen2: 4, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 15, old_gen2: 4, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  54  [2]:   0  [3]:  61  [4]:   0  [5]:  16 
     next_free [0]: ---  [1]:  41  [2]: ---  [3]:  c2  [4]: ---  [5]:  8f 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -2040,7 +2040,7 @@ ITERATION 39
 ALLOCATING a, leaving contents as nil
 ABOUT TO CALL sggc_collect IN ALLOC DUE TO 192 ALLOCATIONS
 sggc_collect: level 2
-  unused: 0, old_gen1: 15, old_gen2: 4, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 15, old_gen2: 4, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  54  [2]:   0  [3]:  61  [4]:   0  [5]:  16 
     next_free [0]: ---  [1]:  4f  [2]: ---  [3]:  c5  [4]: ---  [5]:  92 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -2118,7 +2118,7 @@ sggc_collect: c0 in old_gen1 now free
 sggc_collect: c1 in old_gen1 now free
 sggc_collect: c4 in old_gen1 now free
 sggc_collect: done
-  unused: 0, old_gen1: 5, old_gen2: 4, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 5, old_gen2: 4, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  59  [2]:   0  [3]:  63  [4]:   0  [5]:  19 
     next_free [0]: ---  [1]:  41  [2]: ---  [3]:  c0  [4]: ---  [5]:  83 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -2159,7 +2159,7 @@ ALLOC RETURNING 46
 ALLOCATING d, setting contents to 7777
 ABOUT TO CALL sggc_collect IN ALLOC DUE TO 200 ALLOCATIONS
 sggc_collect: level 0
-  unused: 0, old_gen1: 5, old_gen2: 4, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 5, old_gen2: 4, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  59  [2]:   0  [3]:  63  [4]:   0  [5]:  19 
     next_free [0]: ---  [1]:  47  [2]: ---  [3]:  c1  [4]: ---  [5]:  89 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -2186,7 +2186,7 @@ sggc_collect: 46 now old_gen1
 sggc_look_at: 45 0
 sggc_look_at: 86 0
 sggc_collect: done
-  unused: 0, old_gen1: 9, old_gen2: 4, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 9, old_gen2: 4, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  57  [2]:   0  [3]:  62  [4]:   0  [5]:  18 
     next_free [0]: ---  [1]:  41  [2]: ---  [3]:  c1  [4]: ---  [5]:  83 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -2230,7 +2230,7 @@ ALLOC RETURNING 48
 ALLOCATING b, setting contents to 100*i .. 100*i+9
 ABOUT TO CALL sggc_collect IN ALLOC DUE TO 208 ALLOCATIONS
 sggc_collect: level 0
-  unused: 0, old_gen1: 9, old_gen2: 4, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 9, old_gen2: 4, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  57  [2]:   0  [3]:  62  [4]:   0  [5]:  18 
     next_free [0]: ---  [1]:  49  [2]: ---  [3]:  c4  [4]: ---  [5]:  89 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -2262,7 +2262,7 @@ sggc_collect: 48 now old_gen1
 sggc_look_at: 0 0
 sggc_look_at: 0 0
 sggc_collect: done
-  unused: 0, old_gen1: 14, old_gen2: 4, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 14, old_gen2: 4, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  54  [2]:   0  [3]:  61  [4]:   0  [5]:  17 
     next_free [0]: ---  [1]:  41  [2]: ---  [3]:  c1  [4]: ---  [5]:  89 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -2303,7 +2303,7 @@ ALLOC RETURNING c4
 ALLOCATING a AGAIN, leaving contents as nil
 ABOUT TO CALL sggc_collect IN ALLOC DUE TO 216 ALLOCATIONS
 sggc_collect: level 1
-  unused: 0, old_gen1: 14, old_gen2: 4, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 14, old_gen2: 4, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  54  [2]:   0  [3]:  61  [4]:   0  [5]:  17 
     next_free [0]: ---  [1]:  4e  [2]: ---  [3]:  c5  [4]: ---  [5]:  92 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -2358,7 +2358,7 @@ sggc_collect: c0 in old_gen1 now free
 sggc_collect: c2 in old_gen1 now free
 sggc_collect: c3 in old_gen1 now free
 sggc_collect: done
-  unused: 0, old_gen1: 4, old_gen2: 4, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 4, old_gen2: 4, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  60  [2]:   0  [3]:  63  [4]:   0  [5]:  19 
     next_free [0]: ---  [1]:  41  [2]: ---  [3]:  c0  [4]: ---  [5]:  83 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -2402,7 +2402,7 @@ ALLOC RETURNING 86
 ALLOCATING c, setting its contents to a and b
 ABOUT TO CALL sggc_collect IN ALLOC DUE TO 224 ALLOCATIONS
 sggc_collect: level 0
-  unused: 0, old_gen1: 4, old_gen2: 4, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 4, old_gen2: 4, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  60  [2]:   0  [3]:  63  [4]:   0  [5]:  19 
     next_free [0]: ---  [1]:  47  [2]: ---  [3]:  c1  [4]: ---  [5]:  89 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -2437,7 +2437,7 @@ sggc_collect: 46 now old_gen1
 sggc_look_at: 0 0
 sggc_look_at: 0 0
 sggc_collect: done
-  unused: 0, old_gen1: 10, old_gen2: 4, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 10, old_gen2: 4, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  57  [2]:   0  [3]:  62  [4]:   0  [5]:  17 
     next_free [0]: ---  [1]:  41  [2]: ---  [3]:  c1  [4]: ---  [5]:  89 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -2481,7 +2481,7 @@ ITERATION 47
 ALLOCATING a, leaving contents as nil
 ABOUT TO CALL sggc_collect IN ALLOC DUE TO 232 ALLOCATIONS
 sggc_collect: level 0
-  unused: 0, old_gen1: 10, old_gen2: 4, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 10, old_gen2: 4, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  57  [2]:   0  [3]:  62  [4]:   0  [5]:  17 
     next_free [0]: ---  [1]:  4c  [2]: ---  [3]:  c3  [4]: ---  [5]:  8f 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -2513,7 +2513,7 @@ sggc_collect: 4b now old_gen1
 sggc_look_at: 0 0
 sggc_look_at: 0 0
 sggc_collect: done
-  unused: 0, old_gen1: 15, old_gen2: 4, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 15, old_gen2: 4, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  54  [2]:   0  [3]:  61  [4]:   0  [5]:  16 
     next_free [0]: ---  [1]:  41  [2]: ---  [3]:  c1  [4]: ---  [5]:  8f 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -2554,7 +2554,7 @@ ALLOC RETURNING 4e
 ALLOCATING d, setting contents to 7777
 ABOUT TO CALL sggc_collect IN ALLOC DUE TO 240 ALLOCATIONS
 sggc_collect: level 2
-  unused: 0, old_gen1: 15, old_gen2: 4, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 15, old_gen2: 4, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  54  [2]:   0  [3]:  61  [4]:   0  [5]:  16 
     next_free [0]: ---  [1]:  4f  [2]: ---  [3]:  c3  [4]: ---  [5]:  95 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -2627,7 +2627,7 @@ sggc_collect: c0 in old_gen1 now free
 sggc_collect: c2 in old_gen1 now free
 sggc_collect: c4 in old_gen1 now free
 sggc_collect: done
-  unused: 0, old_gen1: 4, old_gen2: 4, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 4, old_gen2: 4, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  60  [2]:   0  [3]:  63  [4]:   0  [5]:  19 
     next_free [0]: ---  [1]:  41  [2]: ---  [3]:  c0  [4]: ---  [5]:  83 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -2671,7 +2671,7 @@ ALLOC RETURNING 46
 ALLOCATING b, setting contents to 100*i .. 100*i+9
 ABOUT TO CALL sggc_collect IN ALLOC DUE TO 248 ALLOCATIONS
 sggc_collect: level 0
-  unused: 0, old_gen1: 4, old_gen2: 4, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 4, old_gen2: 4, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  60  [2]:   0  [3]:  63  [4]:   0  [5]:  19 
     next_free [0]: ---  [1]:  47  [2]: ---  [3]:  c3  [4]: ---  [5]:  86 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -2703,7 +2703,7 @@ sggc_collect: 46 now old_gen1
 sggc_look_at: 0 0
 sggc_look_at: 0 0
 sggc_collect: done
-  unused: 0, old_gen1: 9, old_gen2: 4, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 9, old_gen2: 4, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  57  [2]:   0  [3]:  62  [4]:   0  [5]:  18 
     next_free [0]: ---  [1]:  41  [2]: ---  [3]:  c0  [4]: ---  [5]:  86 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -2732,7 +2732,7 @@ FINAL LENGTHS:  nil 0, a 2, b 10, c 2, d 1, e 2
 COLLECTING EVERYTHING EXCEPT nil
 
 sggc_collect: level 2
-  unused: 0, old_gen1: 9, old_gen2: 4, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 9, old_gen2: 4, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  57  [2]:   0  [3]:  62  [4]:   0  [5]:  18 
     next_free [0]: ---  [1]:  47  [2]: ---  [3]:  c3  [4]: ---  [5]:  89 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 
@@ -2770,7 +2770,7 @@ sggc_collect: 92 in old_gen1 now free
 sggc_collect: c1 in old_gen1 now free
 sggc_collect: c2 in old_gen1 now free
 sggc_collect: done
-  unused: 0, old_gen1: 0, old_gen2: 1, old_to_new: 0, to_look_at: 0
+  unused: 0, old_gen1: 0, old_gen2: 1, old_to_new: 0, to_look_at: 0, const: 0
   free_or_new [0]:   0  [1]:  64  [2]:   0  [3]:  64  [4]:   0  [5]:  21 
     next_free [0]: ---  [1]:  40  [2]: ---  [3]:  c0  [4]: ---  [5]:  80 
      end_free [0]: ---  [1]: ---  [2]: ---  [3]: ---  [4]: ---  [5]: --- 

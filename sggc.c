@@ -99,6 +99,7 @@ static struct set old_gen1;                   /* Survived collection once */
 static struct set old_gen2;                   /* Survived collection >1 time */
 static struct set old_to_new;                 /* May have old->new references */
 static struct set to_look_at;                 /* Not yet looked at in sweep */
+static struct set constants;                  /* Prealloc'd constant segments */
 
 
 /* NEXT FREE OBJECT AND END OF FREE OBJECTS FOR EACH KIND.  The next_free[k]
@@ -249,7 +250,8 @@ int sggc_init (int max_segments)
   set_init(&old_gen1,SET_OLD_GEN1);
   set_init(&old_gen2,SET_OLD_GEN2);
   set_init(&old_to_new,SET_OLD_TO_NEW);
-  set_init(&to_look_at,SET_TO_LOOK_AT);
+  set_init(&to_look_at,SET_TO_LOOK_AT_CONST);
+  set_init(&constants,SET_TO_LOOK_AT_CONST);
 
   /* Initialize to no free objects of each kind. */
 
@@ -558,12 +560,13 @@ fail:
 static void collect_debug (void)
 { int k;
   printf(
-  "  unused: %d, old_gen1: %d, old_gen2: %d, old_to_new: %d, to_look_at: %d\n",
+  "  unused: %d, old_gen1: %d, old_gen2: %d, old_to_new: %d, to_look_at: %d, const: %d\n",
        set_n_elements(&unused), 
        set_n_elements(&old_gen1), 
        set_n_elements(&old_gen2), 
        set_n_elements(&old_to_new),
-       set_n_elements(&to_look_at));
+       set_n_elements(&to_look_at),
+       set_n_elements(&constants));
   printf("  free_or_new");
   for (k = 0; k < SGGC_N_KINDS; k++) 
   { printf(" [%d]: %3d ",k,set_n_elements(&free_or_new[k]));
@@ -904,4 +907,70 @@ int sggc_youngest_generation (sggc_cptr_t from_ptr)
 int sggc_not_marked (sggc_cptr_t ptr)
 {
   return set_chain_contains (SET_UNUSED_FREE_NEW, ptr);
+}
+
+
+/* REGISTER A CONSTANT SEGMENT.  Called with the type and kind of the
+   segment, the set of bits indicating which objects exist in the
+   segment, and the segment's data and optionally aux1 and aux2 storage.
+
+   Returns a compressed pointer to the first object in the segment (at
+   offset zero), or SGGC_NO_OBJECT if a segment couldn't be allocated.
+
+   If called several times before any calls of sggc_alloc, the segments 
+   will have indexes 0, 1, 2, etc., which fact may be used when setting
+   up their contents if they reference each other. */
+
+sggc_cptr_t sggc_constant (sggc_type_t type, sggc_kind_t kind, set_bits_t bits,
+                           char *data
+#ifdef SGGC_AUX1_SIZE
+                         , char *aux1
+#endif
+#ifdef SGGC_AUX2_SIZE
+                         , char *aux2
+#endif
+)
+{
+  if (next_segment == maximum_segments)
+  { return SGGC_NO_OBJECT;
+  }
+
+  sggc_segment[next_segment] = sggc_malloc (sizeof **sggc_segment);
+  if (sggc_segment[next_segment] == NULL)
+  { return SGGC_NO_OBJECT;
+  }
+
+  set_index_t index = next_segment; 
+  struct set_segment *seg = SET_SEGMENT(index);
+  sggc_cptr_t v = SET_VAL(index,0);
+
+  next_segment += 1;
+
+  set_segment_init (seg);
+
+  set_add (&constants, v);
+  set_assign_segment_bits (&constants, v, bits);
+
+  if (kind_chunks[kind] == 0) /* big segment */
+  { seg->x.big.big = 1;
+  }
+  else /* small segment */
+  { seg->x.small.big = 0;
+    seg->x.small.kind = kind;
+  }
+
+  sggc_type[index] = type;
+  sggc_data[index] = data;
+# ifdef SGGC_AUX1_SIZE
+    sggc_aux1[index] = aux1;
+# endif
+# ifdef SGGC_AUX2_SIZE
+    sggc_aux2[index] = aux2;
+# endif
+    
+  if (SGGC_DEBUG) 
+  { printf("sggc_constant: first object in segment is %x\n", (unsigned)v);
+  }
+
+  return v;
 }

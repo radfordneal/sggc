@@ -18,21 +18,30 @@
    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
 
-/* COMMON PART OF TEST PROGRAMS.  Defines the sequence of allocations and
-   settings of objects, of trace output, and of checks for correctness. */
+/* COMMON PART OF TEST PROGRAMS OF SECOND SORT.  Defines the sequence
+   of allocations and settings of objects, of trace output, and of
+   checks for correctness. */
 
 { int i, j;
 
   printf ("STARTING TEST: segs = %d, iters = %d\n\n", segs, iters);
 
-  /* Initialize and allocate initial nil object, which should be represented
-     as zero. */
+  /* Initialize. */
 
   printf("ABOUT TO CALL sggc_init\n");
   sggc_init(segs);
-  printf("DONE sggc_init\n");
-  printf("ALLOCATING nil\n");
-  nil = alloc (0, 0);
+  printf("DONE sggc_init\n\n");
+
+  /* Make the nil object be a constant. */
+
+  printf("CREATING CONSTANT SEGMENT FOR nil\n");
+
+  static const int32_t length0 = 0;
+  static const int64_t seqno0 = 0;
+  
+  nil = sggc_constant(0, 0, 1, (char *) 0, (char *) &length0, (char *) &seqno0);
+
+  printf("CONSTANT OBJECT RETURNED: %x\n", (unsigned) nil);
 
   a = b = c = d = e = nil;
 

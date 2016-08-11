@@ -32,7 +32,8 @@
 #  define SET_OLD_GEN1 1      /* Objects that survived one GC */
 #  define SET_OLD_GEN2 2      /* Objects that survived more than one GC */
 #  define SET_OLD_TO_NEW 3    /* Objects maybe having old-to-new references */
-#  define SET_TO_LOOK_AT 4    /* Objects that still need to be looked at */
+#  define SET_TO_LOOK_AT_CONST 4 /* Objects that still need to be looked at,
+                                     or that are in a constant segment */
 
 
 /* EXTRA INFORMATION STORED IN A SET_SEGMENT STRUCTURE.  Putting it
