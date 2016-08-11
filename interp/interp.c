@@ -119,6 +119,8 @@ struct type_binding { ptr_t value, next; };  /* Binding, symbol is in aux1 */
 static const char symbol_chars[SGGC_CHUNKS_IN_SMALL_SEGMENT] =
   "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'?@%$=.:&+*^";
 
+static ptr_t symbols[SGGC_CHUNKS_IN_SMALL_SEGMENT];
+
 
 /* GLOBAL VARIABLES. */
 
@@ -173,6 +175,11 @@ char *sggc_aux1_read_only (sggc_kind_t kind)
 void sggc_find_root_ptrs (void)
 { 
   (void) sggc_look_at (nil);  
+
+  int i;
+  for (i = 0; symbol_chars[i]; i++)
+  { (void) sggc_look_at (symbols[i]);
+  }
 
   struct ptr_var *p;
   for (p = first_ptr_var; p != NULL; p = p->next)
@@ -312,9 +319,7 @@ static char read_char (void)
 static ptr_t read (char c)
 {
   if (strchr(symbol_chars,c))
-  { ptr_t p = alloc (TYPE_SYMBOL);
-    SYMBOL(p)->symbol = c;
-    return p;
+  { return symbols [strchr(symbol_chars,c) - symbol_chars];
   }
 
   if (c == '(')
@@ -331,6 +336,7 @@ static ptr_t read (char c)
 
     for (;;)
     { LIST(last) -> head = read(c);
+      OLD_TO_NEW_CHECK (last, LIST(last) -> head);
       c = read_char();
       if (c == ')')
       { PROT_END;
@@ -348,7 +354,7 @@ static ptr_t read (char c)
 }
 
 
-/* FIND THE LATEST BINDING OF A SYMBOL. */
+/* FIND THE LATEST BINDING OF A SYMBOL IN A SET OF BINDINGS. */
 
 static ptr_t find_binding (char sym, ptr_t b)
 {
@@ -363,6 +369,24 @@ static ptr_t find_binding (char sym, ptr_t b)
 }
 
 
+/* CHECK WHETHER TWO OBJECTS ARE EQUAL. */
+
+static int equal (ptr_t a, ptr_t b)
+{
+  if (TYPE(a) != TYPE(b)) 
+  { return 0;
+  }
+
+  switch (TYPE(a))
+  { case TYPE_NIL:    return 1;
+    case TYPE_SYMBOL: return SYMBOL(a)->symbol == SYMBOL(b)->symbol;
+    case TYPE_LIST:   return equal (LIST(a)->head, LIST(b)->head)
+                               && equal (LIST(a)->tail, LIST(b)->tail);
+    default: abort();
+  }
+}
+
+
 /* EVALUATE AN EXPRESSION. */
 
 static void error (int n)
@@ -372,51 +396,115 @@ static void error (int n)
 
 static ptr_t eval (ptr_t e, ptr_t b)
 {
-  ptr_t r;
+  ptr_t r = nil;
   PROT1(e);
   PROT2(b);
+  PROT3(r);
+
+  /* () evaluates to itself. */
 
   if (e == nil)
   { r = nil;
     goto done;
   }
 
+  /* Symbols evaluate to the result of looking them up in the bindings. */
+
   if (TYPE(e) == TYPE_SYMBOL)
-  {
-    r = BINDING (find_binding (SYMBOL(e)->symbol, b)) -> value;
+  { r = BINDING (find_binding (SYMBOL(e)->symbol, b)) -> value;
     goto done;
   }
+
+  /* Lists evaluate to the result of a special or defined function call. */
 
   if (TYPE(e) == TYPE_LIST)
   { 
     ptr_t f = LIST(e) -> head;
-    PROT3(f);
+    PROT4(f);
+
+    /* Check for special function. */
 
     if (TYPE(f) == TYPE_SYMBOL)
     { char sym = SYMBOL(f) -> symbol;
       ptr_t a1 = LIST(e) -> tail;
       ptr_t a2 = TYPE(a1) == TYPE_LIST ? LIST(a1) -> tail : nil;
       ptr_t a3 = TYPE(a2) == TYPE_LIST ? LIST(a2) -> tail : nil;
+      ptr_t a4 = TYPE(a3) == TYPE_LIST ? LIST(a3) -> tail : nil;
+      ptr_t n;
       switch (sym)
-      { case '\'':
+      { case '$':
+        { r = e;
+          goto done;
+        }
+        case '\'':
         { if (a1 == nil) error(__LINE__);
           r = LIST(a1) -> head;
           goto done;
         }
-        case '$':
-        { r = e;
+        case '@':
+        { if (a1 == nil || a2 == nil || a3 != nil) error(__LINE__);
+          if (TYPE(LIST(a1)->head) != TYPE_SYMBOL) error(__LINE__);
+          ptr_t g = find_binding (SYMBOL(LIST(a1)->head) -> symbol, b);
+          n = eval (LIST(a2)->head, b);
+          BINDING(g) -> value = n;
+          OLD_TO_NEW_CHECK (g, n);
+          r = LIST(a1) -> head;
+          goto done;
+        }
+        case '=':
+        { if (a1 == nil || a2 == nil || a3 != nil) error(__LINE__);
+          r = eval (LIST(a1)->head, b);  /* put in r for protection */
+          if (equal (r, eval(LIST(a2)->head, b)))
+          { r = alloc(TYPE_LIST);
+            LIST(r) -> head = f;  /* r will be (=) */
+          }
+          else
+          { r = nil;
+          }
+          goto done;
+        }
+        case '.':
+        { if (a1 == nil || a2 != nil) error(__LINE__);
+          n = eval (LIST(a1)->head, b);
+          if (TYPE(n) != TYPE_LIST) error(__LINE__);
+          r = LIST(n) -> head;
+          goto done;
+        }
+        case ':':
+        { if (a1 == nil || a2 != nil) error(__LINE__);
+          n = eval (LIST(a1)->head, b);
+          if (TYPE(n) != TYPE_LIST) error(__LINE__);
+          r = LIST(n) -> tail;
+          goto done;
+        }
+        case '&':
+        { if (a1 == nil || a2 == nil || a3 != nil) error(__LINE__);
+          r = alloc (TYPE_LIST);
+          n = eval (LIST(a1)->head, b);
+          LIST(r) -> head = n;
+          OLD_TO_NEW_CHECK (r, n);
+          n = eval (LIST(a2)->head, b);
+          if (n != nil && TYPE(n) != TYPE_LIST) error(__LINE__);
+          LIST(r) -> tail = n;
+          OLD_TO_NEW_CHECK (r, n);
           goto done;
         }
       }
     }
 
-    f = eval(f,b);
+    /* If function is not special, evaluate head to get function. */
 
-    e = LIST(e) -> tail;
+    f = eval(f,b);
 
     if (TYPE(f) != TYPE_LIST) error(__LINE__);
     if (TYPE(LIST(f)->head) != TYPE_SYMBOL) error(__LINE__);
     if (SYMBOL(LIST(f)->head)->symbol != '$') error(__LINE__);
+
+    /* Set e to be list of unevaluated arguments. */
+
+    e = LIST(e) -> tail;
+
+    /* Look for formal arguments. */
 
     ptr_t t = LIST(f) -> tail;
 
@@ -424,12 +512,15 @@ static ptr_t eval (ptr_t e, ptr_t b)
     ptr_t a = LIST(t) -> head;
     if (a != nil && TYPE(a) != TYPE_LIST) error(__LINE__);
 
+    /* Create bindings of formal arguments to the results of evaluating actual
+       arguments (with original bindings), */
+
     ptr_t old_b = b;
 
     while (a != nil)
     { if (TYPE (LIST(a)->head) != TYPE_SYMBOL) error(__LINE__);
       ptr_t n = alloc (TYPE_BINDING);
-      BINDING(n) -> next = b;
+      BINDING(n) -> next = b;  /* old-to-new check not needed */
       BOUND_SYMBOL(n) = SYMBOL(LIST(a)->head) -> symbol;
       b = n;
       if (e == nil) error(__LINE__);
@@ -442,6 +533,8 @@ static ptr_t eval (ptr_t e, ptr_t b)
     if (e != nil) error(__LINE__);
 
     printf("bindings: "); print(b); printf("\n");
+
+    /* Evaluate expressions in the body of the function, returning last. */
 
     r = nil;
     t = LIST(t) -> tail;
@@ -470,6 +563,26 @@ int main (void)
   sggc_init (10000);
 
   nil = alloc (TYPE_NIL);
+  if (nil != 0) abort();  /* want nil to be zero for auto initialization */
+
+  global_bindings = nil;
+
+  ptr_t n;
+  int i;
+
+  for (i = 0; symbol_chars[i]; i++)
+  { printf("CREATING SYMBOL %c (%d)\n",symbol_chars[i],i);
+    symbols[i] = alloc (TYPE_SYMBOL);
+    SYMBOL(symbols[i]) -> symbol = symbol_chars[i];
+    n = alloc (TYPE_BINDING);
+    BOUND_SYMBOL(n) = symbol_chars[i];
+    BINDING(n) -> next = global_bindings;
+    global_bindings = n;
+  }
+
+  sggc_collect(2);
+
+  /* The read / eval / print loop. */
 
   for (;;)
   { ptr_t expr = read(read_char());
