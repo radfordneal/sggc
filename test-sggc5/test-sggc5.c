@@ -45,7 +45,7 @@ typedef sggc_cptr_t ptr_t;
 
 
 /* TYPES FOR THIS APPLICATION.  Type 0 is a "nil" type.  Type 1 is a 
-   typical "dotted pair" type.  Type 3 is a typical numeric vector type. */
+   typical "dotted pair" type.  Type 2 is a typical numeric vector type. */
 
 struct type0 { int dummy; };
 struct type1 { ptr_t x, y; };

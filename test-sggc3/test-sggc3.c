@@ -46,7 +46,7 @@ typedef char *ptr_t;
 
 
 /* TYPES FOR THIS APPLICATION.  Type 0 is a "nil" type.  Type 1 is a 
-   typical "dotted pair" type.  Type 3 is a typical numeric vector type.
+   typical "dotted pair" type.  Type 2 is a typical numeric vector type.
    All types must start with a compressed "self" pointer. */
 
 struct type0 { sggc_cptr_t self; };
