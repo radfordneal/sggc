@@ -50,7 +50,8 @@
                        otherwise returns result of evaluing b (default ())
 
      (@ v e)        Assignment expression, evaluates e, then changes the most
-                       recent binding of symbol v to be the value of e
+                       recent binding of symbol v to be the value of e; value
+                       returned is v
 
      (% (x y) e)    Expression that creates bindings for x and y (initially ()),
                        then returns the result of evaluating e
@@ -72,9 +73,10 @@
 
   Bindings for all symbols exists globally, with initial values of ().
 
-  The interpreter repeatedly reads an expression, evaluates it, and prints
-  the value returned, until end-of-file.  Changes to the global bindings
-  from evaluation of one such expression may affect the evaluation of the next.
+  The interpreter repeatedly reads an expression, evaluates it, and
+  prints the value returned (after a sequence number and "\"), until
+  end-of-file.  Changes to the global bindings from evaluation of one
+  such expression may affect the evaluation of the next.  
 */
 
 
@@ -135,7 +137,7 @@ static struct ptr_var { ptr_t *var; struct ptr_var *next; } *first_ptr_var;
   struct ptr_var prot3 = { .var = &v, .next = first_ptr_var }; \
   first_ptr_var = &prot3;
 
-#define END_PROT (first_ptr_var = saved_first_ptr_var)
+#define PROT_END (first_ptr_var = saved_first_ptr_var)
 
 
 /* FUNCTIONS THAT THE APPLICATION NEEDS TO PROVIDE TO THE SGGC MODULE. */
@@ -253,6 +255,7 @@ static void print (ptr_t a)
         print (LIST(p)->head);
       }
       printf (")");
+      break;
     }
     case TYPE_BINDING:
     { ptr_t p;
@@ -264,6 +267,7 @@ static void print (ptr_t a)
         print (BINDING(p)->value);
       }
       printf ("]");
+      break;
     }
   }
 }
@@ -311,7 +315,20 @@ static ptr_t read (char c)
     { return nil;
     }
 
-    abort();
+    ptr_t list = alloc (TYPE_LIST);
+    ptr_t last = list;
+    PROT1(list);
+
+    for (;;)
+    { LIST(last) -> head = read(c);
+      c = read_char();
+      if (c == ')')
+      { PROT_END;
+        return list;
+      }
+      LIST(last) -> tail = alloc (TYPE_LIST);
+      last = LIST(last) -> tail;
+    }
   }
 
   printf ("Syntax error (2)\n");
@@ -323,6 +340,8 @@ static ptr_t read (char c)
 
 int main (void)
 {
+  int seqno = 1;
+
   sggc_init (10000);
 
   nil = alloc (TYPE_NIL);
@@ -332,9 +351,12 @@ int main (void)
 
   for (;;)
   { expr = read(read_char());
-    print(expr);
-    printf("\n");
+    printf ("%d \\ ", seqno++);
+    print (expr);
+    printf ("\n");
   }
+
+  PROT_END;
 
   return 0;
 }

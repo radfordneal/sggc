@@ -5,4 +5,4 @@ test-sggc*/test-sggc?
 test-set/test-set
 test-sggc*/o
 test-set/o
-test-interp/test-interp
+interp/interp
