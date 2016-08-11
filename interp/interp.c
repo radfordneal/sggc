@@ -40,8 +40,21 @@
        
    Expressions:
 
-     (f a b c)      Evaluate f, a, b, c, then call value of f with arguments
-                    a, b, c; f must not be a special symbol as listed below
+     ()             Nil evaluates to itself
+
+     a, b, c, ...   Symbols evaluate to their most recent binding value
+
+     (f a1 a2 ...)  Evaluate f, a1, a2, ..., then call value of f with arguments
+                    a1, a2, ...; f must not be a special symbol as listed below,
+                    and the value f evaluates to must have the $ described below
+
+     ($ (a1 a2 ...) e1 e2 ...)  As an expression, evaluates to itself; as a 
+                                function, takes arguments for a1, a2, ..., makes
+                                bindings for them, evaluates e1, e2, ..., and
+                                the last of them
+
+     (% (v1 v2 ...) e1 e2 ...)  Creates bindings for v1, v2, ... (initially ());
+                                evaluates e1, e2, ...; returns the last of them
 
      (' a)          Returns a unevaluated
 
@@ -51,16 +64,9 @@
 
      (@ v e)        Assignment expression, evaluates e, then changes the most
                        recent binding of symbol v to be the value of e; value
-                       returned is v
+                       returned is v (unevaluated)
 
-     (% (x y) e)    Expression that creates bindings for x and y (initially ()),
-                       then returns the result of evaluating e
-
-     ($ (x y) e)    As an expression, evaluates to itself; as a function, takes
-                       arguments for x and y, creating bindings for them, and
-                       returns the result of evaluating e
-
-     (= a b)        Returns '= if the results of evaluating a and b are equal,
+     (= a b)        Returns '(=) if the results of evaluating a and b are equal,
                        () if not
 
      (. a)          If a evaluates to a list, returns its first element
@@ -86,7 +92,7 @@
 
 typedef sggc_cptr_t ptr_t;
 
-#define OLD_TO_NEW_CHECK(old,new) sggc_old_to_new_check(old,new)
+#define OLD_TO_NEW_CHECK(from,to) sggc_old_to_new_check(from,to)
 #define TYPE(v) SGGC_TYPE(v)
 
 
@@ -116,8 +122,8 @@ static const char symbol_chars[SGGC_CHUNKS_IN_SMALL_SEGMENT] =
 
 /* GLOBAL VARIABLES. */
 
-static ptr_t nil;       /* The nil object, () */
-static ptr_t bindings;  /* Current bindings of symbols with values */
+static ptr_t nil;              /* The nil object, () */
+static ptr_t global_bindings;  /* Global bindings of symbols with values */
 
 
 /* SCHEME FOR PROTECTING POINTERS FROM GARBAGE COLLECTION. */
@@ -136,6 +142,10 @@ static struct ptr_var { ptr_t *var; struct ptr_var *next; } *first_ptr_var;
 #define PROT3(v) \
   struct ptr_var prot3 = { .var = &v, .next = first_ptr_var }; \
   first_ptr_var = &prot3;
+
+#define PROT4(v) \
+  struct ptr_var prot4 = { .var = &v, .next = first_ptr_var }; \
+  first_ptr_var = &prot4;
 
 #define PROT_END (first_ptr_var = saved_first_ptr_var)
 
@@ -169,7 +179,7 @@ void sggc_find_root_ptrs (void)
   { (void) sggc_look_at (*p->var);
   }
 
-  (void) sggc_look_at (bindings);  
+  (void) sggc_look_at (global_bindings);  
 }
 
 void sggc_find_object_ptrs (sggc_cptr_t cptr)
@@ -326,13 +336,128 @@ static ptr_t read (char c)
       { PROT_END;
         return list;
       }
-      LIST(last) -> tail = alloc (TYPE_LIST);
-      last = LIST(last) -> tail;
+      ptr_t n = alloc (TYPE_LIST);
+      LIST(last) -> tail = n;
+      OLD_TO_NEW_CHECK (last, n);
+      last = n;
     }
   }
 
-  printf ("Syntax error (2)\n");
+  printf ("Syntax error %d\n", __LINE__);
   exit(1);
+}
+
+
+/* FIND THE LATEST BINDING OF A SYMBOL. */
+
+static ptr_t find_binding (char sym, ptr_t b)
+{
+  while (b != nil)
+  { if (BOUND_SYMBOL(b) == sym)
+    { return b;
+    }
+    b = BINDING(b) -> next;
+  }
+
+  abort();
+}
+
+
+/* EVALUATE AN EXPRESSION. */
+
+static void error (int n)
+{ printf ("Evaluation error %d\n", n);
+  exit(2);
+}
+
+static ptr_t eval (ptr_t e, ptr_t b)
+{
+  ptr_t r;
+  PROT1(e);
+  PROT2(b);
+
+  if (e == nil)
+  { r = nil;
+    goto done;
+  }
+
+  if (TYPE(e) == TYPE_SYMBOL)
+  {
+    r = BINDING (find_binding (SYMBOL(e)->symbol, b)) -> value;
+    goto done;
+  }
+
+  if (TYPE(e) == TYPE_LIST)
+  { 
+    ptr_t f = LIST(e) -> head;
+    PROT3(f);
+
+    if (TYPE(f) == TYPE_SYMBOL)
+    { char sym = SYMBOL(f) -> symbol;
+      ptr_t a1 = LIST(e) -> tail;
+      ptr_t a2 = TYPE(a1) == TYPE_LIST ? LIST(a1) -> tail : nil;
+      ptr_t a3 = TYPE(a2) == TYPE_LIST ? LIST(a2) -> tail : nil;
+      switch (sym)
+      { case '\'':
+        { if (a1 == nil) error(__LINE__);
+          r = LIST(a1) -> head;
+          goto done;
+        }
+        case '$':
+        { r = e;
+          goto done;
+        }
+      }
+    }
+
+    f = eval(f,b);
+
+    e = LIST(e) -> tail;
+
+    if (TYPE(f) != TYPE_LIST) error(__LINE__);
+    if (TYPE(LIST(f)->head) != TYPE_SYMBOL) error(__LINE__);
+    if (SYMBOL(LIST(f)->head)->symbol != '$') error(__LINE__);
+
+    ptr_t t = LIST(f) -> tail;
+
+    if (t == nil) error(__LINE__);
+    ptr_t a = LIST(t) -> head;
+    if (a != nil && TYPE(a) != TYPE_LIST) error(__LINE__);
+
+    ptr_t old_b = b;
+
+    while (a != nil)
+    { if (TYPE (LIST(a)->head) != TYPE_SYMBOL) error(__LINE__);
+      ptr_t n = alloc (TYPE_BINDING);
+      BINDING(n) -> next = b;
+      BOUND_SYMBOL(n) = SYMBOL(LIST(a)->head) -> symbol;
+      b = n;
+      if (e == nil) error(__LINE__);
+      BINDING(b) -> value = eval (LIST(e)->head, old_b);
+      OLD_TO_NEW_CHECK (b, BINDING(b)->value);
+      e = LIST(e) -> tail;
+      a = LIST(a) -> tail;
+    }
+
+    if (e != nil) error(__LINE__);
+
+    printf("bindings: "); print(b); printf("\n");
+
+    r = nil;
+    t = LIST(t) -> tail;
+    while (t != nil)
+    { r = eval (LIST(t)->head, b);
+      t = LIST(t) -> tail;
+    }
+
+    goto done;
+  }
+
+  abort();
+
+done:
+  PROT_END;
+  return r;
 }
 
 
@@ -346,17 +471,12 @@ int main (void)
 
   nil = alloc (TYPE_NIL);
 
-  ptr_t expr = nil;
-  PROT1(expr);
-
   for (;;)
-  { expr = read(read_char());
+  { ptr_t expr = read(read_char());
     printf ("%d \\ ", seqno++);
-    print (expr);
+    print (eval (expr, global_bindings));
     printf ("\n");
   }
-
-  PROT_END;
 
   return 0;
 }
