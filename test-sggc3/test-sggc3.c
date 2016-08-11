@@ -40,7 +40,7 @@ typedef char *ptr_t;
 
 #define CPTR(p) (* (sggc_cptr_t *) (p))
 
-#define OLD_TO_NEW_CHECK(old,new) sggc_old_to_new_check(CPTR(old),CPTR(new))
+#define OLD_TO_NEW_CHECK(from,to) sggc_old_to_new_check(CPTR(from),CPTR(to))
 #define YOUNGEST(p) sggc_youngest_generation(CPTR(p))
 #define TYPE(p) SGGC_TYPE(CPTR(p))
 

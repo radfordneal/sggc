@@ -38,7 +38,7 @@
 
 typedef sggc_cptr_t ptr_t;
 
-#define OLD_TO_NEW_CHECK(old,new) sggc_old_to_new_check(old,new)
+#define OLD_TO_NEW_CHECK(from,to) sggc_old_to_new_check(from,to)
 #define YOUNGEST(v) sggc_youngest_generation(v)
 #define TYPE(v) SGGC_TYPE(v)
 
