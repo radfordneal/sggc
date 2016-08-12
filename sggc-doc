@@ -52,3 +52,64 @@ allocated objects without taking time for a full sweep.  The SGGC
 library does not decide when a garbage collection (at any of the three
 levels) will be done, but instead provides information allowing the
 application to implement a policy in this regard.
+
+
+USING SGGC IN AN APPLICATION
+
+To use SGGC, an application should create a sggc-app.h file, which
+must define some constants and declare some types (see below) and then
+include the sggc.h file.
+
+The following constants must be declared with #define in set-app.h,
+before including sggc.h:
+
+  SGGC_CHUNK_SIZE       Number of bytes in a data chunk.  Should be a 
+                        power of two for efficiency.
+
+  SGGC_N_TYPES          Number of types of objects.
+
+  SGGC_N_KINDS          Number of kinds of objects (at least SGGC_N_TYPES).
+
+  SGGC_KIND_CHUNKS      An array initializer giving the number of data 
+                        chunks for each kind of object, 0 if the kind uses
+                        big segments (with variable numbers of chunks).
+
+The following may optionally be defined, if auxiliary information 1 or
+auxiliary information 2 is to be used:
+
+  SGGC_AUX1_SIZE        Number of bytes in auxiliary information 1 
+                        (same for all kinds of objects).  Should be
+                        a power of two for efficiency
+
+  SGGC_AUX2_SIZE        Same, but for auxiliary information 2.
+
+  SGGC_AUX1_BLOCK_SIZE  Number of blocks of auxiliary information 1
+                        allocated at once (each block 
+
+  SGGC_AUX2_BLOCK_SIZE
+
+  SGGC_AUX1_READ_ONLY
+
+  SGGC_AUX2_READ_ONLY
+
+The following types must be defined in sggc-app.h:
+
+  sggc_length_t
+  sggc_nchunks_t
+
+The sggc.h file should then be included at the end of sggc-app.h.  It
+will define the following types:
+
+  sggc_index_t
+  sggc_cptr_t
+  sggc_type_t
+  sggc_kind_t
+
+The following constant is also defined in set.h:
+
+  SET_NO_OBJECT     A constant of type sggc_cptr_t that cannot be a
+                    reference to an actual object, and hence can be
+                    used to indicate "no object".
+
+Finally, the sggc.h file will declare prototypes (or macros, or static
+inline definitions) for the functions documented below.
