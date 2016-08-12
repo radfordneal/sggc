@@ -1,0 +1,26 @@
+# (E K) returns a list of primes no bigger than K (in binary) using the 
+# Sieve of Eratosthenes.
+
+(@E ($ (K)
+  (% (p f i h q m)
+    (@p (s ('(O I)) K))
+    (@f (: (d ('x) K)))
+    (@i ('(O I)))
+    (! (n i K)
+       (@h f)
+       (@q p)
+       (! p # more
+         (@f (:f))
+         (@p (:p))
+       )
+       (@f (r h))
+       (@p (r q))
+    )
+    (! p 
+      (? (= (.f) ('x)) (@m (& (.p) m)))
+      (@f (:f))
+      (@p (:p)) 
+    )
+    (r m)
+  )
+))

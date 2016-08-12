@@ -6,3 +6,5 @@
 (+ ('(O I O I I)) ('(O O I I)))
 
 (s ('(O I)) ('(O O O I)))
+
+(d ('q) ('(O O O I)))

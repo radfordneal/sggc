@@ -47,3 +47,14 @@
     (r s)
   )
 ))
+
+
+# (d x k) produces a list of k duplicates of x.  Uses I to increment a 
+# number, and n for not-equal comparison.
+
+(@d ($ (x k)
+  (% (i r)
+    (! (n i k) (@r (& x r)) (@i (I i)))
+    r
+  )
+))
