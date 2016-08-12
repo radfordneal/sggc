@@ -431,7 +431,7 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
   { if (set_contains (&old_gen1, v)) abort();
     if (set_contains (&old_gen2, v)) abort();
     if (set_contains (&old_to_new, v)) abort();
-    if (set_contains (&to_look_at, v)) abort();
+    if (set_chain_contains (SET_TO_LOOK_AT_CONST, v)) abort();
   }
 
   /* Allocate auxiliary information for segment, if not already there. */
