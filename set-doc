@@ -1,0 +1,60 @@
+FACILITY FOR MAINTAINING SETS OF OBJECTS IN SEGMENTS
+
+Copyright (c) 2016 Radford M. Neal.
+
+   This is part of the SGGC library, which is free software.  You can
+   redistribute it and/or modify it under the terms of the GNU General
+   Public License as published by the Free Software Foundation; either
+   version 2 of the License, or (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License along
+   with this program; if not, write to the Free Software Foundation, Inc.,
+   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+
+INTRODUCTION
+
+This set facility is designed to support the SGGC functions, but could
+be used for other purposes, and hence is documented separately here.
+
+The set facility manages sets of "values", each of which is in a
+"segment".  The number of possible values in a segment is fixed and in
+the present implementation is limited to a power of two between 8 and
+64 (larger values would require new coding and have a performance
+cost).  Not all the values allowed in a segment need exist.  Segments
+have integer indexes from 0 up, and values within a segment have
+offsets that are integers from 0 to the number of possible values in a
+segment minus one.  A value within a segment is identified by the pair
+of segment index and offset within segment, which must fit in 32 bits
+(though expanding this to 64 bits would be possible).
+
+Each set is associated with a "chain", with the restriction that two
+sets sharing the same chain must not both contain values that are in
+the same segment.  For some purposes, a chain can be regarded as a set
+that is the union of all sets sharing that chain.  The number of
+chains is intended to be small, and this number must be fixed at
+compile time.  The number of sets using these chains is not
+restricted, and sets could be dynamically created, though it is
+anticipated that the number of sets will be static and fairly small.
+
+For some operations, the values in a set are ordered.  This ordering
+always groups values within one segment together, and the ordering
+within a segment is always by numeric offset within the segment.
+
+Each segment is associated with a data structure that contains, for
+every chain, a bit vector indicating which values within the segment
+are members of some set using that chain, along with the index of a
+following segment containing further members of this set (or an end
+flag).  The structure describing a set contains the identifier of the
+chain it uses, the index of the first segment containing members of
+the set (or an end flag, if there are none), and a count of how many
+elements are in the set.
+
+Functions are provided for testing membership in a set, adding a value
+to a set, removing a value, and scanning values in a set in order,
+finding the number of elements in a set, and some other operations.
