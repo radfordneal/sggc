@@ -17,15 +17,3 @@
        y
   )
 ))
-
-
-# (I n) increments the number n, represented in binary as a list of O and I, 
-# with low-order bit first.
-
-(@I ($ (n)
-  (? n (? (= (.n) ('O)) (& ('I) (:n))
-                        (& ('O) (I (:n)))
-       )
-       ('(I))
-  )
-))
