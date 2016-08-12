@@ -711,7 +711,8 @@ void sggc_collect (int level)
   } while (set_first (&to_look_at, 0) != SGGC_NO_OBJECT);
 
   /* Remove objects that are still in the free_or_new set from the old 
-     generations that were collected.
+     generations that were collected.  Also remove them from the old-to-new
+     set.
 
      This could be greatly sped up with some special facility in the set
      module that would do it a segment at a time. */
@@ -723,6 +724,7 @@ void sggc_collect (int level)
       if (SGGC_DEBUG && remove) 
       { printf("sggc_collect: %x in old_gen2 now free\n",(unsigned)v);
       }
+      set_remove (&old_to_new, v);
       v = set_next (&old_gen2, v, remove);
     }
   }
@@ -734,6 +736,7 @@ void sggc_collect (int level)
       if (SGGC_DEBUG && remove) 
       { printf("sggc_collect: %x in old_gen1 now free\n",(unsigned)v);
       }
+      set_remove (&old_to_new, v);
       v = set_next (&old_gen1, v, remove);
     }
   }
