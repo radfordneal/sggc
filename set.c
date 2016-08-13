@@ -298,14 +298,14 @@ int set_chain_contains (int chain, set_value_t val)
 }
 
 
-/* FIND THE FIRST ELEMENT IN A SET.  Finds the first element of 'set' - ie, 
-   the first element in the first segment in its chain with any elements.
-   Returns SET_NO_VALUE if the set is empty.  If the last argument is
-   non-zero, the element returned is also removed from 'set'.
+/* FIND THE FIRST ELEMENT IN A SET.  Removal of the last value in a segment
+   allows that segment to be added to another set using the same chain.
 
    The linked list of segments for this set is first trimmed of any at 
    the front that have no elements set, to save time in any future searches.
-   This is also done after removing the first element.  */
+   This is also done after removing the first element, to ensure that a
+   segment no longer containing elements of this set can be used in another
+   set using the same chain.  */
 
 set_value_t set_first (struct set *set, int remove)
 { 
@@ -341,10 +341,7 @@ set_value_t set_first (struct set *set, int remove)
 }
 
 
-/* FIND THE NEXT ELEMENT IN A SET.  Returns the next element of 'set'
-   after 'val', which must be an element of 'set.  Returns SET_NO_VALUE 
-   if there are no elements past 'val'.  If the last argument is non-zero,
-   'val' is also removed from 'set' (but the element returned is not removed).
+/* FIND THE NEXT ELEMENT IN A SET.  
 
    If the linked list has to be followed to a later segment, any
    unused segments that are skipped are deleted from the list, to save

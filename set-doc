@@ -236,7 +236,19 @@ for use in an application, with prototypes (if functions) as shown:
 
   set_value_t set_first (struct set *set, int remove)
 
+    Finds the first element in 'set', returning SET_NO_VALUE if the
+    set is empty.  If the 'remove' argument is non-zero, the value
+    found is also removed from 'set'.  If the value is removed, and no
+    other values from the same segment are elements of 'set, the
+    values in this segment may afterward be added to another set that
+    uses the same chain as 'set'.
+
   set_value_t set_next (struct set *set, set_value_t val, int remove)
+
+    Returns the next element of 'set' after 'val', which must be an
+    element of 'set.  Returns SET_NO_VALUE if there are no elements
+    past 'val'.  If the last argument is non-zero, 'val' is also
+    removed from 'set' (but the element returned is not removed).
 
   set_bits_t set_first_bits (struct set *set)
 
@@ -250,3 +262,6 @@ for use in an application, with prototypes (if functions) as shown:
 
   set_value_t set_n_elements (struct set *set)
 
+    Returns the number of elements in 'set', zero if the set is empty.
+    The return type is set_value_t because this is guaranteed to be a
+    large enough integer type (unsigned).

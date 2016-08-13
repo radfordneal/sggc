@@ -18,11 +18,9 @@
    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
 
-/* This header file must be included from the set-app.h file provided
-   by the application using the set facility, after the definition of
-   SET_OFFSET_BITS and SET_CHAINS.  It will define struct set and
-   struct set_segment, which may be used in set-app.h after inclusion of
-   set.h. */
+/*   See set-doc for general documentation on this facility, and for the
+ *   documentation on functions that are part of the application interface.
+ */
 
 
 #include <stdint.h>
