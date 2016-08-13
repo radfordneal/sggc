@@ -22,6 +22,14 @@
 #include "set-app.h"
 
 
+/*   See set-doc for general documentation on this facility, and for the
+ *   documentation on functions that are part of the application interface.
+ */
+
+
+/* --------------------- UTILITIES USED IN THIS MODULE ---------------------- */
+
+
 /* DEBUGGING CHECKS.  These check validity of data, calling abort if
    the check fails.  Enabled only if SET_DEBUG is defined to be 1.
    This may be done with a compiler flag, in which case it isn't
@@ -43,12 +51,12 @@
                   && (set)->first != SET_END_OF_CHAIN) abort(); \
     if (SET_DEBUG && (set)->n_elements != 0 \
                   && (set)->first == SET_END_OF_CHAIN) abort(); \
-    if (!check_n_elements((set))) abort(); \
+    if (SET_DEBUG && !check_n_elements((set))) abort(); \
   } while (0)
 
 #define CHK_SET_INDEX(set,index) \
   do { \
-    if (!check_has_seg((set),(index))) abort(); \
+    if (SET_DEBUG && !check_has_seg((set),(index))) abort(); \
   } while (0)
 
 #define CHK_SEGMENT(seg,chain) \
@@ -94,6 +102,29 @@ static inline int bit_count (set_bits_t b)
 }
 
 
+/* REMOVE ANY EMPTY SEGMENTS AT THE FRONT OF A SET. */
+
+static inline void remove_empty (struct set *set)
+{
+  struct set_segment *seg;
+
+  CHK_SET(set);
+
+  while (set->first != SET_END_OF_CHAIN)
+  { 
+    seg = SET_SEGMENT(set->first);
+    CHK_SEGMENT(seg,set->chain);
+
+    if (seg->bits[set->chain] != 0)
+    { break;
+    }
+
+    set->first = seg->next[set->chain];
+    seg->next[set->chain] = SET_NOT_IN_CHAIN;
+  }
+}
+
+
 /* CHECK WHETHER THE COUNT OF NUMBER OF ELEMENTS IN A SET IS CORRECT. */
 
 static int check_n_elements (struct set *set)
@@ -132,22 +163,22 @@ static int check_has_seg (struct set *set, set_index_t index)
 }
 
 
-/* INITIALIZE A SET, AS EMPTY.  Initializes the set pointed to by
-   'set' to be an empty set, which will use 'chain' to link elements.
-   Note that the set must never contain elements with the same segment
-   index as elements of any other set using the same chain. */
+/* --------------------- FUNCTIONS USED BY APPLICATIONS --------------------- */
+
+
+/* INITIALIZE A SET, AS EMPTY. */
 
 void set_init (struct set *set, int chain)
 {
   CHK_CHAIN(chain);
+
   set->chain = chain;
   set->first = SET_END_OF_CHAIN;
   set->n_elements = 0;
 }
 
 
-/* INITIALIZE A SEGMENT, NOT CONTAINING ELEMENTS IN ANY CHAIN.  Must be called
-   before a segment is used in a set. */
+/* INITIALIZE A SEGMENT STRUCTURE. */
 
 void set_segment_init (struct set_segment *seg)
 {
@@ -159,54 +190,22 @@ void set_segment_init (struct set_segment *seg)
 }
 
 
-/* CHECK WHETHER A SET CONTAINS A SPECIFIED VALUE.  Returns 1 if 'val' is
-   an element of 'set', 0 if not.  For correct operation, 'val' must be
-   guaranteed to not be in a set using the same chain as 'set'.
+/* RETURN THE CHAIN USED BY A SET. */
 
-   This is implemented by just looking at the right bit in the bits for
-   the set's chain, within the segment structure for this value's index. */
-
-int set_contains (struct set *set, set_value_t val)
-{
-  set_index_t index = SET_VAL_INDEX(val);
-  set_offset_t offset = SET_VAL_OFFSET(val);
-  struct set_segment *seg = SET_SEGMENT(index);
-
-  CHK_SET(set);
-  CHK_SEGMENT(seg,set->chain);
-
-  return (seg->bits[set->chain] >> offset) & 1;
+int set_chain (struct set *set)
+{ 
+  return set->chain;
 }
 
 
-/* CHECK WHETHER A VALUE IS CONTAINED IN ANY SET USING A GIVEN CHAIN.
-   Returns 1 if 'val' is an element of any set using 'chain', 0 if not.
-
-   This is implemented by just looking at the right bit in the bits for
-   the chain. */
-
-int set_chain_contains (int chain, set_value_t val)
-{
-  set_index_t index = SET_VAL_INDEX(val);
-  set_offset_t offset = SET_VAL_OFFSET(val);
-  struct set_segment *seg = SET_SEGMENT(index);
-
-  CHK_SEGMENT(seg,chain);
-
-  return (seg->bits[chain] >> offset) & 1;
-}
-
-
-/* ADD A VALUE TO A SET.  Changes 'set' so that it contains 'val' as
-   an element.  Returns 1 if 'set' had already contained 'val', 0 if
-   not.  Note that 'val' must not be added to a set if that set shares
-   its chain with another set that contains elements in the same segment
-   as 'val'.
+/* ADD A VALUE TO A SET.  The value must not be in a segment with
+   members in a different set using the same chain (or previously,
+   if the segment may still be in the other set's chain).
 
    This is implemented by setting the right bit in the bits for the
    set's chain, within the segment structure for this value's index.
    This segment is then added to the linked list of segments for this
-   set if it is not there already. */
+   set if it is not there already, and the element count is updated. */
 
 int set_add (struct set *set, set_value_t val)
 {
@@ -220,7 +219,10 @@ int set_add (struct set *set, set_value_t val)
   set_bits_t b = seg->bits[set->chain];
   set_bits_t t = (set_bits_t)1 << offset;
 
-  if (b & t) return 1;
+  if (b & t)
+  { CHK_SET_INDEX(set,index);
+    return 1;
+  }
 
   if (seg->next[set->chain] == SET_NOT_IN_CHAIN)
   { seg->next[set->chain] = set->first;
@@ -237,16 +239,12 @@ int set_add (struct set *set, set_value_t val)
 }
 
 
-/* REMOVE A VALUE FROM A SET.  Changes 'set' so that it does not contain
-   'val' as an element.  Returns 1 if 'set' had previously contained 'val',
-   0 if not.  When set_remove is called, 'val' must either be in 'set' or
-   not be in any set using the same chain as 'set'.
+/* REMOVE A VALUE FROM A SET.  The value must not be in any other set using
+   the same chain.
 
    This is implemented by clearing the right bit in the bits for the set's 
-   chain, within the segment structure for this value's index.  Removing this
-   segment from the linked list of segments for this set if it is no longer
-   needed is deferred to when (if ever) it is looked at in a search, except
-   that it is removed now if it is at the front of the list. */
+   chain, within the segment structure for this value's index, and updating
+   the count of elements in the set. */
 
 int set_remove (struct set *set, set_value_t val)
 {
@@ -260,49 +258,48 @@ int set_remove (struct set *set, set_value_t val)
   set_bits_t b = seg->bits[set->chain];
   set_bits_t t = (set_bits_t)1 << offset;
 
-  if ((b & t) == 0) return 0;
+  if ((b & t) == 0)
+  { return 0;
+  }
 
   CHK_SET_INDEX(set,index);
 
   seg->bits[set->chain] &= ~t;
-  if (seg->bits[set->chain] == 0 && set->first == index)
-  { set->first = seg->next[set->chain];
-    seg->next[set->chain] = SET_NOT_IN_CHAIN;
-  }
-
   set->n_elements -= 1;
-
-  CHK_SET(set);
 
   return 1;
 }
 
 
-/* REMOVE ANY EMPTY SEGMENTS AT THE FRONT OF A SET. */
+/* CHECK WHETHER A SET, OR ANY SET USING THE SAME CHAIN, CONTAINS A VALUE. */
 
-static inline void remove_empty (struct set *set)
+int set_contains (struct set *set, set_value_t val)
 {
-  struct set_segment *seg;
-
   CHK_SET(set);
 
-  while (set->first != SET_END_OF_CHAIN)
-  { 
-    seg = SET_SEGMENT(set->first);
-    CHK_SEGMENT(seg,set->chain);
-
-    if (seg->bits[set->chain] != 0)
-    { break;
-    }
-
-    set->first = seg->next[set->chain];
-    seg->next[set->chain] = SET_NOT_IN_CHAIN;
-  }
+  return set_chain_contains (set->chain, val);
 }
 
 
-/* FIND THE FIRST ELEMENT IN A SET.  Finds an element of 'set', namely
-   the first in the first segment in its chain with any elements.
+/* CHECK WHETHER A VALUE IS AN ELEMENT OF ANY SET USING A GIVEN CHAIN.
+
+   This is implemented by just looking at the right bit in the bits for
+   the chain. */
+
+int set_chain_contains (int chain, set_value_t val)
+{
+  set_index_t index = SET_VAL_INDEX(val);
+  set_offset_t offset = SET_VAL_OFFSET(val);
+  struct set_segment *seg = SET_SEGMENT(index);
+
+  CHK_SEGMENT(seg,chain);
+
+  return (seg->bits[chain] >> offset) & 1;
+}
+
+
+/* FIND THE FIRST ELEMENT IN A SET.  Finds the first element of 'set' - ie, 
+   the first element in the first segment in its chain with any elements.
    Returns SET_NO_VALUE if the set is empty.  If the last argument is
    non-zero, the element returned is also removed from 'set'.
 

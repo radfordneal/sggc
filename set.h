@@ -105,6 +105,7 @@ struct set
 
 void set_init (struct set *set, int chain);
 void set_segment_init (struct set_segment *seg);
+int set_chain (struct set *set);
 int set_contains (struct set *set, set_value_t val);
 int set_chain_contains (int chain, set_value_t val);
 int set_add (struct set *set, set_value_t val);
