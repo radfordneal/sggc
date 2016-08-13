@@ -1,0 +1,69 @@
+SGGC - A LIBRARY SUPPORTING SEGMENTED GENERATIONAL GARBAGE COLLECTION
+       Internals documentation
+
+Copyright (c) 2016 Radford M. Neal.
+
+   The SGGC library is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2 of the License, or
+   (at your option) any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License along
+   with this program; if not, write to the Free Software Foundation, Inc.,
+   51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+
+
+INTRODUCTION
+
+SGGC implements a "mark and sweep" garbage collector, modified to use
+several "generations", so that a complete mark and sweep is done only
+occassionally.
+
+
+HANDLING OLD-TO-NEW REFERENCES
+
+Actions to do for old-to-new references when collecting at each level.
+
+level 0:
+
+    gen    gen
+   from     to      keep?  stop?  look?
+
+      2      0       yes     no    yes
+      2      1       yes     no     no (won't anyway)
+      2      2        no     no     no (won't anyway)
+
+      1      0        no     no    yes
+      1      1        no     no     no (won't anyway)
+      1      2        no     no     no (won't anyway)
+
+level 1:
+
+    gen    gen
+   from     to      keep?  stop?  look?
+
+      2      0       yes     no    yes
+      2      1        no     no    yes
+      2      2        no     no     no (won't anyway)
+
+      1      0       yes    yes     no
+      1      1        no     no     no
+      1      2        no     no     no (won't anyway)
+
+level 2:
+
+    gen    gen
+   from     to      keep?  stop?  look?
+
+      2      0       yes     no     no
+      2      1        no     no     no
+      2      2        no     no     no
+
+      1      0       yes    yes     no
+      1      1        no     no     no
+      1      2        no     no     no

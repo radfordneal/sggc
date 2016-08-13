@@ -1,4 +1,5 @@
-FACILITY FOR MAINTAINING SETS OF OBJECTS IN SEGMENTS
+SGGC - A LIBRARY SUPPORTING SEGMENTED GENERATIONAL GARBAGE COLLECTION
+       Application interface of the facility for maintaining sets of objects
 
 Copyright (c) 2016 Radford M. Neal.
 
