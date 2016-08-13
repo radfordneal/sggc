@@ -8,11 +8,13 @@ This software is under development, and not yet ready for use.
 The SGGC library provides a facility for allocating and automatically
 freeing objects, such as is needed in interpreters for languages such
 as R.  The interface to this facility is documented in sggc-doc.
+Internal documentation is in sggc-imp.
 
-Tests of SGGC are in test-sggc1, test-sggc2, etc.  As a higher-level
-test, also useful for performance assessment, an interpreter for a toy
-Lisp-like language is in interp, along with example programs in this
-language.
+Some tests of SGGC are in test-sggc1, test-sggc2, etc.
+
+As a higher-level test, also useful for performance assessment, an
+interpreter for a toy Lisp-like language is in interp, along with
+example programs in this language.
 
 A facility used by SGGC for managing sets of values is documented in
 set-doc, and tested in test-set.
