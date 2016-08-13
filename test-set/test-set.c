@@ -44,9 +44,14 @@ int main (void)
   { set_init (&set[i], i<SET_CHAINS ? i : SET_CHAINS-1);
   }
 
-  /* Loop to do commands from script.  Most commands have the form
+  /* Loop to do commands from script.  Commands are:
 
-        command-name  set  index  offset  
+        c  set  index  offset        set_contains
+        a  set  index  offset        set_add
+        r  set  index  offset        set_remove
+        b  set  index  offset        set_assign_segment_bits (to 7)
+        n  set  index  offset        set_move_next (to other of set 1/2)
+        m  set                       set_move_first (to other of set 1/2)
   */
 
   for (;;)
@@ -66,16 +71,16 @@ int main (void)
     fscanf(f,"%[^\n]",s);
 
     if (c == 'm')
-    { if (r != 3)
+    { if (r != 2)
       { printf("Wrong number of arguments\n");
       }
-      printf("%c %d %d %s\n",c,i,x,s);
+      printf("%c %d   %s\n",c,i,s);
     }
     else
     { if (r != 4)
       { printf("Wrong number of arguments\n");
       }
-      printf("%c %d %d %d%s\n",c,i,x,o,s);
+      printf("%c %d %d %d  %s\n",c,i,x,o,s);
     }
 
     if (i < 0 || i >= N_SET) 
@@ -83,13 +88,7 @@ int main (void)
       continue;
     }
 
-    if (c == 'm')
-    { if (x < 0 || x >= N_SET) 
-      { printf("Invalid set\n");
-        continue;
-      }
-    }
-    else
+    if (c != 'm')
     { if (x < 0 || x >= N_SEG) 
       { printf("Invalid segment\n");
         continue;
@@ -104,19 +103,27 @@ int main (void)
 
     switch (c) 
     { case 'c': 
-      { printf("result: %d\n",set_contains(&set[i],SET_VAL(x,o)));
+      { printf("result: %d\n", set_contains (&set[i], SET_VAL(x,o)));
         break;
       }
       case 'a':
-      { printf("result: %d\n",set_add(&set[i],SET_VAL(x,o)));
+      { printf("result: %d\n", set_add (&set[i], SET_VAL(x,o)));
         break;
       }
       case 'r':
-      { printf("result: %d\n",set_remove(&set[i],SET_VAL(x,o)));
+      { printf("result: %d\n", set_remove (&set[i], SET_VAL(x,o)));
+        break;
+      }
+      case 'b':
+      { set_assign_segment_bits (&set[i], SET_VAL(x,o), 7);
+        break;
+      }
+      case 'n':
+      { set_move_next (&set[i], SET_VAL(x,o), &set [i==1 ? 2 : 1]);
         break;
       }
       case 'm':
-      { set_move_first (&set[i], &set[x]);
+      { set_move_first (&set[i], &set [i==1 ? 2 : 1]);
         break;
       }
       default: 
