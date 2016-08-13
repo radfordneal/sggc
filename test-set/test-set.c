@@ -44,8 +44,15 @@ int main (void)
   { set_init (&set[i], i<SET_CHAINS ? i : SET_CHAINS-1);
   }
 
+  /* Loop to do commands from script.  Most commands have the form
+
+        command-name  set  index  offset  
+  */
+
   for (;;)
   { 
+    /* Read a command. */
+
     printf("> ");
     c = ' ';
     i = x = o = -1;
@@ -93,6 +100,8 @@ int main (void)
       }
     }
 
+    /* Do the command. */
+
     switch (c) 
     { case 'c': 
       { printf("result: %d\n",set_contains(&set[i],SET_VAL(x,o)));
@@ -116,9 +125,12 @@ int main (void)
       }
     }
 
+    /* Show the contents of all the sets. */
+
     for (i = 0; i<N_SET; i++)
     { set_value_t v;
-      printf("Set %d, %d elements:",i,set_n_elements(&set[i]));
+      printf ("Set %d (chain %d), %d elements:",
+              i, set_chain(&set[i]), set_n_elements(&set[i]));
       v = set_first (&set[i], 0);
       if (v == SET_NO_VALUE)
       { printf(" empty\n");
