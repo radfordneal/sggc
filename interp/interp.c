@@ -403,9 +403,11 @@ static void error (int n)
 static ptr_t eval (ptr_t e, ptr_t b)
 {
   ptr_t r = nil;
+  ptr_t f = nil;
   PROT1(e);
   PROT2(b);
   PROT3(r);
+  PROT4(f);
 
   /* () evaluates to itself. */
 
@@ -425,8 +427,7 @@ static ptr_t eval (ptr_t e, ptr_t b)
 
   if (TYPE(e) == TYPE_LIST)
   { 
-    ptr_t f = LIST(e) -> head;
-    PROT4(f);
+    f = LIST(e) -> head;
 
     /* Check for special function. */
 
@@ -510,7 +511,7 @@ static ptr_t eval (ptr_t e, ptr_t b)
           r = eval (LIST(a1)->head, b);  /* put in r for protection */
           if (equal (r, eval(LIST(a2)->head, b)))
           { r = alloc(TYPE_LIST);
-            LIST(r) -> head = f;  /* r will be (=) */
+            LIST(r) -> head = f;  /* r will be (=), no old-to-new check req'd */
           }
           else
           { r = nil;
