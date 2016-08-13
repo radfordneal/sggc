@@ -682,7 +682,7 @@ void sggc_collect (int level)
      any pointers they contain (which may add to the to_look_at set),
      until there are no more in the set. */
 
-# ifdef SGGC_AFTER_COLLECT
+# ifdef SGGC_AFTER_MARKING
   int rep = 1;
 # endif
 
@@ -704,8 +704,8 @@ void sggc_collect (int level)
       sggc_find_object_ptrs (v);
     }
 
-#   ifdef SGGC_AFTER_COLLECT
-    sggc_after_collect (level, rep++);
+#   ifdef SGGC_AFTER_MARKING
+    sggc_after_marking (level, rep++);
 #   endif
 
   } while (set_first (&to_look_at, 0) != SGGC_NO_OBJECT);

@@ -110,8 +110,8 @@ char *sggc_aux1_read_only (sggc_kind_t kind);
 char *sggc_aux2_read_only (sggc_kind_t kind);
 #endif
 
-#ifdef SGGC_AFTER_COLLECT
-void sggc_after_collect (int level, int rep);
+#ifdef SGGC_AFTER_MARKING
+void sggc_after_marking (int level, int rep);
 #endif
 
 /* FUNCTIONS USED BY THE APPLICATION. */
