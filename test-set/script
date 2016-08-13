@@ -23,5 +23,5 @@ r 2 5 0    remove something, which will result in zero bits at front
 c 2 2 58   check that things removed are no longer there
 c 2 5 0 
 a 1 7 7    add another element, which will create new first segment
-m 1 2 move first segment of set 1 to set 2
-m 1 2 and move first segment of set 1 to set 2 again
+m 1 2      move first segment of set 1 to set 2
+m 1 2      and move first segment of set 1 to set 2 again
