@@ -803,6 +803,25 @@ void sggc_collect (int level)
     }
   }
 
+  /* Code below can be enabled to wipe out data in free objects, to help
+     debugging.  Assumes a chunk can hold two sggc_cptr_t values. */
+
+  if (1)
+  { for (k = 0; k < SGGC_N_KINDS; k++)
+    { if (kind_chunks[k] != 0)
+      { sggc_cptr_t p;
+        for (p = set_first (&free_or_new[k], 0); 
+             p != SGGC_NO_OBJECT;
+             p = set_next (&free_or_new[k], p, 0))
+        { if (SGGC_DATA(p) != NULL)
+          { * ((sggc_cptr_t *) SGGC_DATA(p) + 0) = SGGC_NO_OBJECT;
+            * ((sggc_cptr_t *) SGGC_DATA(p) + 1) = SGGC_NO_OBJECT;
+          }
+        }
+      }
+    }
+  }
+
   if (SGGC_DEBUG) printf("sggc_collect: done\n");
   if (SGGC_DEBUG) collect_debug();
 }
