@@ -412,9 +412,8 @@ set_value_t set_next (struct set *set, set_value_t val, int remove)
 }
 
 
-/* RETURN THE BITS INDICATING MEMBERSHIP FOR THE FIRST SEGMENT OF A SET.  
-   First removes empty segments at the front.  Returns zero if the set
-   is empty (which will not be returned otherwise). */
+/* RETURN THE BITS INDICATING MEMBERSHIP FOR THE FIRST SEGMENT OF A SET. 
+   First removes empty segments at the front. */
 
 set_bits_t set_first_bits (struct set *set)
 {
@@ -467,10 +466,7 @@ void set_assign_segment_bits (struct set *set, set_value_t val, set_bits_t b)
 }
 
 
-/* MOVE THE FIRST SEGMENT OF A SET TO ANOTHER SET.  Adds the first
-   segment of 'src' as the first element of 'dst', removing it from
-   'src'.  It is an error for 'src' to be empty, or for its first
-   segment to be empty, or for 'src' and 'dst' to use different chains. */
+/* MOVE THE FIRST SEGMENT OF A SET TO ANOTHER SET. */
 
 void set_move_first (struct set *src, struct set *dst)
 {
@@ -483,6 +479,9 @@ void set_move_first (struct set *src, struct set *dst)
 
   if (src->chain != dst->chain) abort();
   if (src->first == SET_END_OF_CHAIN) abort();
+
+  remove_empty(src);
+  remove_empty(dst);
 
   index = src->first;
   seg = SET_SEGMENT(index);
@@ -503,11 +502,7 @@ void set_move_first (struct set *src, struct set *dst)
 }
 
 
-/* MOVE THE SEGMENT AFTER THAT CONTAINING AN ELEMENT TO ANOTHER SET.
-   Adds the first segment after 'val' of 'src' as the first element of
-   'dst', removing it from 'src'.  It is an error for there to be no
-   next segment, or for the next segment to be empty. or for 'val' and
-   'dst' to use different chains. */
+/* MOVE THE SEGMENT AFTER THAT CONTAINING AN ELEMENT TO ANOTHER SET. */
 
 void set_move_next (struct set *src, set_value_t val, struct set *dst)
 {

@@ -247,21 +247,50 @@ for use in an application, with prototypes (if functions) as shown:
 
     Returns the next element of 'set' after 'val', which must be an
     element of 'set.  Returns SET_NO_VALUE if there are no elements
-    past 'val'.  If the last argument is non-zero, 'val' is also
+    past 'val'.  If the 'remove' argument is non-zero, 'val' is also
     removed from 'set' (but the element returned is not removed).
 
   set_bits_t set_first_bits (struct set *set)
 
+    Returns the bit vector indicating membership of all values in the
+    segment of the first element in 'set', with the low-order bit
+    being for the value with offset zero.  If 'set' is empty, the
+    value returned is zero, which will not be returned otherwise.
+
   set_bits_t set_segment_bits (struct set *set, set_value_t val)
+
+    Returns the bit vector indicating membership in 'set' for all
+    values in the segment containing 'val' (which must be an element
+    of 'set').
 
   void set_assign_segment_bits (struct set *set, set_value_t val, set_bits_t b)
 
+    Sets the bit vector indicating membership in 'set' for the segment
+    containing 'val' to the bit vector 'b'.  When set_assign_segment_bits
+    is called, 'val' must already be an element of 'set'.  This operation
+    has the effect of adding or removing values for which the bit at 
+    their offset position differs between 'b' and the previous vector of
+    bits.
+
   void set_move_first (struct set *src, struct set *dst)
 
+    Moves elements in the first segment of one set to another set that
+    uses the same chain.  All elements of 'src' that are in the
+    segment containing the first element of 'src' are moved to 'dst'
+    (becoming its first elements).  It is an error for 'src' to be
+    empty, or for 'src' and 'dst' to use different chains.
+
   void set_move_next (struct set *src, set_value_t val, struct set *dst)
+
+    Moves elements of 'src' in the segment after the segment
+    containing 'val' to the front of 'dst'.  It is an error for there
+    to be no elements of 'src' after 'val' that are in a different
+    segment from 'val', or for 'src' and 'dst' to use different chains.
 
   set_value_t set_n_elements (struct set *set)
 
     Returns the number of elements in 'set', zero if the set is empty.
     The return type is set_value_t because this is guaranteed to be a
     large enough integer type (unsigned).
+
+All the functions above take O(1) amortized time.
