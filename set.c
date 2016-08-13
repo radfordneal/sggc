@@ -35,6 +35,8 @@
    This may be done with a compiler flag, in which case it isn't
    overridden here. */
 
+static int check_n_elements (struct set *set);
+
 #ifndef SET_DEBUG
 #define SET_DEBUG 0
 #endif
