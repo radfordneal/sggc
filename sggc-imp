@@ -23,7 +23,7 @@ INTRODUCTION
 SGGC manages "objects", containing data and other information, using a
 "mark and sweep" garbage collector, modified to use several
 "generations", so that a complete mark and sweep is done only
-occassionally.  The design of SGGC is meant to allow an application to
+occasionally.  The design of SGGC is meant to allow an application to
 use a memory-efficient storage scheme, while also providing fast
 access to data.
 
@@ -41,7 +41,7 @@ knowledge of which is assumed in this document.
 INITIALIZATION
 
 Currently, the maximum number of segments that may be used is fixed at
-initilization time, when several arrays of that size are allocated.
+initialization time, when several arrays of that size are allocated.
 This maximum is limited to 2^26-1, but always allocating space for
 this maximum would occupy an excessive amount of virtual memory on
 some systems.

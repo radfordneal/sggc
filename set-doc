@@ -142,7 +142,7 @@ SETS SHARING THE SAME CHAIN
 To keep the size of a segment structure small, it is desirable for the
 number of chains that are used for sets to be small.  Many sets can
 share the same chain provided certain restrictions and assumptions are
-satisified.
+satisfied.
 
 First, two sets sharing the same chain must not, at the same time,
 contain elements that are values in the same segment.  (This is

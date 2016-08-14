@@ -110,7 +110,7 @@ use during a garbage collection:
 
   SGGC_AFTER_MARKING    If defined (as anything), the application will
                         provide an sggc_after_marking procedure to call
-                        after preliminary marking of objets (see below).
+                        after preliminary marking of objects (see below).
 
 The following types must be defined in sggc-app.h:
 
