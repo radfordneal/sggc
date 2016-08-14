@@ -56,7 +56,7 @@ arrays.
 
 REPRESENTATION OF DATA AND OTHER INFORMATION FOR AN OBJECT
 
-The data and other information for an object consists of a single-byte
+The data and other information for an object consist of a single-byte
 "type" for the object, a main data part, and optionally up to two
 pieces of auxiliary information.
 
@@ -79,7 +79,7 @@ The number of chunks of data associated with an object might sometimes
 be more than required, in order to limit the number of "kinds", which
 may allow better reuse of data space, or because the application
 wishes to allow for the possibility that the amount of data needed for
-an object could increase.
+an object could increase during its lifetime.
 
 Objects with data of indefinite size are put in "big" segments, which
 are of a kind for which the number of chunks is specified as zero
@@ -93,13 +93,14 @@ available.
 Small segments may contain more than one object, and are of a kind
 with a specified number of chunks of data for an object, which will be
 between 1 and SGGC_CHUNKS_IN_SMALL_SEGMENT, currently 64.  The data
-for all objects in the segment is allocated as a contiguous block.  If
-the number of chunks of data for the kind is 1, a segment of this kind
-can contain up to 64 objects, which will have offsets from 0 to 63.
-The number of possible objects in a segment is reduced if they require
+for all objects in the segment is allocated as a contiguous block of
+SGGC_CHUNK_SIZE times SGGC_CHUNKS_IN_SMALL_SEGMENT bytes.  If the
+number of chunks of data for the kind is 1, a segment of this kind can
+contain up to 64 objects, which will have offsets from 0 to 63.  The
+number of possible objects in a segment is reduced if they require
 more than one chunk for their data - eg, a segment of a kind for which
 the number of chunks of data is 5 will be able to store only 12
-objects, which are given offsets of 0, 5, 10, 15, ..., 60.  Currently,
+objects, which are given offsets of 0, 5, 10, 15, ..., 55.  Currently,
 there will be 4 chunks of unused space at the end of the data space
 for such a segment.  This is done in order to keep the data for all
 small segments the same size, which aids reuse.
@@ -110,9 +111,9 @@ the data for small segments is 2^26-1 times 64 times SGGC_CHUNK_SIZE
 SGGC_CHUNK_SIZE might be 16, which would give a limit of about 32
 Gigabytes of data in small segments.
 
-With this scheme for assigning offsets to objects, finding address of
-the data for an object from a compressed pointer to it can be done as
-follows:
+With this scheme for assigning offsets to objects, finding the address
+of the data for an object from a compressed pointer to it can be done
+as follows:
 
   1) Find the address of the data block for the segment by indexing
      an array of pointers by the index part of the compressed pointer.
@@ -123,14 +124,15 @@ follows:
      power of two.
 
 Step (1) will involve fetching the pointer to the array of data block
-pointers (which may sometimes have previously been fetched into a
-register), shifting the compressed pointer right to obtain the index
-part, and then doing an indexed fetch of the data block address.  Step
-(2) will involve masking out the offset part of the compressed
-pointer, shifting it to perform the multiplication by SGGC_CHUNK_SIZE,
-and then adding it to the data block address.  The last addition (and
-perhaps the multiplication) may in some cases be merged with further
-address arithmetic that is needed to obtain a particular item from the
+pointers (which may often have previously been fetched into a
+register, since it will be needed for many accesses), shifting the
+compressed pointer right to obtain the index part, and then doing an
+indexed fetch of the data block address.  Step (2) will involve
+masking out the offset part of the compressed pointer, shifting it to
+perform the multiplication by SGGC_CHUNK_SIZE, and then adding it to
+the data block address.  The last addition (and perhaps the
+multiplication) may in some cases be merged with further address
+arithmetic that is needed to obtain a particular item from the
 object's data.
 
 In future, the masking operation may be eliminated by modifying the
@@ -153,6 +155,7 @@ steps (1) and (2) above, except that SGGC_CHUNK_SIZE is replaced by
 SGGC_AUX1_SIZE.  Auxiliary information may often consist of a single
 small data item, in which case the processor may have indexing
 instructions that will allow these steps to be performed quickly.
+
 Small segments for which an object's data occupies more than one chunk
 cannot contain objects with all possible offsets.  Accordingly, the
 auxiliary information found in this way is distributed with unused
@@ -173,8 +176,8 @@ wasting space for this information when it is not used.
 
 In addition to possible quicker access and perhaps sharing, another
 reason for use of auxiliary information may be that it could let other
-data fit neatly in chunks of the specified size, without wasteful
-padding.
+data fit neatly (considering alignment requirements) in some multiple
+of SGGC_CHUNK_SIZE bytes, without wasteful padding.
 
 
 HANDLING OLD-TO-NEW REFERENCES
