@@ -180,6 +180,66 @@ data fit neatly (considering alignment requirements) in some multiple
 of SGGC_CHUNK_SIZE bytes, without wasteful padding.
 
 
+GENERATIONAL GARBAGE COLLECTION
+
+The design of SGGC assumes that it is typical for many objects to be
+allocated, used briefly, and then no longer referenced, while some
+other objects are allocated and then used (or at least are still
+referenced) for a long time.
+
+Accordingly, SGGC uses a "generational" garbage collector in which
+objects that have survived one or two garbage collections are regarded
+as being in "old generation 1" or "old generation 2", and are not
+garbage collected unless a "level 1" or "level 2" garbage collection
+is done.  Collection at "level 0" looks (mostly) at only those objects
+that were allocated since the last garbage collection, and will not
+recover unused objects in old generations 1 or 2.  Similarly,
+collection at level 1 looks only at newly-allocated objects and
+objects in old generation 1, and will not recover unused objects in
+old generation 2.  Collection at level 2 looks at all objects, and
+will recover all unused objects, but of course takes longer than a
+level 0 or level 1 collection.
+
+An application may also create "constant" objects, which may reference
+only other constant objects, but may be referenced from any object.
+Constant objects may also be stored in read-only memory.  Constant
+objects are never looked at or collected by the garbage collector.
+
+When collecting at level 0 or level 1, it is necessary to handle the
+possibility that some objects in the generations being collected are
+referred to by an object that is not being collected, and hence is not
+looked at by the usual marking procedure.  It is assumed that such
+referenes are fairly uncommmon, as otherwise the generational scheme
+will not be advantageous.  The exceptions where old-to-new references
+do exist are handled by keeping track of which objects in old
+generation 1 or old generation 2 may contain such references, assisted
+by the application calling the sggc_old_to_new_check procedure when
+necessary, as documented in sggc-doc.
+
+
+SETS OF OBJECTS
+
+SGGC maintains several sets of objects, using the set facilities
+documented in set-doc.  Some of these sets share the same 'chain'.
+There are five chains, identified by symbols defined in set-app.h (the
+application specific header file for use of the set facility by SGGC),
+as follows:
+
+  SET_UNUSED_FREE_NEW   Used for sets of free or newly-allocated objects
+                        of different kinds, and for unused big segments
+
+  SET_OLD_GEN1          Used for the set of objects in old generation 1
+
+  SET_OLD_GEN2_CONST    Used for the set of objects in old generation 2,
+                        and for the set of constant objects
+
+  SET_OLD_TO_NEW        Used for the set of objects possibly having 
+                        old-to-new references
+
+  SET_TO_LOOK_AT        Used for the set of objects that need to be
+                        looked at to follow pointers they contain
+
+
 HANDLING OLD-TO-NEW REFERENCES
 
 Actions to do for old-to-new references when collecting at each level.
