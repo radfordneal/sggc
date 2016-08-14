@@ -248,10 +248,10 @@ int sggc_init (int max_segments)
   { set_init(&free_or_new[k],SET_UNUSED_FREE_NEW);
   }
   set_init(&old_gen1,SET_OLD_GEN1);
-  set_init(&old_gen2,SET_OLD_GEN2);
+  set_init(&old_gen2,SET_OLD_GEN2_CONST);
   set_init(&old_to_new,SET_OLD_TO_NEW);
-  set_init(&to_look_at,SET_TO_LOOK_AT_CONST);
-  set_init(&constants,SET_TO_LOOK_AT_CONST);
+  set_init(&to_look_at,SET_TO_LOOK_AT);
+  set_init(&constants,SET_OLD_GEN2_CONST);
 
   /* Initialize to no free objects of each kind. */
 
@@ -387,6 +387,7 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
   { if (1) /* can be enabled for consistency checks */
     { if (sggc_type[index] != type) abort();
       if (seg->x.small.big) abort();
+      if (seg->x.small.constant) abort();
       if (seg->x.small.kind != kind) abort();
     }
   }
@@ -397,14 +398,15 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
     }
     else /* small segment */
     { seg->x.small.big = 0;
+      seg->x.small.constant = 0;
       seg->x.small.kind = kind;
     }
   }
 
   /* Add the object to the free_or_new set.  For small segments not
-     from free_or_new, we also put the segment into free_or_new, and
-     use it as the current set of free objects if there were none
-     before. */
+     from free_or_new, we also put all other objects in the segment
+     into free_or_new, and use them as the current set of free objects
+     if there were none before. */
 
   if (from_free || kind_chunks[kind] == 0) /* big, or already in new_or_free */
   {
@@ -431,7 +433,7 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
   { if (set_contains (&old_gen1, v)) abort();
     if (set_contains (&old_gen2, v)) abort();
     if (set_contains (&old_to_new, v)) abort();
-    if (set_chain_contains (SET_TO_LOOK_AT_CONST, v)) abort();
+    if (set_contains (&to_look_at, v)) abort();
   }
 
   /* Allocate auxiliary information for segment, if not already there. */
@@ -462,6 +464,9 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
         }
         sggc_aux1[index] = kind_aux1_block[kind] 
                             + kind_aux1_block_pos[kind] * SGGC_AUX1_SIZE;
+        if (!seg->x.small.big)
+        { seg->x.small.aux1_off = kind_aux1_block_pos[kind];
+        }
         if (SGGC_DEBUG)
         { printf(
             "sggc_alloc: aux1 block for %x has pos %d in block for kind %d\n",
@@ -498,6 +503,9 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
         }
         sggc_aux2[index] = kind_aux2_block[kind] 
                             + kind_aux2_block_pos[kind] * SGGC_AUX2_SIZE;
+        if (!seg->x.small.big)
+        { seg->x.small.aux2_off = kind_aux2_block_pos[kind];
+        }
         if (SGGC_DEBUG)
         { printf(
             "sggc_alloc: aux2 block for %x has pos %d in block for kind %d\n",
@@ -914,9 +922,10 @@ void sggc_old_to_new_check (sggc_cptr_t from_ptr, sggc_cptr_t to_ptr)
 
 
 /* CHECK WHETHER AN OBJECT IS IN THE YOUNGEST GENERATION.  If it is,
-   the application can skip the old-to-new check.  Note that an object
-   may cease to be in the youngest generation when an allocation or
-   explicit garbage collection is done. */
+   the application can skip the old-to-new check when storing pointers
+   in this object.  Note that an object may cease to be in the
+   youngest generation when an allocation or explicit garbage
+   collection is done. */
 
 int sggc_youngest_generation (sggc_cptr_t from_ptr)
 {
@@ -924,17 +933,40 @@ int sggc_youngest_generation (sggc_cptr_t from_ptr)
 }
 
 
+/* CHECK WHETHER AN OBJECT IS IN THE OLDEST GENERATION, OR IS A
+   CONSTANT.  If it is, the application can skip the old-to-new check
+   when storing a pointer to it in some other object.  Note that once
+   an object is in the oldest generation, it will remain there as long
+   as it is still referenced. */
+
+int sggc_oldest_generation (sggc_cptr_t to_ptr)
+{
+  return set_chain_contains (SET_OLD_GEN2_CONST, to_ptr);
+}
+
+
 /* TEST WHETHER AN OBJECT IS NOT (YET) MARKED AS IN USE. */
 
-int sggc_not_marked (sggc_cptr_t ptr)
+int sggc_not_marked (sggc_cptr_t cptr)
 {
-  return set_chain_contains (SET_UNUSED_FREE_NEW, ptr);
+  return set_chain_contains (SET_UNUSED_FREE_NEW, cptr);
+}
+
+
+/* TEST WHETHER AN OBJECT IS A CONSTANT. */
+
+int sggc_is_constant (sggc_cptr_t cptr)
+{
+  struct set_segment *set = SET_SEGMENT(SET_VAL_INDEX(cptr));
+
+  return !set->x.small.big && set->x.small.constant;
 }
 
 
 /* REGISTER A CONSTANT SEGMENT.  Called with the type and kind of the
-   segment, the set of bits indicating which objects exist in the
-   segment, and the segment's data and optionally aux1 and aux2 storage.
+   segment (must not be big), the set of bits indicating which objects
+   exist in the segment, and the segment's data and optionally aux1
+   and aux2 storage.
 
    Returns a compressed pointer to the first object in the segment (at
    offset zero), or SGGC_NO_OBJECT if a segment couldn't be allocated.
@@ -953,6 +985,8 @@ sggc_cptr_t sggc_constant (sggc_type_t type, sggc_kind_t kind, set_bits_t bits,
 #endif
 )
 {
+  if (kind_chunks[kind] == 0) abort(); /* big segments not allowed */
+
   if (next_segment == maximum_segments)
   { return SGGC_NO_OBJECT;
   }
@@ -970,16 +1004,12 @@ sggc_cptr_t sggc_constant (sggc_type_t type, sggc_kind_t kind, set_bits_t bits,
 
   set_segment_init (seg);
 
+  seg->x.small.big = 0;
+  seg->x.small.constant = 1;
+  seg->x.small.kind = kind;
+
   set_add (&constants, v);
   set_assign_segment_bits (&constants, v, bits);
-
-  if (kind_chunks[kind] == 0) /* big segment */
-  { seg->x.big.big = 1;
-  }
-  else /* small segment */
-  { seg->x.small.big = 0;
-    seg->x.small.kind = kind;
-  }
 
   sggc_type[index] = type;
   sggc_data[index] = data;

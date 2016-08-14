@@ -27,7 +27,7 @@ typedef unsigned sggc_nchunks_t;/* Type for how many chunks are in a segment */
 
 #define SGGC_N_KINDS 6          /* Number of kinds of segments */
 
-#define SGGC_KIND_CHUNKS { 0, 1, 0, 1, 2, 3 } 
+#define SGGC_KIND_CHUNKS { 1, 1, 0, 1, 2, 3 } 
 
 #define SGGC_AUX1_SIZE 4        /* Size of auxiliary information 1 */
 #define SGGC_AUX1_BLOCK_SIZE 4  /* Number of blocks in aux1 allocations */

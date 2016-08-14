@@ -152,9 +152,10 @@ since this might help with allocation and reuse by malloc.
 The address of the auxiliary information for an object is found from a
 compressed pointer in the same way as data is found, described by
 steps (1) and (2) above, except that SGGC_CHUNK_SIZE is replaced by
-SGGC_AUX1_SIZE.  Auxiliary information may often consist of a single
-small data item, in which case the processor may have indexing
-instructions that will allow these steps to be performed quickly.
+SGGC_AUX1_SIZE, and of course a different array of pointers is used.
+Auxiliary information may often consist of a single small data item,
+in which case the processor may have indexing instructions that will
+allow these steps to be performed especially quickly.
 
 Small segments for which an object's data occupies more than one chunk
 cannot contain objects with all possible offsets.  Accordingly, the

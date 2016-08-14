@@ -122,8 +122,10 @@ void sggc_collect (int level);
 int sggc_look_at (sggc_cptr_t cptr);
 void sggc_old_to_new_check (sggc_cptr_t from_ptr, sggc_cptr_t to_ptr);
 int sggc_youngest_generation (sggc_cptr_t from_ptr);
-int sggc_not_marked (sggc_cptr_t ptr);
+int sggc_oldest_generation (sggc_cptr_t from_ptr);
+int sggc_not_marked (sggc_cptr_t cptr);
 
+int sggc_is_constant (sggc_cptr_t cptr);
 sggc_cptr_t sggc_constant (sggc_type_t type, sggc_kind_t kind, set_bits_t bits,
                            char *data
 #ifdef SGGC_AUX1_SIZE

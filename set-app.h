@@ -28,12 +28,18 @@
    a collection of sets, one set for each possible kind of object. */
 
 #define SET_CHAINS 5       /* Number of chains that can be used for sets */
+
 #  define SET_UNUSED_FREE_NEW 0  /* Unused, free or newly allocated objects */
-#  define SET_OLD_GEN1 1      /* Objects that survived one GC */
-#  define SET_OLD_GEN2 2      /* Objects that survived more than one GC */
-#  define SET_OLD_TO_NEW 3    /* Objects maybe having old-to-new references */
-#  define SET_TO_LOOK_AT_CONST 4 /* Objects that still need to be looked at,
-                                     or that are in a constant segment */
+
+#  define SET_OLD_GEN1 1         /* Objects that survived one GC */
+
+#  define SET_OLD_GEN2_CONST 2   /* Objects that survived more than one GC,
+                                    and also constant objects */
+
+#  define SET_OLD_TO_NEW 3       /* Objects maybe with old-to-new references */
+
+#  define SET_TO_LOOK_AT 4       /* Objects that still need to be looked at 
+                                    in order to mark objects still in use */
 
 
 /* EXTRA INFORMATION STORED IN A SET_SEGMENT STRUCTURE.  Putting it
@@ -52,7 +58,8 @@
     } big;                                  /*  allocated; 0 if size fixed  */ \
     struct                 /* For small segments... */ \
     { unsigned big : 1;       /* 0 for a segment with several small objects */ \
-      unsigned unused : 7;    /* Bits not currently in use                  */ \
+      unsigned unused : 6;    /* Bits not currently in use                  */ \
+      unsigned constant : 1;  /* 1 for a constant segment                   */ \
       unsigned char aux1_off; /* Offset of aux1 info from start of block    */ \
       unsigned char aux2_off; /* Offset of aux2 info from start of block    */ \
       unsigned char kind;     /* The kind of segment (equal to type if big) */ \
