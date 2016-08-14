@@ -85,7 +85,7 @@ typedef unsigned char sggc_kind_t;
 
 sggc_type_t *sggc_type;            /* Types of objects in each segment */
 
-/* Macro to access type of object, from the index of its segment. */
+/* Macro to access type of object, using the index of its segment. */
 
 #define SGGC_TYPE(cptr) (sggc_type[SET_VAL_INDEX(cptr)])
 

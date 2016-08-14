@@ -169,33 +169,73 @@ FUNCTIONS PROVIDED BY SGGC TO THE APPLICATION
 The SGGC library provides an application with the functions (or
 macros) below, which have (if functions) prototypes as shown:
 
-  sggc_type_t SGGC_TYPE (sggc_cptr_t cptr);
+  sggc_type_t SGGC_TYPE (sggc_cptr_t cptr)
 
-  sggc_type_t SGGC_KIND (sggc_cptr_t cptr);
+    Returns the type of the object whose compressed pointer is passed,
+    an integer from 0 to SGGC_N_TYPES-1.
 
-  char *SGGC_DATA (sggc_cptr_t cptr);
+  sggc_type_t SGGC_KIND (sggc_cptr_t cptr)
 
-  char *SGGC_AUX1 (sggc_cptr_t cptr);   (only if SGGC_AUX1_SIZE defined)
+    Returns the kind of the object whose compressed pointer is passed,
+    an integer from 0 to SGGC_N_KIND-1.
 
-  char *SGGC_AUX2 (sggc_cptr_t cptr);   (only if SGGC_AUX2_SIZE defined)
+  char *SGGC_DATA (sggc_cptr_t cptr)
 
-  int sggc_init (int max_segments);
+    Returns a regular pointer to the data associated with the object
+    whose compressed pointer is passed.
 
-  sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length);
+  char *SGGC_AUX1 (sggc_cptr_t cptr)   (only if SGGC_AUX1_SIZE defined)
 
-  void sggc_collect (int level);
+    Returns a regular pointer to the auxiliary information 1 for the
+    object whose compressed pointer is passed.
 
-  int sggc_look_at (sggc_cptr_t cptr);
+  char *SGGC_AUX2 (sggc_cptr_t cptr)   (only if SGGC_AUX2_SIZE defined)
 
-  void sggc_old_to_new_check (sggc_cptr_t from_ptr, sggc_cptr_t to_ptr);
+    Returns a regular pointer to the auxiliary information 2 for the
+    object whose compressed pointer is passed.
 
-  int sggc_youngest_generation (sggc_cptr_t from_ptr);
+  int sggc_init (int max_segments)
 
-  int sggc_oldest_generation (sggc_cptr_t to_ptr);
+    Initializes the SGGC facility, with the maximum number of segments
+    being as specified.
 
-  int sggc_not_marked (sggc_cptr_t cptr);
+  sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
 
-  int sggc_is_constant (sggc_cptr_t cptr);
+    Allocates space for an object of the specified type and length,
+    returning a compressed pointer to the object, or SGGC_NO_OBJECT if
+    space could not be allocated.  If SGGC_NO_OBJECT is returned, it
+    is possible that if a garbage collection is then performed using
+    sggc_collect, a subsequent call of sggc_alloc for the same type
+    and length will succeed (though this will not always be the case).
+
+    Note that the significant of type and length for the storage that
+    is needed is determined by the application, via the sggc_kind
+    function and the SGGC_KIND_CHUNKS initializer.
+
+  void sggc_collect (int level)
+
+    Peforms a garbage collection operation, at the specified level.
+    Level 0 attempts to recover only unused object that were allocated
+    since the last garbage collection.  Level 1 also attempts to
+    recover unused objects that have survived one garbage collection
+    (only).  Level 2 attempts to recover all unused objects (except
+    constants).
+
+    Note that this function is never called automatically by SGGC.  
+    It is up to the application to implement a policy for when to call
+    the garbage collector, and at what level.
+
+  int sggc_look_at (sggc_cptr_t cptr)
+
+  void sggc_old_to_new_check (sggc_cptr_t from_ptr, sggc_cptr_t to_ptr)
+
+  int sggc_youngest_generation (sggc_cptr_t from_ptr)
+
+  int sggc_oldest_generation (sggc_cptr_t to_ptr)
+
+  int sggc_not_marked (sggc_cptr_t cptr)
+
+  int sggc_is_constant (sggc_cptr_t cptr)
 
   sggc_cptr_t sggc_constant (sggc_type_t type, sggc_kind_t kind, 
                              set_bits_t bits, char *data, 
@@ -207,16 +247,16 @@ FUNCTIONS THE APPLICATION MUST PROVIDE TO SGGC
 The application defines the following functions, which are called from
 the SGGC library functions:
 
-  sggc_kind_t sggc_kind (sggc_type_t type, sggc_length_t length);
+  sggc_kind_t sggc_kind (sggc_type_t type, sggc_length_t length)
 
-  sggc_nchunks_t sggc_nchunks (sggc_type_t type, sggc_length_t length);
+  sggc_nchunks_t sggc_nchunks (sggc_type_t type, sggc_length_t length)
 
-  void sggc_find_root_ptrs (void);
+  void sggc_find_root_ptrs (void)
 
-  void sggc_find_object_ptrs (sggc_cptr_t cptr);
+  void sggc_find_object_ptrs (sggc_cptr_t cptr)
 
-  char *sggc_aux1_read_only (sggc_kind_t kind);  (if def SGGC_AUX1_READ_ONLY)
+  char *sggc_aux1_read_only (sggc_kind_t kind)  (if def SGGC_AUX1_READ_ONLY)
 
-  char *sggc_aux2_read_only (sggc_kind_t kind);  (if def SGGC_AUX2_READ_ONLY)
+  char *sggc_aux2_read_only (sggc_kind_t kind)  (if def SGGC_AUX2_READ_ONLY)
 
-  void sggc_after_marking (int level, int rep);  (if def SGGC_AFTER_MARKING)
+  void sggc_after_marking (int level, int rep)  (if def SGGC_AFTER_MARKING)
