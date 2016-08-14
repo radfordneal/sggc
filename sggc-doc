@@ -147,11 +147,24 @@ The following constants are also defined in sggc.h:
                                 SGGC_CHUNK_SIZE) for the data associated
                                 with all objects in a "small" segment.
 
+An application may optionally define the following in sggc-app.h:
+
+  sggc_malloc           May be defined as a simple symbol or as a 
+                        one-argument macro (not a function), which
+                        is used by SGGC to allocate memory blocks.
+                        Defaults to the symbol 'malloc'.
+
+  sggc_free             May be defined as a simple symbol or as a 
+                        one-argument macro (not a function), which is
+                        used by SGGC to free blocks of memory that
+                        were allocated by sggc_malloc.  Defaults to
+                        the symbol 'free'.
+
 Finally, the sggc.h file will declare prototypes (or macros, or static
 inline definitions) for the functions documented below.
 
 
-FUNCTIONS PROVIDED TO THE APPLICATION
+FUNCTIONS PROVIDED BY SGGC TO THE APPLICATION
 
 The SGGC library provides an application with the functions (or
 macros) below, which have (if functions) prototypes as shown:
