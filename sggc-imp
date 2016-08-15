@@ -218,7 +218,7 @@ by the application calling the sggc_old_to_new_check procedure when
 necessary, as documented in sggc-doc.
 
 
-SETS OF OBJECTS
+SETS OF OBJECTS AND THEIR USE
 
 SGGC maintains several sets of objects, using the set facilities
 documented in set-doc.  Some of these sets share the same 'chain'.
@@ -227,18 +227,35 @@ application specific header file for use of the set facility by SGGC),
 as follows:
 
   SET_UNUSED_FREE_NEW   Used for sets of free or newly-allocated objects
-                        of different kinds, and for unused big segments
+                        of different kinds, called 'free_or_new[k]' for
+                        each kind k, and a set of unused big segments,
+                        called 'unused'.
 
-  SET_OLD_GEN1          Used for the set of objects in old generation 1
+  SET_OLD_GEN1          Used for the set of objects in old generation 1,
+                        called 'old_gen1'.
 
   SET_OLD_GEN2_CONST    Used for the set of objects in old generation 2,
-                        and for the set of constant objects
+                        acalled 'old_gen2', and for the set of constant 
+                        objects, called 'constants'.
 
   SET_OLD_TO_NEW        Used for the set of objects possibly having 
-                        old-to-new references
+                        old-to-new references, called 'old_to_new'.
 
   SET_TO_LOOK_AT        Used for the set of objects that need to be
-                        looked at to follow pointers they contain
+                        looked at to follow pointers they contain,
+                        called 'to_look_at'.
+
+The 'constants' set is added to only when the application registers a
+new constant object, never has elements removed.  Constants can be
+distinguished from objects in the 'old_gen2' set (which shares the
+same chain) by a 'constant' flag stored in their segment, or by their
+using a big segment, which is not allowed for constants.  The fact
+that these two sets share a chain is convenient when checking that an
+object can be referenced from an object in old generation 2 without
+using old-to-new.
+
+When a garbage collection is not in progress, the 'to_look_at' set is
+empty.
 
 
 HANDLING OLD-TO-NEW REFERENCES
