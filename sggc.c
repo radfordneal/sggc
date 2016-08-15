@@ -18,8 +18,15 @@
    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
 
+/*   See sggc-doc for general information on the SGGC library, and for the
+     documentation on the application interface to SGGC.  See sggc-imp for
+     discussion of the implementation of SGGC. */
+
+
 #include <stdio.h>
 #include <stdlib.h>
+
+#define SGGC_INTERNAL  /* So sggc_info will be declared here without 'extern' */
 #include "sggc-app.h"
 
 
@@ -264,6 +271,13 @@ int sggc_init (int max_segments)
 
   maximum_segments = max_segments;
   next_segment = 0;
+
+  /* Initialize the sggc_info structure. */
+
+  sggc_info.gen0_count = 0;
+  sggc_info.gen1_count = 0;
+  sggc_info.gen2_count = 0;
+  sggc_info.big_chunks = 0;
 
   return 0;
 }
@@ -530,6 +544,8 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
       { printf ("sggc_alloc: called malloc for %x (big %d, %d chunks):: %p\n", 
                  v, kind, (int)nch, sggc_data[index]);
       }
+
+      sggc_info.big_chunks += nch;
     }
     else /* small segment */
     { 
@@ -545,6 +561,8 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
     { goto fail;
     }
   }
+
+  sggc_info.gen0_count += 1;
 
   return v;
 
@@ -833,6 +851,11 @@ void sggc_collect (int level)
       }
     }
   }
+
+  sggc_info.gen0_count = 0;
+  sggc_info.gen1_count = set_n_elements(&old_gen1);
+  sggc_info.gen2_count = set_n_elements(&old_gen2);
+  sggc_info.big_chunks = 0;
 
   if (SGGC_DEBUG) printf("sggc_collect: done\n");
   if (SGGC_DEBUG) collect_debug();

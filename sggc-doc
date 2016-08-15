@@ -57,15 +57,15 @@ as the application must sometimes pass compressed pointers to SGGC.
 
 Memory is freed using a "mark and sweep" garbage collector, with three
 "generations" of objects, allowing quick recovery of recently
-allocated objects without taking time for a full sweep.  The SGGC
-library does not decide when a garbage collection (at any of the three
-levels) will be done, but instead provides information allowing the
+allocated objects without the cost of a full sweep.  The SGGC library
+does not decide when a garbage collection (at any of the three levels)
+will be done, but instead provides information allowing the
 application to implement a policy in this regard.
 
 
 USING SGGC IN AN APPLICATION
 
-To use SGGC, an application should create a sggc-app.h file, which
+To use SGGC, an application should create an sggc-app.h file, which
 must define some constants and declare some types (see below) and then
 include the sggc.h file.
 
@@ -99,7 +99,7 @@ auxiliary information 2 is to be used:
 
   SGGC_AUX2_BLOCK_SIZE  As above, but for auxiliary information 2.
 
-  SGGC_AUX1_READ_ONLY   If defined (as anything), the application will
+  SGGC_AUX1_READ_ONLY   If defined (as anything), the application may
                         sometimes use read-only auxiliary information 1.
 
   SGGC_AUX2_READ_ONLY   As above, but for auxiliary information 2.
@@ -121,6 +121,19 @@ The following types must be defined in sggc-app.h:
   sggc_nchunks_t        Type for holding the number of chunks (with
                         SGGC_CHUNK_SIZE bytes) in the data for an
                         object.
+
+An application may optionally define the following in sggc-app.h:
+
+  sggc_malloc           May be defined as a simple symbol or as a 
+                        one-argument macro (not a function), which
+                        is used by SGGC to allocate memory blocks.
+                        Defaults to the symbol 'malloc'.
+
+  sggc_free             May be defined as a simple symbol or as a 
+                        one-argument macro (not a function), which is
+                        used by SGGC to free blocks of memory that
+                        were allocated by sggc_malloc.  Defaults to
+                        the symbol 'free'.
 
 The sggc.h file should be included after the above have been defined,
 at the end of sggc-app.h.  It will define the following types:
@@ -147,21 +160,26 @@ The following constants are also defined in sggc.h:
                                 SGGC_CHUNK_SIZE) for the data associated
                                 with all objects in a "small" segment.
 
-An application may optionally define the following in sggc-app.h:
+The sggc.h file will declare the following global structure variable,
+which SGGC will continually update with information that the
+application may use when deciding whether to call sggc_collect to do a
+garbage collection:
 
-  sggc_malloc           May be defined as a simple symbol or as a 
-                        one-argument macro (not a function), which
-                        is used by SGGC to allocate memory blocks.
-                        Defaults to the symbol 'malloc'.
+  extern struct sggc_info
+  {
+    unsigned gen0_count;       /* Number of newly-allocated objects */
+    unsigned gen1_count;       /* Number of objects in old generation 1 */
+    unsigned gen2_count;       /* Number of objects in old generation 2.
+                                  Does not include constants */
 
-  sggc_free             May be defined as a simple symbol or as a 
-                        one-argument macro (not a function), which is
-                        used by SGGC to free blocks of memory that
-                        were allocated by sggc_malloc.  Defaults to
-                        the symbol 'free'.
+    sggc_nchunks_t big_chunks; /* # of chunks in newly-allocated big objects */
+
+} sggc_info;
 
 Finally, the sggc.h file will declare prototypes (or macros, or static
-inline definitions) for the functions documented below.
+inline definitions) for the functions documented below, some of which
+may be used by the application, others of which must be defined by the
+application for use by SGGC.
 
 
 FUNCTIONS PROVIDED BY SGGC TO THE APPLICATION

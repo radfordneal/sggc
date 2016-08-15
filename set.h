@@ -18,7 +18,7 @@
    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
 
-/*   See set-doc for general documentation on this facility, and for the
+/*   See set-doc for general information on this facility, and for the
  *   documentation on functions that are part of the application interface.
  */
 

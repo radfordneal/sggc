@@ -18,9 +18,9 @@
    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
 
-/* This header file must be included from the sggc-app.h file provided
-   by the application using the set facility, after the definitions of
-   some required types and constants. */
+/*   See sggc-doc for general information on the SGGC library, and for the
+     documentation on the application interface to SGGC.  See sggc-imp for
+     discussion of the implementation of SGGC. */
 
 
 #include "set-app.h"
@@ -94,6 +94,24 @@ sggc_type_t *sggc_type;            /* Types of objects in each segment */
 #define SGGC_KIND(cptr) \
   (SET_SEGMENT(SET_VAL_INDEX(cptr))->x.big.big ? SGGC_TYPE(cptr) \
     : SET_SEGMENT(SET_VAL_INDEX(cptr))->x.small.kind)
+
+
+/* STRUCTURE HOLDING INFORMATION ON CURRENT SPACE USAGE.  This structure
+   is kept up-to-date after calls to sggc_alloc and sggc_collect. */
+
+#ifndef SGGC_INTERNAL
+extern 
+#endif
+struct sggc_info
+{ 
+  unsigned gen0_count;       /* Number of newly-allocated objects */
+  unsigned gen1_count;       /* Number of objects in old generation 1 */
+  unsigned gen2_count;       /* Number of objects in old generation 2.
+                                Does not include constants */
+
+  sggc_nchunks_t big_chunks; /* # of chunks in newly-allocated big objects */
+
+} sggc_info;
 
 
 /* FUNCTIONS PROVIDED BY THE APPLICATION. */
