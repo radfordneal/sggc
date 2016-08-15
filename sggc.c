@@ -705,8 +705,8 @@ void sggc_collect (int level)
         if (SGGC_DEBUG) printf("sggc_collect: %x now old_gen2\n",(unsigned)v);
       }
       else if (level < 2 || !set_contains (&old_gen2, v))
-      { set_add (&old_gen1, v); 
-        if (SGGC_DEBUG) printf("sggc_collect: %x now old_gen1\n",(unsigned)v);
+      { if (!set_add (&old_gen1, v) /* done regardless of SGGC_DEBUG setting */
+         && SGGC_DEBUG) printf("sggc_collect: %x now old_gen1\n",(unsigned)v);
       }
   
       sggc_find_object_ptrs (v);
