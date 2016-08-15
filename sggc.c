@@ -728,7 +728,7 @@ void sggc_collect (int level)
   if (level == 2)
   { v = set_first (&old_gen2, 0); 
     while (v != SET_NO_VALUE)
-    { int remove = set_contains (&free_or_new[SGGC_KIND(v)], v);
+    { int remove = set_chain_contains (SET_UNUSED_FREE_NEW, v);
       if (SGGC_DEBUG && remove) 
       { printf("sggc_collect: %x in old_gen2 now free\n",(unsigned)v);
       }
@@ -740,7 +740,7 @@ void sggc_collect (int level)
   if (level >= 1)
   { v = set_first (&old_gen1, 0); 
     while (v != SET_NO_VALUE)
-    { int remove = set_contains (&free_or_new[SGGC_KIND(v)], v);
+    { int remove = set_chain_contains (SET_UNUSED_FREE_NEW, v);
       if (SGGC_DEBUG && remove) 
       { printf("sggc_collect: %x in old_gen1 now free\n",(unsigned)v);
       }
@@ -762,10 +762,12 @@ void sggc_collect (int level)
     { while ((v = set_first (&free_or_new[k], 1)) != SGGC_NO_OBJECT)
       { set_index_t index = SET_VAL_INDEX(v);
         if (SGGC_DEBUG) 
-        { printf ("sggc_collect: calling free for %x:: %p\n", v, SGGC_DATA(v));
+        { printf ("sggc_collect: calling free for data for %x:: %p\n", 
+                   v, SGGC_DATA(v));
         }
         sggc_free (sggc_data[index]);
         sggc_data [index] = NULL;
+
 #       ifdef SGGC_AUX1_READ_ONLY
           if (kind_aux1_read_only[k])
           { if (SGGC_DEBUG) 
@@ -780,6 +782,7 @@ void sggc_collect (int level)
           { printf("sggc_collect: retaining aux1 for %x:: %p\n",v,SGGC_AUX1(v));
           }
 #       endif
+
 #       ifdef SGGC_AUX2_READ_ONLY
           if (kind_aux2_read_only[k])
           { if (SGGC_DEBUG) 
@@ -794,10 +797,11 @@ void sggc_collect (int level)
           { printf("sggc_collect: retaining aux2 for %x:: %p\n",v,SGGC_AUX2(v));
           }
 #       endif
+
         if (SGGC_DEBUG) 
         { printf("sggc_collect: putting %x in unused\n",(unsigned)v);
         }
-        set_add (&unused, v);
+        set_add (&unused, v); /* allowed because v was removed with set_first */
       }
     }
   }
@@ -899,23 +903,38 @@ int sggc_look_at (sggc_cptr_t ptr)
 
 void sggc_old_to_new_check (sggc_cptr_t from_ptr, sggc_cptr_t to_ptr)
 {
+  /* If to_ptr is youngest generation, no need to check anything else. */
+
+  if (set_chain_contains (SET_UNUSED_FREE_NEW, from_ptr))
+  { return;
+  }
+
+  /* Can quit if from_ptr is already in the old-to-new set. */
+
   if (set_contains (&old_to_new, from_ptr))
   { return;
   }
 
   if (set_contains (&old_gen2, from_ptr))
-  { if (set_contains (&old_gen2, to_ptr))
+  { 
+    /* If from_ptr is in old generation 2, only others in old generation 2
+       and constants can be referenced without using old-to-new. */
+
+    if (set_chain_contains (SET_OLD_GEN2_CONST, to_ptr))
     { return;
     }
   }
-  else if (set_contains (&old_gen1, from_ptr))
-  { if (set_contains (&old_gen1, to_ptr) || set_contains (&old_gen2, to_ptr))
+  else 
+  { 
+    /* If from_ptr is in old generation 1, only references to newly 
+       allocated objects require using old-to-new. */
+
+    if (!set_chain_contains (SET_UNUSED_FREE_NEW, to_ptr))
     { return;
     }
   }
-  else
-  { return;
-  }
+
+  /* Need to record the existence of an old-to-new reference in from_ptr. */
 
   set_add (&old_to_new, from_ptr);
 }
