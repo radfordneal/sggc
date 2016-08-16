@@ -125,8 +125,8 @@ static set_offset_t next_segment;             /* Number of segments in use */
 
 /* GLOBAL VARIABLES USED FOR LOOKING AT OLD-NEW REFERENCES. */
 
-static int collect_level;     /* Level of current garbage collection */
-static int old_to_new_check;  /* 1 if should look for old-to-new reference */
+static int collect_level = -1; /* Level of current garbage collection */
+static int old_to_new_check;   /* 1 if should look for old-to-new reference */
 
 
 /* INITIALIZE SEGMENTED MEMORY.  Allocates space for pointers for the
@@ -628,6 +628,8 @@ void sggc_collect (int level)
   if (SGGC_DEBUG) printf("sggc_collect: level %d\n",level);
   if (SGGC_DEBUG) collect_debug();
 
+  collect_level = level;
+
   if (set_first(&to_look_at, 0) != SET_NO_VALUE) abort();
 
   /* Put objects in the old generations being collected in the free_or_new set.
@@ -659,7 +661,6 @@ void sggc_collect (int level)
 
   /* Handle old-to-new references. */
 
-  collect_level = level;
   v = set_first(&old_to_new, 0);
 
   while (v != SET_NO_VALUE)
@@ -857,6 +858,8 @@ void sggc_collect (int level)
   sggc_info.gen2_count = set_n_elements(&old_gen2);
   sggc_info.big_chunks = 0;
 
+  collect_level = -1;
+
   if (SGGC_DEBUG) printf("sggc_collect: done\n");
   if (SGGC_DEBUG) collect_debug();
 }
@@ -913,13 +916,7 @@ int sggc_look_at (sggc_cptr_t ptr)
 }
 
 
-/* RECORD AN OLD-TO-NEW REFERENCE.  Must be called by the application
-   when about to store a reference to to_ptr in the object from_ptr,
-   unless from_ptr has just been allocated (with no allocations or
-   explicit garbage collections since then), or unless from_ptr has
-   been verified to be in the youngest generation by using
-   sggc_youngest_generation (with no allocations or explicit garbage
-   collections have been done since then). */
+/* RECORD AN OLD-TO-NEW REFERENCE IF NECESSARY. */
 
 void sggc_old_to_new_check (sggc_cptr_t from_ptr, sggc_cptr_t to_ptr)
 {
@@ -960,11 +957,7 @@ void sggc_old_to_new_check (sggc_cptr_t from_ptr, sggc_cptr_t to_ptr)
 }
 
 
-/* CHECK WHETHER AN OBJECT IS IN THE YOUNGEST GENERATION.  If it is,
-   the application can skip the old-to-new check when storing pointers
-   in this object.  Note that an object may cease to be in the
-   youngest generation when an allocation or explicit garbage
-   collection is done. */
+/* CHECK WHETHER AN OBJECT IS IN THE YOUNGEST GENERATION.  */
 
 int sggc_youngest_generation (sggc_cptr_t from_ptr)
 {
@@ -972,11 +965,7 @@ int sggc_youngest_generation (sggc_cptr_t from_ptr)
 }
 
 
-/* CHECK WHETHER AN OBJECT IS IN THE OLDEST GENERATION, OR IS A
-   CONSTANT.  If it is, the application can skip the old-to-new check
-   when storing a pointer to it in some other object.  Note that once
-   an object is in the oldest generation, it will remain there as long
-   as it is still referenced. */
+/* CHECK WHETHER AN OBJECT IS IN THE OLDEST GENERATION, OR IS A CONSTANT. */
 
 int sggc_oldest_generation (sggc_cptr_t to_ptr)
 {
@@ -984,10 +973,13 @@ int sggc_oldest_generation (sggc_cptr_t to_ptr)
 }
 
 
-/* TEST WHETHER AN OBJECT IS NOT (YET) MARKED AS IN USE. */
+/* TEST WHETHER AN OBJECT IS NOT (YET) MARKED AS IN USE.  May only be 
+   called during a garbage collection. */
 
 int sggc_not_marked (sggc_cptr_t cptr)
 {
+  if (collect_level < 0) abort();  /* not in middle of a garbage collection */
+
   return set_chain_contains (SET_UNUSED_FREE_NEW, cptr);
 }
 

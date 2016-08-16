@@ -111,6 +111,10 @@ use during a garbage collection:
   SGGC_AFTER_MARKING    If defined (as anything), the application will
                         provide an sggc_after_marking procedure to call
                         after preliminary marking of objects (see below).
+                        This procedure may call sggc_not_marked to see
+                        which objects are known to be in use, and may
+                        call sggc_look_at to mark additional objects as
+                        in use.
 
 The following types must be defined in sggc-app.h:
 
@@ -394,11 +398,45 @@ macros) below, which have (if functions) prototypes as shown:
 
   void sggc_old_to_new_check (sggc_cptr_t from_ptr, sggc_cptr_t to_ptr)
 
+    This procedure informs SGGC that the application has stored a
+    reference to the object pointed to by to_ptr in the object pointed
+    to by from_ptr (perhaps in the data area associated with from_ptr,
+    or perhaps in the auxiliary information for from_ptr, as either a
+    compressed pointer or regular pointer).
+  
+    The applicatoin must call this procedure whenever (ie, just after)
+    a reference to another object is stored in an object, unless
+    from_ptr can be guaranteed to be in the youngest generation of
+    objects or to_ptr can be guaranteed to be in the oldest
+    generation, or is a constant.  It is guaranteed that from_ptr is
+    in the youngest generation if it has just been allocated, or if
+    sggc_youngest_generation says it is in the youngest generation, as
+    long as there has been no subsequent call of sggc_collect.  An
+    object is guaranteed to be in the oldest generation (or constant)
+    if sggc_youngest_generation (or sggc_is_constant) indicates that
+    it is, and if so, it will remain so thereafter.
+
   int sggc_youngest_generation (sggc_cptr_t from_ptr)
+
+    Returns 1 if the object pointed to by from_ptr is in the youngest
+    generaton - ie, was allocated since the last call of sggc_collect
+    - and 0 otherwise.  Note that the object may cease to be in the
+    youngest generation after the next call of sggc_collect.
 
   int sggc_oldest_generation (sggc_cptr_t to_ptr)
 
+    Returns 1 if the object pointed to by from_ptr is in the oldest
+    generaton, or is a constant object, and 0 otherwise.  If an object
+    is in the oldest generation (or a constant) it will remain so
+    thereafter.
+
   int sggc_not_marked (sggc_cptr_t cptr)
+
+    Returns 1 if the object with compressed pointer cptr has not been
+    marked as in use during the garbage collection currently under
+    way, and 0 otherwise.  This function may be called only from the
+    sggc_after_marking procedure, which an application may provide to
+    be called after preliminary marking of objects in use.
 
   int sggc_is_constant (sggc_cptr_t cptr)
 
