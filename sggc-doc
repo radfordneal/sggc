@@ -264,7 +264,7 @@ The application is responsible for ensuring that the SGGC routines
 will be informed of all references to objects at any time when
 sggc_collect is called.  This is done in three ways.
 
-First, the applicaton must provided an sggc_find_root_ptrs procedure.
+First, the application must provided an sggc_find_root_ptrs procedure.
 This procedure must call the sggc_look_at function for every "root"
 compressed pointer, which the application might use to directly refer
 to an object.  In this context, the value returned by sggc_look_at may
@@ -305,11 +305,11 @@ object being modified has just been allocated by sggc_alloc (with no
 other calls of sggc_alloc since then).  An application can also
 enquire with the sggc_youngest_generation function whether an object
 is of the youngest generation, in which case modifications to it do
-not have to be signalled with sggc_check_old_to_new (as long as
+not have to be signaled with sggc_check_old_to_new (as long as
 sggc_alloc is not called).  Similarly, an application can enquire with
 the sggc_oldest_generation function whether an object is of the oldest
 generation, in which case modifications of any object to refer to it
-do not have to be signalled with sggc_check_old_to_new.  The
+do not have to be signaled with sggc_check_old_to_new.  The
 sggc_youngest_generation and sggc_oldest_generation functions are
 useful only if more than one modification is to be made, since
 sggc_old_to_new_check is a faster way of handling a single
@@ -366,7 +366,7 @@ macros) below, which have (if functions) prototypes as shown:
 
   void sggc_collect (int level)
 
-    Peforms a garbage collection operation, at the specified level.
+    Performs a garbage collection operation, at the specified level.
     Level 0 attempts to recover only unused object that were allocated
     since the last garbage collection.  Level 1 also attempts to
     recover unused objects that have survived one garbage collection
