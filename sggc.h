@@ -114,23 +114,43 @@ struct sggc_info
 } sggc_info;
 
 
-/* FUNCTIONS PROVIDED BY THE APPLICATION. */
+/* FUNCTIONS PROVIDED BY THE APPLICATION.  Prototypes are declared here only
+   if they haven't been defined as macros. */
 
+#ifndef sggc_kind
 sggc_kind_t sggc_kind (sggc_type_t type, sggc_length_t length);
+#endif
+
+#ifndef sggc_nchunks
 sggc_nchunks_t sggc_nchunks (sggc_type_t type, sggc_length_t length);
+#endif
+
+#ifndef sggc_find_root_ptrs
 void sggc_find_root_ptrs (void);
+#endif
+
+#ifndef sggc_find_object_ptrs
 void sggc_find_object_ptrs (sggc_cptr_t cptr);
+#endif
 
 #ifdef SGGC_AUX1_READ_ONLY
+#ifndef sggc_aux1_read_only
 char *sggc_aux1_read_only (sggc_kind_t kind);
 #endif
+#endif
+
 #ifdef SGGC_AUX1_READ_ONLY
+#ifndef sggc_aux2_read_only
 char *sggc_aux2_read_only (sggc_kind_t kind);
+#endif
 #endif
 
 #ifdef SGGC_AFTER_MARKING
+#ifndef sggc_after_marking
 void sggc_after_marking (int level, int rep);
 #endif
+#endif
+
 
 /* FUNCTIONS USED BY THE APPLICATION. */
 

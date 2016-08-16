@@ -158,17 +158,9 @@ static struct ptr_var { ptr_t *var; struct ptr_var *next; } *first_ptr_var;
 #define PROT_END (first_ptr_var = saved_first_ptr_var)
 
 
-/* FUNCTIONS THAT THE APPLICATION NEEDS TO PROVIDE TO THE SGGC MODULE. */
+/* FUNCTIONS THAT THE APPLICATION NEEDS TO PROVIDE TO THE SGGC MODULE. 
 
-sggc_kind_t sggc_kind (sggc_type_t type, sggc_length_t length)
-{
-  return type;
-}
-
-sggc_nchunks_t sggc_nchunks (sggc_type_t type, sggc_length_t length)
-{
-  return 1;
-}
+   Note that sggc_kind and sggc_nchunks are macros in sggc-app.h. */
 
 char *sggc_aux1_read_only (sggc_kind_t kind)
 {

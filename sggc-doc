@@ -338,8 +338,9 @@ macros) below, which have (if functions) prototypes as shown:
 
 FUNCTIONS THE APPLICATION MUST PROVIDE TO SGGC
 
-The application defines the following functions (which could instead
-be macros), which are called from the SGGC library functions:
+The application defines the following functions called from the SGGC
+library functions (which can instead be macros defined in sggc-app.h
+before sggc.h is included):
 
   sggc_kind_t sggc_kind (sggc_type_t type, sggc_length_t length)
 

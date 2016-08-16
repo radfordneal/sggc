@@ -33,6 +33,10 @@ typedef unsigned sggc_nchunks_t;/* Type for how many chunks are in a segment */
 #define SGGC_AUX1_BLOCK_SIZE 8  /* Number of blocks in aux1 allocations */
 #define SGGC_AUX1_READ_ONLY     /* Some auxiliary information 1 is read-only */
 
+#define sggc_kind(type,length) (type) /* One kind for each type */
+
+#define sggc_nchunks(type,length) 1  /* Should never be used, no big segments */
+
 /* Include the generic SGGC header file. */
 
 #include "sggc.h"
