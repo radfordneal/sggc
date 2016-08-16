@@ -258,6 +258,64 @@ If SGGC_AUX1_READ_ONLY is defined, the application must similarly
 provide an sggc_aux2_read_only function.
 
 
+INFORMING SGGC ABOUT OBJECT REFERENCES
+
+The application is responsible for ensuring that the SGGC routines
+will be informed of all references to objects at any time when
+sggc_collect is called.  This is done in three ways.
+
+First, the applicaton must provided an sggc_find_root_ptrs procedure.
+This procedure must call the sggc_look_at function for every "root"
+compressed pointer, which the application might use to directly refer
+to an object.  In this context, the value returned by sggc_look_at may
+be ignored.
+
+Root pointers would, for example, include compressed pointers stored
+in global variables used by the application.  If the application also
+uses regular pointers (to data areas) as roots, sggc_find_root_ptrs
+must be called with the corresponding compressed pointer, which the
+application must somehow be able to find (eg, by storing a compressed
+pointer to itself at the start of the data area for every object).
+
+An application may also store root pointers in the local variables of
+functions.  The application will need to implement some scheme for
+finding all such local variables, and calling sggc_find_root_ptrs for
+each of them, passing the compressed pointer for the reference.
+
+Secondly, the application must provide an sggc_find_object_ptrs
+procedure, which is passed a compressed pointer to an object, and
+which must call sggc_look_at for every object that is referenced from
+that object - except that if a call of sggc_look_at returns zero,
+sggc_find_object_ptrs should return immediately without looking for
+any more pointers.
+
+Finally, the application must call the sggc_old_to_new_check whenever
+it may have modified an object in an older generation so that it now
+refers to an object in a younger generation.  The arguments of
+sggc_old_to_new_check are a compressed pointer to an object that has
+just been modified and a compressed pointer to the object that it now
+references.  If sggc_old_to_new_check sees that the first object is in
+an older generation than the second, an appropriate record of this
+will be kept, so that the newer object will be recognized as being
+referenced even if the older object would not normally be looked at in
+a partial garbage collection.
+
+The sggc_old_to_new_check procedure does not have to be called if the
+object being modified has just been allocated by sggc_alloc (with no
+other calls of sggc_alloc since then).  An application can also
+enquire with the sggc_youngest_generation function whether an object
+is of the youngest generation, in which case modifications to it do
+not have to be signalled with sggc_check_old_to_new (as long as
+sggc_alloc is not called).  Similarly, an application can enquire with
+the sggc_oldest_generation function whether an object is of the oldest
+generation, in which case modifications of any object to refer to it
+do not have to be signalled with sggc_check_old_to_new.  The
+sggc_youngest_generation and sggc_oldest_generation functions are
+useful only if more than one modification is to be made, since
+sggc_old_to_new_check is a faster way of handling a single
+modification.
+
+
 FUNCTIONS PROVIDED BY SGGC TO THE APPLICATION
 
 The SGGC library provides an application with the functions (or
