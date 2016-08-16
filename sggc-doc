@@ -379,6 +379,19 @@ macros) below, which have (if functions) prototypes as shown:
 
   int sggc_look_at (sggc_cptr_t cptr)
 
+    This function must be called from the sggc_find_root_ptrs and
+    sggc_find_object_ptrs procedures that the application provided for
+    SGGC (and must only be called from these procedures).  It signals
+    to SGGC that the object referenced by the compressed pointer
+    passed is accessible, via a root pointer or via a reference in
+    another object, and hence should not be collected.  
+
+    The return value should be ignored if it is called from
+    sggc_find_root_ptrs.  If sggc_look_at is called from
+    sggc_find_object_ptrs, a return value of zero indicates that
+    sggc_find_object_ptrs should return immediately without looking
+    for further references.
+
   void sggc_old_to_new_check (sggc_cptr_t from_ptr, sggc_cptr_t to_ptr)
 
   int sggc_youngest_generation (sggc_cptr_t from_ptr)

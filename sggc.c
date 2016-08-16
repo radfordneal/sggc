@@ -863,22 +863,19 @@ void sggc_collect (int level)
 
 
 /* TELL THE GARBAGE COLLECTOR THAT AN OBJECT NEEDS TO BE LOOKED AT.
-   Called by the application from within its sggc_find_root_ptrs or
-   sggc_find_object_ptrs functions, to signal to the garbage collector
-   that it has found a pointer to an object for the GC to look at.
-   The caller should continue calling sggc_look_at for all root pointers,
-   and for all pointers in an object, except that the rest of the 
-   pointers in an object should be skipped if sggc_look_at returns 0.
 
    The principal use of this is to mark objects as in use.  If the
-   object is presently in the free_or_new set, it is removed, and put
-   in the set of objects to be looked at.  (If it is not in
-   free_or_new, it has already been looked at, and so needn't be
-   looked at again.)
+   object is presently in the free_or_new set for its kind, it is
+   removed, and put in the set of objects to be looked at.  (If it is
+   not in free_or_new, it has already been looked at, and so needn't
+   be looked at again.)
 
    This procedure is also used as part of the old-to-new scheme to
    check whether an object in the old-to-new set still needs to be
-   there, as well as sometimes marking the objects it points to. */
+   there, as well as sometimes marking the objects it points to.  In
+   this context, sggc_look_at will return 0 to indicate looking at
+   further references is unnecessary, since a reference requiring that
+   the object remain in the old-to-new set has been seen. */
 
 int sggc_look_at (sggc_cptr_t ptr)
 {
