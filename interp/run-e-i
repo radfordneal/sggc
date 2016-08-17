@@ -1,0 +1,9 @@
+#!/bin/bash
+
+( cat defs-iterative
+  cat defs-numeric
+  cat eratosthenes
+  echo "(E ('(O O O O O I)))"
+  echo "(@l (E ('(O O O O O O O I))))"
+  echo "l"
+) | interp
