@@ -210,7 +210,7 @@ When collecting at level 0 or level 1, it is necessary to handle the
 possibility that some objects in the generations being collected are
 referred to by an object that is not being collected, and hence is not
 looked at by the usual marking procedure.  It is assumed that such
-referenes are fairly uncommmon, as otherwise the generational scheme
+references are fairly uncommon, as otherwise the generational scheme
 will not be advantageous.  The exceptions where old-to-new references
 do exist are handled by keeping track of which objects in old
 generation 1 or old generation 2 may contain such references, assisted
@@ -235,7 +235,7 @@ as follows:
                         called 'old_gen1'.
 
   SET_OLD_GEN2_CONST    Used for the set of objects in old generation 2,
-                        acalled 'old_gen2', and for the set of constant 
+                        called 'old_gen2', and for the set of constant 
                         objects, called 'constants'.
 
   SET_OLD_TO_NEW        Used for the set of objects possibly having 
