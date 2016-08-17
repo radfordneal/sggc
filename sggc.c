@@ -710,7 +710,7 @@ void sggc_collect (int level)
      until there are no more in the set. */
 
 # ifdef SGGC_AFTER_MARKING
-  int rep = 1;
+  int rep = 0;
 # endif
 
   do

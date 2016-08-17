@@ -468,10 +468,52 @@ before sggc.h is included):
 
   void sggc_find_root_ptrs (void)
 
+    This procedure must call sggc_look_at for every "root" pointer via
+    which an object might be referenced, passing sggc_look_at the
+    compressed pointer for that object.  See the discussion above
+    for more context.
+
   void sggc_find_object_ptrs (sggc_cptr_t cptr)
 
-  char *sggc_aux1_read_only (sggc_kind_t kind)  (if def SGGC_AUX1_READ_ONLY)
+    This procedure must call sggc_look_at for every object that is
+    referenced via 'cptr' (in any order), passing it the compressed
+    pointer to the object that is referenced, except that if usch a
+    call of sggc_look_at returns 0, sggc_find_object_ptrs should
+    immediately return, rather than calling sggc_look_at for the
+    remaining objects referenced via 'cptr'.  See the discussion above
+    for more context.
 
-  char *sggc_aux2_read_only (sggc_kind_t kind)  (if def SGGC_AUX2_READ_ONLY)
+  char *sggc_aux1_read_only (sggc_kind_t kind)
 
-  void sggc_after_marking (int level, int rep)  (if def SGGC_AFTER_MARKING)
+    Only provided if the application defines SGGC_AUX1_READ_ONLY.
+    
+    Returns a pointer to the shared, read-only auxiliary information 1
+    for a segment of the given kind, or NULL if this kind does not use
+    read-only auxiliary information 1.
+
+  char *sggc_aux2_read_only (sggc_kind_t kind)
+
+    Only provided if the application defines SGGC_AUX2_READ_ONLY.
+
+    Returns a pointer to the shared, read-only auxiliary information 2
+    for a segment of the given kind, or NULL if this kind does not use
+    read-only auxiliary information 2.
+
+  void sggc_after_marking (int level, int rep)
+
+    Only provided if the application defines SGGC_AFTER_MARKING.
+
+    Performs whatever operations an application needs to do after the
+    preliminary marking stage of a garbage collection.  This may
+    involve enquiring about which objects have not already been marked
+    as in use, using sggc_not_marked, and perhaps indicating that
+    further objects are in use by calling sggc_look_at.  
+
+    If any new objects are looked at, sggc_find_object_ptrs will
+    be called to trace further references from these objects, and
+    sggc_after_marking will be called again.  
+
+    The arguments to sggc_after_marking give the level of garbage
+    collection (0, 1, or 2) and the number of previous times that
+    sggc_after_marking was called for this collection (zero the first
+    time).
