@@ -258,6 +258,9 @@ If an application defines the symbols SGGC_AUX1_READ_ONLY, it must
 also provide a function called sggc_aux1_read_only that returns
 read-only auxiliary information 1 for a segment of a given kind, or
 NULL if this information is not read-only for segments of this kind.
+Read-only auxiliary information is not allowed for kinds that use big
+segments.
+
 If SGGC_AUX1_READ_ONLY is defined, the application must similarly
 provide an sggc_aux2_read_only function.
 

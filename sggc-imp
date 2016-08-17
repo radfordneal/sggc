@@ -245,17 +245,46 @@ as follows:
                         looked at to follow pointers they contain,
                         called 'to_look_at'.
 
+Between calls of sggc_collect, for kinds, k, that use small segments,
+'free_or_new[[k]' contains objects in segments with data and auxiliary
+information allocated, some of which are newly-allocated (since the
+last call of sggc_collect), and may still be in use, and others of
+which are free.  The free objects form a sequential subset delimited
+by the compressed pointers in 'next_free[k]', which is the next free
+object, and 'end_free[k]', which is the first object after the free
+sequence (or SGGC_NO_OBJECT if the free sequence goes to the end of
+the set).  A call of sggc_alloc for an object of kind k will use the
+object from 'free_or_new[k]' identified by 'next_free[k]', unless this
+is equal to 'end_free[k]', indicating that no free objects are
+available for reuse (in which case sggc_malloc is called to obtain new
+space).
+
+If k uses big segments, 'free_or_new[[k]' contains only newly
+allocated objects between calls of sggc_collect. Allocation for
+objects that are stored in big segments is done by looking for an
+existing segment in the 'unused' set, which is shared by all kinds
+that use big segments.  These objects have auxiliary information
+already allocated (which is the same for all kinds, and cannot be
+read-only), but do not have a data area allocated - one is allocated
+using sggc_malloc when it becomes used.  If 'unused' is empty, a new
+segment and auxiliary information is allocated using sggc_malloc.
+
 The 'constants' set is added to only when the application registers a
-new constant object, never has elements removed.  Constants can be
+new constant object, and never has elements removed.  Constants can be
 distinguished from objects in the 'old_gen2' set (which shares the
-same chain) by a 'constant' flag stored in their segment, or by their
-using a big segment, which is not allowed for constants.  The fact
-that these two sets share a chain is convenient when checking that an
+same chain) by a 'constant' flag stored in their segment, or by the
+fact that big segments are not allowed for constants.  The fact that
+these two sets share a chain is convenient when checking whether an
 object can be referenced from an object in old generation 2 without
 using old-to-new.
 
 When a garbage collection is not in progress, the 'to_look_at' set is
-empty.
+empty.  During a garbage collection, as objects are marked as in use,
+from sggc_find_root_ptrs or sggc_find_object_ptrs calling
+sggc_look_at, they are added to the 'to_look_at' set, from which
+objects are repeatedly removed, and passed to sggc_find_object_ptrs,
+until the 'to_look_at' set becomes empty.  This avoids use of
+recursion to following references to objects from other objects.
 
 
 HANDLING OLD-TO-NEW REFERENCES

@@ -417,16 +417,16 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
     }
   }
 
-  /* Add the object to the free_or_new set.  For small segments not
-     from free_or_new, we also put all other objects in the segment
-     into free_or_new, and use them as the current set of free objects
-     if there were none before. */
+  /* Add the object to the free_or_new set, if not already there.  For
+     small segments not from free_or_new, we also put all other
+     objects in the segment into free_or_new, and use them as the
+     current set of free objects if there were none before. */
 
-  if (from_free || kind_chunks[kind] == 0) /* big, or already in new_or_free */
+  if (kind_chunks[kind] == 0) /* big segment, can't be from free_or_new */
   {
     set_add (&free_or_new[kind], v);
   }
-  else /* small segment not already in new_or_free */
+  else if (!from_free) /* small segment not already in new_or_free */
   { 
     if (next_free[kind]!=end_free[kind]) abort(); /* should be none free now */
 
