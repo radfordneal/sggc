@@ -1016,7 +1016,8 @@ sggc_cptr_t sggc_constant (sggc_type_t type, sggc_kind_t kind, set_bits_t bits,
 #endif
 )
 {
-  if (kind_chunks[kind] == 0) abort(); /* big segments not allowed */
+  if (kind_chunks[kind] == 0) abort(); /* big segments are not allowed */
+  if ((bits & 1) == 0) abort();  /* first object in segment must exist */
 
   if (next_segment == maximum_segments)
   { return SGGC_NO_OBJECT;

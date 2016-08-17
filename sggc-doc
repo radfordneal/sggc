@@ -440,9 +440,33 @@ macros) below, which have (if functions) prototypes as shown:
 
   int sggc_is_constant (sggc_cptr_t cptr)
 
+    Returns 1 if the object is in a constant, 0 otherwise. The data
+    and auxiliary information in a constant object must not be
+    modified.
+
   sggc_cptr_t sggc_constant (sggc_type_t type, sggc_kind_t kind, 
                              set_bits_t bits, char *data, 
                              char *aux1, char *aux2)
+
+    Creates a segment containing constant objects, and returns the
+    compressed pointer to the first object in this segment (compressed
+    pointers to the other objects will have the same segment index but
+    different offsets).
+
+    The type and kind of the segment are specified by the first two
+    arguments.  The kind must not specify a big segment.
+
+    The 'bits' argument indicates which offsets within this segment
+    correspond to objects.  The first (low-order) bit must be a 1.
+
+    The 'data' argument is a pointer to the data block for objects in
+    this segment.  The 'aux1' and 'aux2' arguments are pointers to the
+    auxiliary information for the segment; they exist only if
+    SGGC_AUX1_SIZE or SGGC_AUX2_SIZE are defined.
+
+    If called several times before any calls of sggc_alloc, the
+    segments will have indexes 0, 1, 2, etc., which fact may be used
+    when setting up their contents if they reference each other.
 
 
 FUNCTIONS THE APPLICATION MUST PROVIDE TO SGGC
