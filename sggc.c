@@ -772,10 +772,14 @@ void sggc_collect (int level)
       if (SGGC_DEBUG && remove) 
       { printf("sggc_collect: %x in old_gen2 now free\n",(unsigned)v);
       }
-      set_remove (&old_to_new, v);
+      if (remove)
+      { set_remove (&old_to_new, v);
+      }
       v = set_next (&old_gen2, v, remove);
     }
   }
+
+  /* Below shouldn't be necessary?  Do anyway but abort if anything found. */
 
   if (level >= 1)
   { v = set_first (&old_gen1, 0); 
@@ -784,7 +788,9 @@ void sggc_collect (int level)
       if (SGGC_DEBUG && remove) 
       { printf("sggc_collect: %x in old_gen1 now free\n",(unsigned)v);
       }
-      set_remove (&old_to_new, v);
+      if (remove)
+      { set_remove (&old_to_new, v);
+      }
       v = set_next (&old_gen1, v, remove);
     }
   }
