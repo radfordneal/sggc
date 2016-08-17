@@ -297,8 +297,50 @@ objects are repeatedly removed, and passed to sggc_find_object_ptrs,
 until the 'to_look_at' set becomes empty.  This avoids use of
 recursion to following references to objects from other objects.
 
+Once the marking process has finished, the objects in all the
+'free_or_new[k]' sets are known to be unused.  However, some of them
+may still be in the 'old_gen2' or 'old_gen1', so these sets are
+scanned to remove any of their elements that are in a set in the
+SET_UNUSED_FREE_NEW chain.  Such objects are also removed from the
+'old_to_new' set (see below).
+
 
 HANDLING OLD-TO-NEW REFERENCES
+
+When garbage collection is done level 0, only newly-allocated objects
+(generation 0) are potentially collected, so objects in old
+generations 1 and 2 do not need to be examined - except that if an
+object in one of these older generations may refer to a
+newly-allocated object, this must be visible to the garbage collector,
+so that it will not erroneously reuse this referenced object.
+Similary, in a garbage collection at level 1, objects in old
+generation 2 need not be examined - except for those that may refer to
+newly-allocated objects or objects in old generation 1.
+
+To achieve this, the 'old_to_new' set contains objects in old
+generation 1 that may refer to a newly-allocated (generation 0)
+object, and objects in old generation 2 that may refer to an object in
+either generation 1 or generation 0.  Whan a garbage collection is
+done, the objects in the 'old_to_new' set are scanned, and any objects
+in a generaton being collected from an object in a generation that is
+not being collection that is in the 'old_to_new' set is noted as being
+referenced.  Also during this scan, objects in the 'old_to_new" set
+that will no longer contain a reference to a younger object after this
+collection are removed from 'old_to_new'.
+
+In a level 2 garbage collection, objects in 'old_to_new' that are
+currently in old generation 1 (and hence will be in old generaton 2
+after the collection, if they survive) are examined, but only to
+determine whether or not they should remain in the 'old_to_new' set.
+References to newly-allocated objects from these objects are not
+marked as in use, since it is unknown whether or not the object
+referring to them is still in use.  However, if a reference to a
+newly-allocated object is found, the generation 1 object referring to
+it is not removed from 'old_to_new', since if this object survives
+collection, becoming generation 2, it will contain a reference to a
+generation 1 object.  Once such a reference is found, no further
+references need be examined, which is indicated to the application by
+having sggc_look_at return zero.
 
 Actions to do for old-to-new references when collecting at each level.
 
