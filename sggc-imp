@@ -266,17 +266,28 @@ existing segment in the 'unused' set, which is shared by all kinds
 that use big segments.  These objects have auxiliary information
 already allocated (which is the same for all kinds, and cannot be
 read-only), but do not have a data area allocated - one is allocated
-using sggc_malloc when it becomes used.  If 'unused' is empty, a new
-segment and auxiliary information is allocated using sggc_malloc.
+using sggc_malloc when the segment becomes used.  If 'unused' is
+empty, a new segment and auxiliary information is allocated using
+sggc_malloc.
+
+At the start of garbage collection at level 1, objects in 'old_gen1'
+of kind k (with k being determinable from the compressed pointer for
+an object) are added to the 'free_or_new[k]' set.  For collection at
+level 2, this is done for both 'old_gen1' and 'old_gen2'.
+
+When during the marking stage of garbage collection, an object in a
+generation being collected is found to still be in use, it is added to
+'old_gen1' if newly-allocated, or to 'old_gen2' if currently in
+'old_gen1', or remains in 'old_gen2' if it was already there.
 
 The 'constants' set is added to only when the application registers a
 new constant object, and never has elements removed.  Constants can be
 distinguished from objects in the 'old_gen2' set (which shares the
-same chain) by a 'constant' flag stored in their segment, or by the
-fact that big segments are not allowed for constants.  The fact that
-these two sets share a chain is convenient when checking whether an
-object can be referenced from an object in old generation 2 without
-using old-to-new.
+same chain) by the fact that big segments are not allowed for
+constants and by the 'constant' flag stored in small segments.  The
+fact that these two sets share a chain is convenient when checking
+whether an object can be referenced from an object in old generation 2
+without using old-to-new.
 
 When a garbage collection is not in progress, the 'to_look_at' set is
 empty.  During a garbage collection, as objects are marked as in use,
