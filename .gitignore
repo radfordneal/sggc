@@ -7,3 +7,5 @@ test-sggc*/o
 test-set/o
 interp/interp
 interp/interp-db
+interp/o-e-i
+interp/o-e-r
