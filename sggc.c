@@ -718,15 +718,32 @@ void sggc_collect (int level)
     while ((v = set_first (&to_look_at, 1)) != SGGC_NO_OBJECT)
     {
       if (SGGC_DEBUG) printf("sggc_collect: looking at %x\n",(unsigned)v);
-  
-      if (level > 0 && set_remove (&old_gen1, v))
-      { set_add (&old_gen2, v);
-        if (SGGC_DEBUG) printf("sggc_collect: %x now old_gen2\n",(unsigned)v);
+
+      if (level == 0)
+      { /* must be in generation 0 */
+        set_add (&old_gen1, v);
+        if (SGGC_DEBUG) printf("sggc_collect: %x now old_gen1\n",(unsigned)v);
       }
-      else if (level < 2 || !set_contains (&old_gen2, v))
-      { if (!set_add (&old_gen1, v) /* done regardless of SGGC_DEBUG setting */
-         && SGGC_DEBUG) printf("sggc_collect: %x now old_gen1\n",(unsigned)v);
+      else if (level == 1)
+      { if (set_remove (&old_gen1, v))
+        { set_add (&old_gen2, v);
+          if (SGGC_DEBUG) printf("sggc_collect: %x now old_gen2\n",(unsigned)v);
+        }
+        else /* must be in generation 0 */
+        { set_add (&old_gen1, v);
+          if (SGGC_DEBUG) printf("sggc_collect: %x now old_gen1\n",(unsigned)v);
+        }
       }
+      else /* level == 2 */
+      { if (set_remove (&old_gen1, v))
+        { set_add (&old_gen2, v);
+          if (SGGC_DEBUG) printf("sggc_collect: %x now old_gen2\n",(unsigned)v);
+        }
+        else if (!set_contains (&old_gen2, v)) /* must be in generation 0 */
+        { set_add (&old_gen1, v);
+          if (SGGC_DEBUG) printf("sggc_collect: %x now old_gen1\n",(unsigned)v);
+        }
+      }  
   
       sggc_find_object_ptrs (v);
     }
@@ -740,6 +757,10 @@ void sggc_collect (int level)
   /* Remove objects that are still in the free_or_new set from the old 
      generations that were collected.  Also remove them from the old-to-new
      set.
+
+     This is done by scanning the old generation sets, not the free sets,
+     since this is easier, and likely faster, if lots of objects were 
+     allocated but not used for long, and hence are in the free sets.
 
      This could be greatly sped up with some special facility in the set
      module that would do it a segment at a time. */
