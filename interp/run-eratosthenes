@@ -1,3 +1,9 @@
-(E ('(O O O O O I)))
-(@l (E ('(O O O O O O O I))))
-l
+#!/bin/bash
+
+( cat defs-recursive
+  cat defs-numeric
+  cat eratosthenes
+  echo "(E ('(O O O O O I)))"
+  echo "(@l (E ('(O O O O O O O I))))"
+  echo "l"
+) | interp
