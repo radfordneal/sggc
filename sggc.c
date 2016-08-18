@@ -1047,9 +1047,11 @@ sggc_cptr_t sggc_constant (sggc_type_t type, sggc_kind_t kind, set_bits_t bits,
   sggc_data[index] = data;
 # ifdef SGGC_AUX1_SIZE
     sggc_aux1[index] = aux1;
+    seg->x.small.aux1_off = 0;
 # endif
 # ifdef SGGC_AUX2_SIZE
     sggc_aux2[index] = aux2;
+    seg->x.small.aux2_off = 0;
 # endif
     
   if (SGGC_DEBUG) 
