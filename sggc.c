@@ -800,9 +800,8 @@ void sggc_collect (int level)
   }
 
   /* Move big segments to the 'unused' set, while freeing their data
-     storage.  Auxiliary information is not freed, but pointers to
-     read-only information are cleared, since it might not apply when
-     the segment is re-used as a different kind.
+     storage.  Auxiliary information is not freed (and should not be
+     read-only).
 
      Note that all big kinds are equal to their types, so we stop the
      loop at SGGC_N_TYPES. */
@@ -817,37 +816,6 @@ void sggc_collect (int level)
         }
         sggc_free (sggc_data[index]);
         sggc_data [index] = NULL;
-
-#       ifdef SGGC_AUX1_READ_ONLY
-          if (kind_aux1_read_only[k])
-          { if (SGGC_DEBUG) 
-            { printf ("sggc_collect: clearing read-only aux1 for %x:: %p\n", 
-                       v, SGGC_AUX1(v));
-            }
-            sggc_aux1[index] = NULL;
-          }
-#       endif
-#       ifdef SGGC_AUX1_SIZE
-          if (SGGC_DEBUG && sggc_aux1[index] != NULL)
-          { printf("sggc_collect: retaining aux1 for %x:: %p\n",v,SGGC_AUX1(v));
-          }
-#       endif
-
-#       ifdef SGGC_AUX2_READ_ONLY
-          if (kind_aux2_read_only[k])
-          { if (SGGC_DEBUG) 
-            { printf ("sggc_collect: clearing read-only aux2 for %x:: %p\n", 
-                       v, SGGC_AUX2(v));
-            }
-            sggc_aux2[index] = NULL;
-          }
-#       endif
-#       ifdef SGGC_AUX2_SIZE
-          if (SGGC_DEBUG && sggc_aux2[index] != NULL)
-          { printf("sggc_collect: retaining aux2 for %x:: %p\n",v,SGGC_AUX2(v));
-          }
-#       endif
-
         if (SGGC_DEBUG) 
         { printf("sggc_collect: putting %x in unused\n",(unsigned)v);
         }
