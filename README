@@ -1,9 +1,7 @@
 SEGMENTED GENERATIONAL GARBAGE COLLECTOR
 
-Copyright 2016 Radford M. Neal.  Distributed under the GPL version 2 or later.
-
-This software is under development, and not yet ready for use.
-
+Copyright 2016 Radford M. Neal.  Distributed under the GPL version 2
+or later.  See COPYING for licence details.
 
 The SGGC library provides a facility for allocating and automatically
 freeing objects, such as is needed in interpreters for languages such
@@ -18,3 +16,9 @@ example programs in this language.
 
 A facility used by SGGC for managing sets of values is documented in
 set-doc, and tested in test-set.
+
+See VERSIONS for information on current and past stable versions.
+
+The source code repository for this software is at
+
+   https://gitlab.com/radfordneal/sggc
