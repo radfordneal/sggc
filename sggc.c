@@ -746,7 +746,12 @@ void sggc_collect (int level)
     }
   }
 
-  /* Handle old-to-new references. */
+  /* Handle old-to-new references.  Done in cooperation with
+     sggc_look_at, using the global variables collect_level (the level
+     of collection being done) and old_to_new_check (which contains
+     the generation of the referring object, always 1 or 2, except it
+     is cleared to 0 to indicate that further special processing is
+     unnecessary, and that the old-to-new entry is still needed). */
 
   v = set_first(&old_to_new, 0);
 
@@ -784,7 +789,7 @@ void sggc_collect (int level)
     v = set_next (&old_to_new, v, remove);
   }
 
-  old_to_new_check = 0;
+  old_to_new_check = 0;  /* no special old-to-new processing in sggc_look_at */
 
   /* Get the application to take root pointers out of the free_or_new set,
      and put them in the to_look_at set. */
@@ -973,17 +978,19 @@ int sggc_look_at (sggc_cptr_t ptr)
   if (ptr != SGGC_NO_OBJECT)
   { if (old_to_new_check != 0)
     { if (collect_level == 0)
-      { if (!set_contains (&old_gen2, ptr))
+      { if (!set_chain_contains (SET_OLD_GEN2_CONST, ptr))
         { old_to_new_check = 0;
         }
       }
       else if (collect_level == 1 && old_to_new_check == 2)
-      { if (!set_contains (&old_gen2, ptr) && !set_contains (&old_gen1, ptr))
+      { if (!set_chain_contains (SET_OLD_GEN2_CONST, ptr) 
+              && !set_contains (&old_gen1, ptr))
         { old_to_new_check = 0;
         }
       }
-      else
-      { if (!set_contains (&old_gen2, ptr) && !set_contains (&old_gen1, ptr))
+      else /* collect_level==2 || collect_level == 1 && old_to_new_check == 1 */
+      { if (!set_chain_contains (SET_OLD_GEN2_CONST, ptr) 
+              && !set_contains (&old_gen1, ptr))
         { old_to_new_check = 0;
           return 0;
         }
@@ -1004,13 +1011,13 @@ int sggc_look_at (sggc_cptr_t ptr)
 
 void sggc_old_to_new_check (sggc_cptr_t from_ptr, sggc_cptr_t to_ptr)
 {
-  /* If to_ptr is youngest generation, no need to check anything else. */
+  /* If from_ptr is youngest generation, no need to check anything else. */
 
   if (set_chain_contains (SET_UNUSED_FREE_NEW, from_ptr))
   { return;
   }
 
-  /* Can quit if from_ptr is already in the old-to-new set. */
+  /* Can quit now if from_ptr is already in the old-to-new set. */
 
   if (set_contains (&old_to_new, from_ptr))
   { return;
@@ -1025,7 +1032,7 @@ void sggc_old_to_new_check (sggc_cptr_t from_ptr, sggc_cptr_t to_ptr)
     { return;
     }
   }
-  else 
+  else
   { 
     /* If from_ptr is in old generation 1, only references to newly 
        allocated objects require using old-to-new. */
@@ -1035,7 +1042,8 @@ void sggc_old_to_new_check (sggc_cptr_t from_ptr, sggc_cptr_t to_ptr)
     }
   }
 
-  /* Need to record the existence of an old-to-new reference in from_ptr. */
+  /* If we get here, we need to record the existence of an old-to-new
+     reference in from_ptr. */
 
   set_add (&old_to_new, from_ptr);
 }
