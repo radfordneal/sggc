@@ -135,11 +135,6 @@ multiplication) may in some cases be merged with further address
 arithmetic that is needed to obtain a particular item from the
 object's data.
 
-In future, the masking operation may be eliminated by modifying the
-array of data block addresses so that adding the shifted offset
-together with the shifted unmasked index produces the correct final
-result.
-
 If used by the application, auxiliary information 1 is the same size
 (SGGC_AUX1_SIZE) for all objects, and is allocated in blocks
 containing sufficient space for some multiple (SGGC_AUX1_BLOCK_SIZE)
@@ -175,7 +170,7 @@ segments.  In particular, if the auxiliary information is irrelevant
 for some type of object, it can be set to shared dummy data, avoiding
 wasting space for this information when it is not used.  However,
 auxiliary information cannot be read-only for "big" segments, since
-this would complicate the method for re-using auxiliary information.
+this would make re-using auxiliary information more difficult.
 
 In addition to possible quicker access and perhaps sharing, another
 reason for use of auxiliary information may be that it could let other
@@ -384,3 +379,58 @@ level 2:
       1      0       yes    yes     no
       1      1        no     no     no
       1      2        no     no     no
+
+
+FUTURE IMPROVEMENTS
+
+Possible (or likely) extensions and efficiency improvements for SGGC
+include the following:
+
+  o The procedures for finding the lowest-order 1 bit and counting the
+    number of 1 bits in a 64-bit word could be sped up, including
+    arranging somehow for special processor instructions to be used if
+    available.
+
+  o Additional procedures could be included in the set facility to
+    allow operations such as putting all object in an old generation
+    into a free_or_new set to be done a segment at a time, giving a
+    large speed improvement for small segments.
+
+  o The need to mask out just the offset part of a compressed pointer
+    when computing the address of its data or auxiliary information
+    may be eliminated by adjusting the pointers to data or auxiliary
+    information for a segment so that the correct result is obtaned
+    when the unmasked index is present along with the offset.
+
+  o Currently, SGGC never frees memory used for auxiliary information,
+    though it may be reused for other objects of the same kind.  If
+    many objects of some kind are allocated, and then most of them
+    become unused, this could lead to a large amount of memory being
+    allocated but unused.  A block of memory used for auxiliary
+    information could be freed once all objects using that block are
+    no longer in use.  There is currently no data structure support
+    for identifying such blocks, and adding such support would
+    probably increase the amount of memory used per object, but these
+    blocks could be identified by scanning the 'free_or_new' and
+    'unused' sets while maintaining a hash table of auxiliary data
+    block addresses.  There is current support for finding the start
+    of the auxiliary information block used by an object, via the
+    aux1_off and aux2_off fields in a segment.
+
+  o Currently, SGGC immediately frees the data area for a big segment
+    once it is known to be unused.  This may be inefficient,
+    especially if malloc uses high-overhead memory-mapping system
+    calls to allocate and release data areas.  Some way of often
+    reusing the data area for a future object that needs a data area
+    with the same or slightly smaller size might be beneficial.
+
+  o More information could be maintained in sggc_info to help the
+    application decide when to call sggc_collect.
+
+  o A function could be provided that determines whether or not a
+    32-bit word is a valid compressed pointer, to an object that is
+    not currently free.  This could be done fairly efficiency (ie,
+    with just a small number of fetches and comparisons, without
+    searching), by adding a flag in small segments that is set if any
+    object in the segment is in the free portion of a free_or_new set.
+
