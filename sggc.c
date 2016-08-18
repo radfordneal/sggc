@@ -38,6 +38,12 @@
 #endif
 
 
+/* ENABLE/DISABLE EXTRA CHECKS.  These are consistency checks that take
+   non-negligible time. */
+
+#define EXTRA_CHECKS 1
+
+
 /* MALLOC/FREE TO USE.  Defaults to the system malloc/free if not something
    else is not defined in sggc-app.h. */
 
@@ -333,9 +339,9 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
   /* Look for an existing segment for this object to go in (and offset
      within).  For a small segment, the object found will be in
      free_or_new, but will not be between next_free and end_free, and
-     so won't be taken again (at least before the next collection). 
-     For a big segment, the segement will be added to free_or_new, 
-     again outside the region being allocated from. */
+     so won't be taken again (at least before the next collection).
+     For a big segment, the segment will be taken from 'unused', if
+     one is there, and will be added to free_or_new for this kind. */
 
   from_free = 0;
   if (kind_chunks[kind] == 0) /* uses big segments */
@@ -398,7 +404,7 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
   struct set_segment *seg = SET_SEGMENT(index);
 
   if (from_free) /* should be a small segment of the right kind already */
-  { if (1) /* can be enabled for consistency checks */
+  { if (EXTRA_CHECKS) 
     { if (sggc_type[index] != type) abort();
       if (seg->x.small.big) abort();
       if (seg->x.small.constant) abort();
@@ -443,7 +449,7 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
     next_free[kind] = set_next (&free_or_new[kind], v, 0);
   }
 
-  if (1) /* can be enabled for consistency checks */
+  if (EXTRA_CHECKS)
   { if (set_contains (&old_gen1, v)) abort();
     if (set_contains (&old_gen2, v)) abort();
     if (set_contains (&old_to_new, v)) abort();
@@ -779,8 +785,6 @@ void sggc_collect (int level)
     }
   }
 
-  /* Below shouldn't be necessary?  Do anyway but abort if anything found. */
-
   if (level >= 1)
   { v = set_first (&old_gen1, 0); 
     while (v != SET_NO_VALUE)
@@ -861,10 +865,10 @@ void sggc_collect (int level)
     }
   }
 
-  /* Code below can be enabled to wipe out data in free objects, to help
-     debugging.  Assumes a chunk can hold two sggc_cptr_t values. */
+  /* Code below can be enabled to wipe out data in free objects, storing
+     up to two copies of SGGC_NO_OBJECT at the front, to help debugging. */
 
-  if (1)
+  if (EXTRA_CHECKS)
   { for (k = 0; k < SGGC_N_KINDS; k++)
     { if (kind_chunks[k] != 0)
       { sggc_cptr_t p;
@@ -872,8 +876,9 @@ void sggc_collect (int level)
              p != SGGC_NO_OBJECT;
              p = set_next (&free_or_new[k], p, 0))
         { if (SGGC_DATA(p) != NULL)
-          { * ((sggc_cptr_t *) SGGC_DATA(p) + 0) = SGGC_NO_OBJECT;
-            * ((sggc_cptr_t *) SGGC_DATA(p) + 1) = SGGC_NO_OBJECT;
+          { sggc_cptr_t *d =  (sggc_cptr_t *) SGGC_DATA(p);
+            if (sizeof (sggc_cptr_t) < SGGC_CHUNK_SIZE) *d++ = SGGC_NO_OBJECT;
+            if (2 * sizeof (sggc_cptr_t) < SGGC_CHUNK_SIZE) *d = SGGC_NO_OBJECT;
           }
         }
       }
