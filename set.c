@@ -129,6 +129,8 @@ static inline void remove_empty (struct set *set)
 
 /* CHECK WHETHER THE COUNT OF NUMBER OF ELEMENTS IN A SET IS CORRECT. */
 
+#if SET_DEBUG
+
 static int check_n_elements (struct set *set)
 {
   struct set_segment *seg;
@@ -149,8 +151,11 @@ static int check_n_elements (struct set *set)
   return cnt == 0;
 }
 
+#endif
 
 /* CHECK WHETHER A SET CONTAINS A SEGMENT WITH GIVEN INDEX. */
+
+#if SET_DEBUG
 
 static int check_has_seg (struct set *set, set_index_t index)
 {
@@ -163,6 +168,8 @@ static int check_has_seg (struct set *set, set_index_t index)
   }
   return 0;
 }
+
+#endif
 
 
 /* --------------------- FUNCTIONS USED BY APPLICATIONS --------------------- */
@@ -300,14 +307,15 @@ int set_chain_contains (int chain, set_value_t val)
 }
 
 
-/* FIND THE FIRST ELEMENT IN A SET.  Removal of the last value in a segment
-   allows that segment to be added to another set using the same chain.
+/* FIND AND POSSIBLY REMOVE THE FIRST ELEMENT IN A SET.  Removal with
+   the function of the last value in a segment allows that segment to
+   be added to another set using the same chain.
 
-   The linked list of segments for this set is first trimmed of any at 
-   the front that have no elements set, to save time in any future searches.
-   This is also done after removing the first element, to ensure that a
-   segment no longer containing elements of this set can be used in another
-   set using the same chain.  */
+   The linked list of segments for this set is first trimmed of any at
+   the front that have no elements set, to save time in any future
+   searches.  This is also done after removing the first element, to
+   ensure that if the segment no longer contains elements of this set
+   it can be used in another set using the same chain.  */
 
 set_value_t set_first (struct set *set, int remove)
 { 
@@ -468,7 +476,7 @@ void set_assign_segment_bits (struct set *set, set_value_t val, set_bits_t b)
 }
 
 
-/* MOVE THE FIRST SEGMENT OF A SET TO ANOTHER SET. */
+/* MOVE THE FIRST SEGMENT OF A SET TO ANOTHER SET USING THE SAME CHAIN. */
 
 void set_move_first (struct set *src, struct set *dst)
 {
@@ -504,7 +512,7 @@ void set_move_first (struct set *src, struct set *dst)
 }
 
 
-/* MOVE THE SEGMENT AFTER THAT CONTAINING AN ELEMENT TO ANOTHER SET. */
+/* MOVE SEGMENT AFTER THAT CONTAINING AN ELEMENT TO ANOTHER SET IN THE CHAIN. */
 
 void set_move_next (struct set *src, set_value_t val, struct set *dst)
 {
