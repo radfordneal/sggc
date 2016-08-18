@@ -113,7 +113,11 @@
     }
   }
 
-  printf("DONE TESTING\n");
+  printf("DONE MAIN PART OF TEST\n");
+
+  printf("\nSGGC_INFO:  gen0: %u, gen1: %u, gen2: %u, big chunks: %llu\n",
+         sggc_info.gen0_count, sggc_info.gen1_count, sggc_info.gen2_count, 
+         (long long unsigned) sggc_info.big_chunks);
 
   printf("\nFINAL YOUNGEST:  nil %d, a %d, b %d, c %d, d %d, e %d\n",
          YOUNGEST(nil), YOUNGEST(a), YOUNGEST(b), 

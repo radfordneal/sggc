@@ -536,7 +536,7 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
     }
 # endif
 
-  /* Allocate data for the segment, if not already there. */
+  /* Allocate data for the segment, if not already there.  Update sggc_info. */
 
   if (sggc_data[index] == NULL)
   {

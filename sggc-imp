@@ -242,6 +242,11 @@ as follows:
                         looked at to follow pointers they contain,
                         called 'to_look_at'.
 
+Note that with five chains the size of a set_segment structure is 64
+bytes, which may be a good size for cache performance.  It also allows
+efficient indexing of arrays of segments, though this is not relevant
+with the current implementation.
+
 Between calls of sggc_collect, for kinds, k, that use small segments,
 'free_or_new[[k]' contains objects in segments with data and auxiliary
 information allocated, some of which are newly-allocated (since the
@@ -440,6 +445,18 @@ include the following:
     calls to allocate and release data areas.  Some way of often
     reusing the data area for a future object that needs a data area
     with the same or slightly smaller size might be beneficial.
+
+  o The space required to store types for segments could be eliminated
+    by encoding the type in the segment index.  This would also speed
+    up access to type information.  For example, if there are 32
+    possible types, they could be identified by the low-order 5 bits
+    of a segment index.  This would of course require that segments of
+    different types be allocated indexes with the right low-order
+    bits.  There would (for this example) be a limit of 2^21 (which is
+    about 2 million) segments of any particular type.  If each segment
+    had a data area of 1024 bytes, this would give a limit of 2 GBytes
+    of data for one type, which might sometimes be a problem, though
+    likely not on a system with a 32-bit address space.
 
   o More information could be maintained in sggc_info to help the
     application decide when to call sggc_collect.
