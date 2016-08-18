@@ -129,8 +129,6 @@ static inline void remove_empty (struct set *set)
 
 /* CHECK WHETHER THE COUNT OF NUMBER OF ELEMENTS IN A SET IS CORRECT. */
 
-#if SET_DEBUG
-
 static int check_n_elements (struct set *set)
 {
   struct set_segment *seg;
@@ -151,11 +149,8 @@ static int check_n_elements (struct set *set)
   return cnt == 0;
 }
 
-#endif
 
 /* CHECK WHETHER A SET CONTAINS A SEGMENT WITH GIVEN INDEX. */
-
-#if SET_DEBUG
 
 static int check_has_seg (struct set *set, set_index_t index)
 {
@@ -168,8 +163,6 @@ static int check_has_seg (struct set *set, set_index_t index)
   }
   return 0;
 }
-
-#endif
 
 
 /* --------------------- FUNCTIONS USED BY APPLICATIONS --------------------- */

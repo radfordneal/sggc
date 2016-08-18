@@ -135,6 +135,9 @@ static int collect_level = -1; /* Level of current garbage collection */
 static int old_to_new_check;   /* 1 if should look for old-to-new reference */
 
 
+/* ------------------------------ INITIALIZATION ---------------------------- */
+
+
 /* INITIALIZE SEGMENTED MEMORY.  Allocates space for pointers for the
    specified number of segments (currently not expandable).  Returns
    zero if successful, non-zero if allocation fails. */
@@ -287,6 +290,9 @@ int sggc_init (int max_segments)
 
   return 0;
 }
+
+
+/* -------------------------------- ALLOCATION ------------------------------ */
 
 
 /* UPDATE POSITION TO USE NEXT IN BLOCK OF AUXILIARY INFORMATION. */
@@ -580,17 +586,82 @@ fail:
 }
 
 
-/* DO A GARBAGE COLLECTION AT THE SPECIFIED LEVEL.  Levels are 0 for
-   collecting only newly allocated objects, 1 for also collecting
-   objects that have survived one collection, and 2 for collecting all
-   objects.
+/* REGISTER A CONSTANT SEGMENT.  Called with the type and kind of the
+   segment (must not be big), the set of bits indicating which objects
+   exist in the segment, and the segment's data and optionally aux1
+   and aux2 storage.
 
-   This procedure is called automatically when sggc_alloc would
-   otherwise fail, but should also be called by the application
-   according to its heuristics for when this would be desirable. */
+   Returns a compressed pointer to the first object in the segment (at
+   offset zero), or SGGC_NO_OBJECT if a segment couldn't be allocated.
+
+   If called several times before any calls of sggc_alloc, the segments 
+   will have indexes 0, 1, 2, etc., which fact may be used when setting
+   up their contents if they reference each other. */
+
+sggc_cptr_t sggc_constant (sggc_type_t type, sggc_kind_t kind, set_bits_t bits,
+                           char *data
+#ifdef SGGC_AUX1_SIZE
+                         , char *aux1
+#endif
+#ifdef SGGC_AUX2_SIZE
+                         , char *aux2
+#endif
+)
+{
+  if (kind_chunks[kind] == 0) abort(); /* big segments are not allowed */
+  if ((bits & 1) == 0) abort();  /* first object in segment must exist */
+
+  if (next_segment == maximum_segments)
+  { return SGGC_NO_OBJECT;
+  }
+
+  sggc_segment[next_segment] = sggc_malloc (sizeof **sggc_segment);
+  if (sggc_segment[next_segment] == NULL)
+  { return SGGC_NO_OBJECT;
+  }
+
+  set_index_t index = next_segment; 
+  struct set_segment *seg = SET_SEGMENT(index);
+  sggc_cptr_t v = SET_VAL(index,0);
+
+  next_segment += 1;
+
+  set_segment_init (seg);
+
+  seg->x.small.big = 0;
+  seg->x.small.constant = 1;
+  seg->x.small.kind = kind;
+
+  set_add (&constants, v);
+  set_assign_segment_bits (&constants, v, bits);
+
+  sggc_type[index] = type;
+  sggc_data[index] = data;
+# ifdef SGGC_AUX1_SIZE
+    sggc_aux1[index] = aux1;
+    seg->x.small.aux1_off = 0;
+# endif
+# ifdef SGGC_AUX2_SIZE
+    sggc_aux2[index] = aux2;
+    seg->x.small.aux2_off = 0;
+# endif
+    
+  if (SGGC_DEBUG) 
+  { printf("sggc_constant: first object in segment is %x\n", (unsigned)v);
+  }
+
+  return v;
+}
+
+
+/* ---------------------------- GARBAGE COLLECTION -------------------------- */
+
+
+/* PRINT DEBUG INFORMATION FOR GARBAGE COLLECTION. */
 
 static void collect_debug (void)
-{ int k;
+{ 
+  int k;
   printf(
   "  unused: %d, old_gen1: %d, old_gen2: %d, old_to_new: %d, to_look_at: %d, const: %d\n",
        set_n_elements(&unused), 
@@ -625,6 +696,16 @@ static void collect_debug (void)
   }
   printf("\n");
 }
+
+
+/* DO A GARBAGE COLLECTION AT THE SPECIFIED LEVEL.  Levels are 0 for
+   collecting only newly allocated objects, 1 for also collecting
+   objects that have survived one collection, and 2 for collecting all
+   objects.
+
+   This procedure is called automatically when sggc_alloc would
+   otherwise fail, but should also be called by the application
+   according to its heuristics for when this would be desirable. */
 
 void sggc_collect (int level)
 { 
@@ -865,6 +946,9 @@ void sggc_collect (int level)
 }
 
 
+/* ------------------------- APPLICATION INTERFACE -------------------------- */
+
+
 /* TELL THE GARBAGE COLLECTOR THAT AN OBJECT NEEDS TO BE LOOKED AT.
 
    The principal use of this is to mark objects as in use.  If the
@@ -991,72 +1075,4 @@ int sggc_is_constant (sggc_cptr_t cptr)
   struct set_segment *set = SET_SEGMENT(SET_VAL_INDEX(cptr));
 
   return !set->x.small.big && set->x.small.constant;
-}
-
-
-/* REGISTER A CONSTANT SEGMENT.  Called with the type and kind of the
-   segment (must not be big), the set of bits indicating which objects
-   exist in the segment, and the segment's data and optionally aux1
-   and aux2 storage.
-
-   Returns a compressed pointer to the first object in the segment (at
-   offset zero), or SGGC_NO_OBJECT if a segment couldn't be allocated.
-
-   If called several times before any calls of sggc_alloc, the segments 
-   will have indexes 0, 1, 2, etc., which fact may be used when setting
-   up their contents if they reference each other. */
-
-sggc_cptr_t sggc_constant (sggc_type_t type, sggc_kind_t kind, set_bits_t bits,
-                           char *data
-#ifdef SGGC_AUX1_SIZE
-                         , char *aux1
-#endif
-#ifdef SGGC_AUX2_SIZE
-                         , char *aux2
-#endif
-)
-{
-  if (kind_chunks[kind] == 0) abort(); /* big segments are not allowed */
-  if ((bits & 1) == 0) abort();  /* first object in segment must exist */
-
-  if (next_segment == maximum_segments)
-  { return SGGC_NO_OBJECT;
-  }
-
-  sggc_segment[next_segment] = sggc_malloc (sizeof **sggc_segment);
-  if (sggc_segment[next_segment] == NULL)
-  { return SGGC_NO_OBJECT;
-  }
-
-  set_index_t index = next_segment; 
-  struct set_segment *seg = SET_SEGMENT(index);
-  sggc_cptr_t v = SET_VAL(index,0);
-
-  next_segment += 1;
-
-  set_segment_init (seg);
-
-  seg->x.small.big = 0;
-  seg->x.small.constant = 1;
-  seg->x.small.kind = kind;
-
-  set_add (&constants, v);
-  set_assign_segment_bits (&constants, v, bits);
-
-  sggc_type[index] = type;
-  sggc_data[index] = data;
-# ifdef SGGC_AUX1_SIZE
-    sggc_aux1[index] = aux1;
-    seg->x.small.aux1_off = 0;
-# endif
-# ifdef SGGC_AUX2_SIZE
-    sggc_aux2[index] = aux2;
-    seg->x.small.aux2_off = 0;
-# endif
-    
-  if (SGGC_DEBUG) 
-  { printf("sggc_constant: first object in segment is %x\n", (unsigned)v);
-  }
-
-  return v;
 }
