@@ -394,13 +394,30 @@ include the following:
   o Additional procedures could be included in the set facility to
     allow operations such as putting all object in an old generation
     into a free_or_new set to be done a segment at a time, giving a
-    large speed improvement for small segments.
+    large speed improvement for small segments that contain many
+    objects.
 
   o The need to mask out just the offset part of a compressed pointer
     when computing the address of its data or auxiliary information
     may be eliminated by adjusting the pointers to data or auxiliary
-    information for a segment so that the correct result is obtaned
+    information for a segment so that the correct result is obtained
     when the unmasked index is present along with the offset.
+
+  o Currently, small segments of a given kind are never freed, nor
+    reused for a different kind, which could cause problems if many
+    objects of one kind are allocated, and then most of them become
+    unused.  It would be possible to have a 'small_unused' set that
+    contains objects in small segments that have only unused objects.
+    Segments that are entirely free could be identified when
+    allocating an object (moving them to 'small_unused' at that time,
+    preferring to allocate from a partially-used segment), or in a
+    separate pass over the 'free_or_new' sets at the end of a level 2
+    garbage collection.  The currently unused set_move_first and
+    set_move_next procedures provided by the set facility are intended
+    to facilitate this.  The segments in 'small_unused' could then be
+    reused for any small kind.  Their data areas might or might not be
+    freed when they are put in 'small_unused' (perhaps only if a call
+    of sggc_malloc fails).
 
   o Currently, SGGC never frees memory used for auxiliary information,
     though it may be reused for other objects of the same kind.  If
@@ -430,7 +447,7 @@ include the following:
   o A function could be provided that determines whether or not a
     32-bit word is a valid compressed pointer, to an object that is
     not currently free.  This could be done fairly efficiency (ie,
-    with just a small number of fetches and comparisons, without
+    with a fairly small number of fetches and tests, without any
     searching), by adding a flag in small segments that is set if any
     object in the segment is in the free portion of a free_or_new set.
 
