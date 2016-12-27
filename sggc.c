@@ -398,7 +398,7 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
       sggc_aux2[index] = NULL;
 #   endif
     
-    v = SET_VAL(index,0);
+    v = SGGC_CPTR_VAL(index,0);
     if (SGGC_DEBUG) 
     { printf("sggc_alloc: created %x in new segment\n", (unsigned)v);
     }
@@ -631,7 +631,7 @@ sggc_cptr_t sggc_constant (sggc_type_t type, sggc_kind_t kind, int n_objects,
 
   set_index_t index = next_segment; 
   struct set_segment *seg = SET_SEGMENT(index);
-  sggc_cptr_t v = SET_VAL(index,0);
+  sggc_cptr_t v = SGGC_CPTR_VAL(index,0);
 
   next_segment += 1;
 

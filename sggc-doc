@@ -362,6 +362,12 @@ macros) below, which have (if functions) prototypes as shown:
     Returns a regular pointer to the auxiliary information 2 for the
     object whose compressed pointer is passed.
 
+  sggc_cptr_t SGGC_CPTR_VAL (unsigned index, unsigned offset)
+
+    Returns a compressed pointer constructed from the given segment
+    index and offset.  This is needed only in a few specialized
+    contexts.
+
   int sggc_init (int max_segments)
 
     Initializes the SGGC facility, with the maximum number of segments
