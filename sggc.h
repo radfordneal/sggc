@@ -164,7 +164,7 @@ int sggc_oldest_generation (sggc_cptr_t from_ptr);
 int sggc_not_marked (sggc_cptr_t cptr);
 
 int sggc_is_constant (sggc_cptr_t cptr);
-sggc_cptr_t sggc_constant (sggc_type_t type, sggc_kind_t kind, set_bits_t bits,
+sggc_cptr_t sggc_constant (sggc_type_t type, sggc_kind_t kind, int n_objects,
                            char *data
 #ifdef SGGC_AUX1_SIZE
                          , char *aux1
