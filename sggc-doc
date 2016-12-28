@@ -254,7 +254,7 @@ its sggc-app.h file:
     ((type) < 2 ? (type)     /* Types 0 and 1 use kinds 0 and 1 */ \
     : (length) <= 1 ? 3      /* Type 2 with length 1 or less can use kind 3 */ \
     : (length) <= 3 ? 4      /* Type 2 with length 3 or less can use kind 4 */ \
-    : 2)                     /* Type 2 with length >6 must use a big segment */
+    : 2)                     /* Type 2 with length >3 must use a big segment */
 
   #define sggc_nchunks(type,length) \
     ((sggc_nchunks_t)(length) * 2) /* Number of chunks needed is twice length */
