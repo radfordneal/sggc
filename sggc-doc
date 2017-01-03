@@ -188,6 +188,12 @@ garbage collection:
 
 } sggc_info;
 
+The sggc.h file will also declare the array initialized with the
+application's definition of SGGC_KIND_CHUNKS in sggc-app.h, as
+follows:
+
+  const int sggc_kind_chunks[SGGC_N_KINDS];
+
 Finally, the sggc.h file will declare prototypes (or macros, or static
 inline definitions) for the functions documented below, some of which
 may be used by the application, others of which must be defined by the
