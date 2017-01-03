@@ -1,7 +1,7 @@
 SGGC - A LIBRARY SUPPORTING SEGMENTED GENERATIONAL GARBAGE COLLECTION
        Application interface documentation
 
-Copyright (c) 2016 Radford M. Neal.
+Copyright (c) 2016, 2017 Radford M. Neal.
 
    The SGGC library is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -133,16 +133,19 @@ The following types must be defined in sggc-app.h:
 
 An application may optionally define the following in sggc-app.h:
 
-  sggc_malloc           May be defined as a simple symbol or as a 
+  sggc_alloc_zeroed     May be defined as a simple symbol or as a 
                         one-argument macro (not a function), which
-                        is used by SGGC to allocate memory blocks.
-                        Defaults to the symbol 'malloc'.
+                        is used by SGGC to allocate a block of memory
+                        with the given number of bytes, which must be 
+                        set to all zero bits, with return of NULL 
+                        indicating failure.  Defaults to a call of
+                        the C library 'calloc' function.
 
   sggc_free             May be defined as a simple symbol or as a 
                         one-argument macro (not a function), which is
                         used by SGGC to free blocks of memory that
-                        were allocated by sggc_malloc.  Defaults to
-                        the symbol 'free'.
+                        were allocated by sggc_alloc_zeroed.  Defaults
+                        to the symbol 'free', the C library function.
 
 The sggc.h file should be included after the above have been defined,
 at the end of sggc-app.h.  It will define the following types:
@@ -385,6 +388,10 @@ macros) below, which have (if functions) prototypes as shown:
     Note that the significance of type and length for the storage that
     is needed is determined by the application, via the sggc_kind
     function and the SGGC_KIND_CHUNKS initializer.
+
+    The data area for the newly allocated object will be set to all
+    zero bits, but any auxiliary information for the object will have
+    undefined contents.
 
   void sggc_collect (int level)
 
