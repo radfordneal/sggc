@@ -42,7 +42,7 @@
 /* ENABLE/DISABLE EXTRA CHECKS.  These are consistency checks that take
    non-negligible time. */
 
-#define EXTRA_CHECKS 1
+#define EXTRA_CHECKS 0
 
 
 /* ALLOCATE / FREE MACROS.  Defaults to the system calloc/free if something
