@@ -1,6 +1,6 @@
 # (E K) returns a list of primes no bigger than K (in binary) using the 
 # Sieve of Eratosthenes.  Uses n for not equal comparison, d for duplication,
-# r for reversal, I for incrementing, and + for addition.
+# r for reversal, I for incrementing, s for sequence, and + for addition.
 
 (@E ($ (K)
   (% (p q f h i j m)
