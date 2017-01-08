@@ -81,7 +81,7 @@
                     first element dropped, () if the list had only one element
 
      (& x a)        If a evaluates to a list or (), returns the list with the
-                    result of evaluating x appended to the front of this list
+                    result of evaluating x prepended to the front of this list
 
   Bindings for all symbols exists globally, with initial values of ().
 
