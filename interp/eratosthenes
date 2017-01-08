@@ -7,7 +7,7 @@
 
     (@p (s ('(O I)) K))  # Sequence from 2 to K
     (@f (: (d ('x) K)))  # Corresponding flags, all 'x to start
-    (@m ())              # Sequence of number found to be prime
+    (@m ())              # Sequence of numbers found to be prime
 
     # Loop with i going from 2 to K, putting i in m if its flag is still 'x,
     # setting flags for multiples of i to o.
