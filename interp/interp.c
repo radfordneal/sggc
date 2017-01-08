@@ -214,7 +214,12 @@ static ptr_t alloc (sggc_type_t type)
      not after allocating the object, which would then get collected! */
 
   alloc_count += 1;
-  if (alloc_count % 100 == 0)
+  if (0) /* can enable for debugging */
+  { if (alloc_count > 1) /* don't try it before nil is created */
+    { sggc_collect(2); 
+    }
+  }
+  else if (alloc_count % 100 == 0)
   { sggc_collect (alloc_count % 2000 == 0 ? 2 : alloc_count % 500 == 0 ? 1 : 0);
   }
 
@@ -311,8 +316,7 @@ static char read_char (void)
 
 /* READ AN OBJECT.  Passed the next character of input; reads more if
    appropriate, but doesn't read past end of expression.  Prints an
-   error message and exits if there is a syntax error.  Exits without
-   an error if end-of-file is encountered at the beginning. */
+   error message and exits if there is a syntax error. */
 
 static ptr_t read (char c)
 {
