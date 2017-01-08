@@ -51,7 +51,7 @@
      ($ (a1 a2 ...) e1 e2 ...)  As an expression, evaluates to itself; as a 
                                 function, takes arguments for a1, a2, ..., makes
                                 bindings for them, evaluates e1, e2, ..., and
-                                the last of them
+                                returns the last of them
 
      (% (v1 v2 ...) e1 e2 ...)  Creates bindings for v1, v2, ... (initially ());
                                 evaluates e1, e2, ...; returns the last of them
