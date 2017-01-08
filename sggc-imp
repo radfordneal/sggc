@@ -327,7 +327,7 @@ object, and objects in old generation 2 that may refer to an object in
 either generation 1 or generation 0.  Whan a garbage collection is
 done, the objects in the 'old_to_new' set are scanned, and any
 references to an object in a generation being collected from an object
-in a generation that is not being collection that is in the
+in a generation that is not being collected that is in the
 'old_to_new' set is noted as being referenced.  Also during this scan,
 objects in the 'old_to_new" set that will no longer contain a
 reference to a younger object after this collection are removed from
