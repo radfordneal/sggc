@@ -7,8 +7,6 @@
   cat defs-numeric
   cat eratosthenes
   echo "(E ('(O O O O O I)))"
-  echo "(@l (E ('(O O O O O O O I))))"
+  echo "(@l (E ('(O O O O O O O O O O I))))"
   echo "l"
-) | interp$1 >o-e-r
-
-diff -u out-e-r o-e-r
+) | interp$1
