@@ -213,6 +213,20 @@ int sggc_init (int max_segments)
     }
   }
 
+  /* Initialize tables of read-only auxiliary information. */
+
+# ifdef SGGC_AUX1_READ_ONLY
+    for (k = 0; k < SGGC_N_KINDS; k++)
+    { kind_aux1_read_only[k] = sggc_aux1_read_only(k);
+    }
+# endif
+
+# ifdef SGGC_AUX2_READ_ONLY
+    for (k = 0; k < SGGC_N_KINDS; k++)
+    { kind_aux2_read_only[k] = sggc_aux2_read_only(k);
+    }
+# endif
+
   /* Check for read-only data for big segments, and initialize all aux blocks
      to NULL. */
 
@@ -245,20 +259,6 @@ int sggc_init (int max_segments)
         kind_aux2_block[k] = NULL;
         kind_aux2_block_pos[k] = 0;
       }
-    }
-# endif
-
-  /* Initialize tables of read-only auxiliary information. */
-
-# ifdef SGGC_AUX1_READ_ONLY
-    for (k = 0; k < SGGC_N_KINDS; k++)
-    { kind_aux1_read_only[k] = sggc_aux1_read_only(k);
-    }
-# endif
-
-# ifdef SGGC_AUX2_READ_ONLY
-    for (k = 0; k < SGGC_N_KINDS; k++)
-    { kind_aux2_read_only[k] = sggc_aux2_read_only(k);
     }
 # endif
 
