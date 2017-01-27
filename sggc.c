@@ -151,6 +151,16 @@ int sggc_init (int max_segments)
 {
   int i, j, k;
 
+  /* Check that auxiliary block sixes aren't too big. */
+
+# ifdef SGGC_AUX1_SIZE
+    if (SGGC_AUX1_BLOCK_SIZE * SGGC_CHUNKS_IN_SMALL_SEGMENT > 256) abort();
+# endif
+
+# ifdef SGGC_AUX2_SIZE
+    if (SGGC_AUX2_BLOCK_SIZE * SGGC_CHUNKS_IN_SMALL_SEGMENT > 256) abort();
+# endif
+
   /* Allocate space for pointers to segment descriptors, data, and
      possibly auxiliary information for segments.  Information for
      segments these point to is allocated later, when the segment is
@@ -217,13 +227,15 @@ int sggc_init (int max_segments)
 
 # ifdef SGGC_AUX1_READ_ONLY
     for (k = 0; k < SGGC_N_KINDS; k++)
-    { kind_aux1_read_only[k] = sggc_aux1_read_only(k);
+    { kind_aux1_read_only[k] = sggc_kind_chunks[k] == 0 /* big segment */
+                                ? NULL : sggc_aux1_read_only(k);
     }
 # endif
 
 # ifdef SGGC_AUX2_READ_ONLY
     for (k = 0; k < SGGC_N_KINDS; k++)
-    { kind_aux2_read_only[k] = sggc_aux2_read_only(k);
+    { kind_aux2_read_only[k] = sggc_kind_chunks[k] == 0 /* big segment */
+                                ? NULL : sggc_aux2_read_only(k);
     }
 # endif
 
@@ -315,20 +327,35 @@ int sggc_init (int max_segments)
 static void next_aux_pos (sggc_kind_t kind, char **block, unsigned char *pos,
                           int block_size)
 {
-  *pos += 1;
+  int new_pos;  /* used to avoid overflow in operations on *pos */
 
   sggc_nchunks_t nch = sggc_kind_chunks[kind];
 
-  if (nch != 0)  /* small segment */
+  new_pos = *pos + 1;
+
+  if (nch == 0)  /* big segment */
+  { if (new_pos >= block_size * SGGC_CHUNKS_IN_SMALL_SEGMENT)
+    { *block = NULL;
+      *pos = 0;  /* though should be irrelevant */
+    }
+    else
+    { *pos = new_pos;
+    }
+  }
+  else  /* small segment */
   { if (*pos % nch == 0) 
-    { *pos += nch * (kind_objects[kind] - 1);
+    { new_pos += nch * (kind_objects[kind] - 1);
+    }
+    if (new_pos + nch * (kind_objects[kind] - 1) 
+         >= block_size * SGGC_CHUNKS_IN_SMALL_SEGMENT)
+    { *block = NULL;
+      *pos = 0;  /* though should be irrelevant */
+    }
+    else
+    { *pos = new_pos;
     }
   }
 
-  if (*pos >= block_size * SGGC_CHUNKS_IN_SMALL_SEGMENT)
-  { *block = NULL;
-    *pos = 0;  /* though should be irrelevant */
-  }
 }
 
 
