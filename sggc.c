@@ -27,7 +27,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define SGGC_INTERNAL  /* So sggc_info will be declared here without 'extern' */
+#define SGGC_EXTERN    /* So globals will be declared here without 'extern' */
 #include "sggc-app.h"
 
 #if SET_STATIC
