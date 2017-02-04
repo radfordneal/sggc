@@ -8,5 +8,6 @@ test-set/o
 interp/interp
 interp/interp-db
 interp/interp-set-static
+interp/interp-set-max-static
 interp/o-e-i
 interp/o-e-r

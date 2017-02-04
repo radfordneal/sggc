@@ -144,14 +144,15 @@ static int old_to_new_check;   /* 1 if should look for old-to-new reference */
 
 
 /* INITIALIZE SEGMENTED MEMORY.  Allocates space for pointers for the
-   specified number of segments (currently not expandable).  Returns
-   zero if successful, non-zero if allocation fails. */
+   specified number of segments (currently not expandable), unless
+   SGGC_MAX_SEGMENTS is defined, so they are statically allocated.
+   Returns zero if successful, non-zero if allocation fails. */
 
 int sggc_init (int max_segments)
 {
   int i, j, k;
 
-  /* Check that auxiliary block sixes aren't too big. */
+  /* Check that auxiliary block sizes aren't too big. */
 
 # ifdef SGGC_AUX1_SIZE
     if (SGGC_AUX1_BLOCK_SIZE * SGGC_CHUNKS_IN_SMALL_SEGMENT > 256) abort();
@@ -161,41 +162,44 @@ int sggc_init (int max_segments)
     if (SGGC_AUX2_BLOCK_SIZE * SGGC_CHUNKS_IN_SMALL_SEGMENT > 256) abort();
 # endif
 
-  /* Allocate space for pointers to segment descriptors, data, and
-     possibly auxiliary information for segments.  Information for
-     segments these point to is allocated later, when the segment is
-     actually needed. */
+  /* If not done statically, allocate space for pointers to segment
+     descriptors, data, and possibly auxiliary information for
+     segments.  Information for segments these point to is allocated
+     later, when the segment is actually needed.  Also allocate space
+     for segment types. */
 
-  sggc_segment = sggc_alloc_zeroed (max_segments * sizeof *sggc_segment);
-  if (sggc_segment == NULL)
-  { return 1;
-  }
+#ifndef SGGC_MAX_SEGMENTS
 
-  sggc_data = sggc_alloc_zeroed (max_segments * sizeof *sggc_data);
-  if (sggc_data == NULL)
-  { return 2;
-  }
-
-# ifdef SGGC_AUX1_SIZE
-    sggc_aux1 = sggc_alloc_zeroed (max_segments * sizeof *sggc_aux1);
-    if (sggc_aux1 == NULL)
-    { return 3;
+    sggc_segment = sggc_alloc_zeroed (max_segments * sizeof *sggc_segment);
+    if (sggc_segment == NULL)
+    { return 1;
     }
-# endif
 
-# ifdef SGGC_AUX2_SIZE
-    sggc_aux2 = sggc_alloc_zeroed (max_segments * sizeof *sggc_aux2);
-    if (sggc_aux2 == NULL)
-    { return 4;
+    sggc_data = sggc_alloc_zeroed (max_segments * sizeof *sggc_data);
+    if (sggc_data == NULL)
+    { return 2;
     }
-# endif
 
-  /* Allocate space for holding the types of segments. */
+#   ifdef SGGC_AUX1_SIZE
+      sggc_aux1 = sggc_alloc_zeroed (max_segments * sizeof *sggc_aux1);
+      if (sggc_aux1 == NULL)
+      { return 3;
+      }
+#   endif
 
-  sggc_type = sggc_alloc_zeroed (max_segments * sizeof *sggc_type);
-  if (sggc_type == NULL)
-  { return 5;
-  }
+#   ifdef SGGC_AUX2_SIZE
+      sggc_aux2 = sggc_alloc_zeroed (max_segments * sizeof *sggc_aux2);
+      if (sggc_aux2 == NULL)
+      { return 4;
+      }
+#   endif
+
+    sggc_type = sggc_alloc_zeroed (max_segments * sizeof *sggc_type);
+    if (sggc_type == NULL)
+    { return 5;
+    }
+
+#endif
 
   /* Compute numbers of objects in segments of each kind, and
      initialize bit vectors that indicate when segments of different

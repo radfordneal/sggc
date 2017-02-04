@@ -74,14 +74,20 @@
 
 /* POINTER TO ARRAY OF POINTERS TO SEGMENTS.  This array of pointers
    is allocated when the GC is initialized, with the segments themselves
-   allocated later, as needed. */
+   allocated later, as needed, except that if SGGC_MAX_SEGMENTS is
+   defined, it is allocated statically instead. */
 
 #ifdef SGGC_EXTERN
 SGGC_EXTERN 
 #else
 extern
 #endif
+
+#ifdef SGGC_MAX_SEGMENTS
+struct set_segment *sggc_segment[SGGC_MAX_SEGMENTS];
+#else
 struct set_segment **sggc_segment;
+#endif
 
 
 /* MACRO FOR GETTING SEGMENT POINTER FROM SEGMENT INDEX. */

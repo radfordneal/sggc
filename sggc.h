@@ -49,7 +49,10 @@ typedef set_value_t sggc_cptr_t;  /* Type of compressed pointer (index,offset)*/
 
 /* ARRAYS OF POINTERS TO SPACE FOR MAIN AND AUXILIARY DATA .  The sggc_data
    and (perhaps) sggc_aux[0], sggc_aux[1], etc. arrays have length equal to
-   the maximum number of segments, and are allocated at initialization.  
+   the maximum number of segments, and are either allocated at initialization,
+   or statically allocated, if the maximum number of segments is specified
+   at compile time with SGGC_MAX_SEGMENTS.
+   
    Pointers in these arrays are set when segments are needed, by the 
    application, since the application may do tricks like making some of
    of these be shared between segments, if it knows this is possible.
@@ -57,6 +60,21 @@ typedef set_value_t sggc_cptr_t;  /* Type of compressed pointer (index,offset)*/
    Main data is for one object in a 'big' segment, and for several in a
    'small' segment, having total number of chunks no more than given by
    SGGC_CHUNKS_IN_SMALL_SEGMENT. */
+
+#ifdef SGGC_MAX_SEGMENTS
+
+SGGC_EXTERN char *sggc_data[SGGC_MAX_SEGMENTS]; /* Pointers to arrays of data
+                                                   blocks for objects in seg */
+
+#ifdef SGGC_AUX1_SIZE
+SGGC_EXTERN char *sggc_aux1[SGGC_MAX_SEGMENTS]; /* Pointers to aux1 data */
+#endif
+
+#ifdef SGGC_AUX2_SIZE
+SGGC_EXTERN char *sggc_aux2[SGGC_MAX_SEGMENTS]; /* Pointers to aux2 data */
+#endif
+
+#else
 
 SGGC_EXTERN char **sggc_data;      /* Pointer to array of pointers to arrays of 
                                       data blocks for objects within segments */
@@ -69,6 +87,8 @@ SGGC_EXTERN char **sggc_aux1;      /* Pointer to array of pointers to arrays of
 #ifdef SGGC_AUX2_SIZE
 SGGC_EXTERN char **sggc_aux2;      /* Pointer to array of pointers to arrays of 
                                       auxiliary info for objects in segments */
+#endif
+
 #endif
 
 #define SGGC_CHUNKS_IN_SMALL_SEGMENT (1 << SET_OFFSET_BITS)
@@ -97,12 +117,17 @@ static inline char *SGGC_AUX2 (sggc_cptr_t cptr)
 /* TYPES AND KINDS OF SEGMENTS.  Types and kinds must fit in 8 bits,
    with the kind being equal to the type if it is for a "big" segment.
    The kind of a small segment is recorded in the segment description.
-   The array of types for segments is allocated at initialization. */
+   The array of types for segments is allocated at initialization, or
+   statically if SGGC_MAX_SEGMENTS is defined. */
 
 typedef unsigned char sggc_type_t;
 typedef unsigned char sggc_kind_t;
 
+#ifdef SGGC_MAX_SEGMENTS
+SGGC_EXTERN sggc_type_t sggc_type[SGGC_MAX_SEGMENTS];  /* Types for segments */
+#else
 SGGC_EXTERN sggc_type_t *sggc_type;  /* Types of objects in each segment */
+#endif
 
 /* Macro to access type of object, using the index of its segment. */
 
