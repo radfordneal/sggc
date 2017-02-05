@@ -97,6 +97,26 @@ SGGC_EXTERN char **sggc_aux2;      /* Pointer to array of pointers to arrays of
 /* INLINE FUNCTION TO GET DATA POINTER FOR AN OBJECT, and similarly
    for auxiliary information (if present). */
 
+#if SGGC_USE_OFFSET_POINTERS
+
+static inline char *SGGC_DATA (sggc_cptr_t cptr)
+{ return sggc_data[SET_VAL_INDEX(cptr)] + SGGC_CHUNK_SIZE * cptr;
+}
+
+#ifdef SGGC_AUX1_SIZE
+static inline char *SGGC_AUX1 (sggc_cptr_t cptr)
+{ return sggc_aux1[SET_VAL_INDEX(cptr)] + SGGC_AUX1_SIZE * cptr;
+}
+#endif
+
+#ifdef SGGC_AUX2_SIZE
+static inline char *SGGC_AUX2 (sggc_cptr_t cptr)
+{ return sggc_aux2[SET_VAL_INDEX(cptr)] + SGGC_AUX2_SIZE * cptr;
+}
+#endif
+
+#else
+
 static inline char *SGGC_DATA (sggc_cptr_t cptr)
 { return sggc_data[SET_VAL_INDEX(cptr)] + SGGC_CHUNK_SIZE*SET_VAL_OFFSET(cptr);
 }
@@ -111,6 +131,8 @@ static inline char *SGGC_AUX1 (sggc_cptr_t cptr)
 static inline char *SGGC_AUX2 (sggc_cptr_t cptr)
 { return sggc_aux2[SET_VAL_INDEX(cptr)] + SGGC_AUX2_SIZE * SET_VAL_OFFSET(cptr);
 }
+#endif
+
 #endif
 
 

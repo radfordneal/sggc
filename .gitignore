@@ -7,7 +7,9 @@ test-sggc*/o
 test-set/o
 interp/interp
 interp/interp-db
+interp/interp-db-offset
 interp/interp-set-static
 interp/interp-set-max-static
+interp/interp-set-max-static-offset
 interp/o-e-i
 interp/o-e-r

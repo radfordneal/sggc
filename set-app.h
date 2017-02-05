@@ -54,8 +54,8 @@
   union \
   { struct                 /* For big segments... */ \
     { unsigned big : 1;       /* 1 for a big segment with one large object  */ \
-      unsigned max_chunks : SGGC_CHUNK_BITS;/* Chunks that fit in the space */ \
-    } big;                                  /*  allocated; 0 if size fixed  */ \
+      unsigned max_chunks : SGGC_CHUNK_BITS;/* Chunks that fit in allocated */ \
+    } big;                                  /* space; 0 if too big to record*/ \
     struct                 /* For small segments... */ \
     { unsigned big : 1;       /* 0 for a segment with several small objects */ \
       unsigned unused : 6;    /* Bits not currently in use                  */ \

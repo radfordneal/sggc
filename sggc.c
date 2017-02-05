@@ -380,9 +380,79 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
   }
 
   sggc_kind_t kind = sggc_kind(type,length);
+  char *data = NULL;
   sggc_index_t index;
+  sggc_nchunks_t nch;
   sggc_cptr_t v;
-  int from_free;
+  int from_free = 0;
+  int new = 0;
+
+  /* If this object will be put in a big segment, try to allocate its
+     data area now, and return SGGC_NO_OBJECT if this does not succeed. */
+
+  if (sggc_kind_chunks[kind] == 0) /* big segment */
+  { nch = sggc_nchunks (type, length);
+    data = sggc_alloc_zeroed ((size_t) SGGC_CHUNK_SIZE * nch);
+    if (data == NULL) 
+    { goto fail;
+    }
+    if (SGGC_DEBUG) 
+    { printf (
+       "sggc_alloc: called alloc_zeroed for data (big %d, %d chunks):: %p\n", 
+        kind, (int)nch, data);
+    }
+  }
+
+  /* Make sure we have blocks of auxiliary information 1 and 2 available 
+     (if required), in case we need them (though we may not).  Return
+     SGGC_NO_OBJECT if we can't allocate these blocks (freeing data
+     if it was allocated). */
+
+# ifdef SGGC_AUX1_SIZE
+    char * const read_only_aux1 = 
+#     ifdef SGGC_AUX1_READ_ONLY
+        kind_aux1_read_only[kind];
+#     else
+        0;
+#     endif
+    if (!read_only_aux1 && kind_aux1_block[kind] == NULL)
+    { kind_aux1_block[kind] = sggc_alloc_zeroed
+                               (SGGC_CHUNKS_IN_SMALL_SEGMENT
+                                 * SGGC_AUX1_BLOCK_SIZE * SGGC_AUX1_SIZE);
+      if (kind_aux1_block[kind] == NULL) 
+      { goto fail;
+      }
+      kind_aux1_block_pos[kind] = 0;
+      if (SGGC_DEBUG)
+      { printf(
+         "sggc_alloc: called alloc_zeroed for aux1 block (kind %d):: %p\n", 
+          kind, kind_aux1_block[kind]);
+      }
+    }
+# endif
+
+# ifdef SGGC_AUX2_SIZE 
+    char * const read_only_aux2 = 
+#     ifdef SGGC_AUX2_READ_ONLY
+        kind_aux2_read_only[kind];
+#     else
+        0;
+#     endif
+    if (!read_only_aux2 && kind_aux2_block[kind] == NULL)
+    { kind_aux2_block[kind] = sggc_alloc_zeroed
+                               (SGGC_CHUNKS_IN_SMALL_SEGMENT
+                                 * SGGC_AUX2_BLOCK_SIZE * SGGC_AUX2_SIZE);
+      if (kind_aux2_block[kind] == NULL) 
+      { goto fail;
+      }
+      kind_aux2_block_pos[kind] = 0;
+      if (SGGC_DEBUG)
+      { printf(
+         "sggc_alloc: called alloc_zeroed for aux2 block (kind %d):: %p\n", 
+          kind, kind_aux2_block[kind]);
+      }
+    }
+# endif
 
   /* Look for an existing segment for this object to go in (and offset
      within).  For a small segment, the object found will be in
@@ -391,7 +461,6 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
      For a big segment, the segment will be taken from 'unused', if
      one is there, and will be added to free_or_new for this kind. */
 
-  from_free = 0;
   if (sggc_kind_chunks[kind] == 0) /* uses big segments */
   { v = set_first (&unused, 1);
     if (v != SGGC_NO_OBJECT)
@@ -412,39 +481,37 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
   }
 
   /* Create a new segment for this object, if none found above.  Also set
-     'index' to the new or old segment being used.  May return SGGC_NO_OBJECT
-     if a new segment can't be created. */
+     'index' to the new or old segment being used.  Allocate the data block
+     if the new segment is a small one.  Will return with value SGGC_NO_OBJECT
+     if a new segment or new data block can't be created (freeing data also
+     if it was allocated). */
 
   if (v != SGGC_NO_OBJECT)
   { index = SET_VAL_INDEX(v);
   }
   else
-  { 
-    if (next_segment == maximum_segments)
-    { return SGGC_NO_OBJECT;
+  { if (next_segment == maximum_segments)
+    { goto fail;
     }
-
+    if (data == NULL) /* small segment */
+    { data = sggc_alloc_zeroed ((size_t) SGGC_CHUNK_SIZE 
+                                  * SGGC_CHUNKS_IN_SMALL_SEGMENT);
+      if (data == NULL) 
+      { goto fail;
+      }
+    }
     sggc_segment[next_segment] = sggc_alloc_zeroed (sizeof **sggc_segment);
     if (sggc_segment[next_segment] == NULL)
-    { return SGGC_NO_OBJECT;
+    { goto fail;
     }
-
     index = next_segment; 
     next_segment += 1;
-
     set_segment_init (SET_SEGMENT(index));
-    sggc_data[index] = NULL;
-#   ifdef SGGC_AUX1_SIZE
-      sggc_aux1[index] = NULL;
-#   endif
-#   ifdef SGGC_AUX2_SIZE
-      sggc_aux2[index] = NULL;
-#   endif
-    
     v = SGGC_CPTR_VAL(index,0);
     if (SGGC_DEBUG) 
     { printf("sggc_alloc: created %x in new segment\n", (unsigned)v);
     }
+    new = 1;
   }
 
   /* Set up type and flags for the segment, or (if enabled) check that they 
@@ -505,35 +572,22 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
     if (set_contains (&to_look_at, v)) abort();
   }
 
-  /* Allocate auxiliary information for segment, if not already there. */
+  /* Allocate auxiliary information for the segment, if needed.  We've
+     previously guaranteed that space will be available if required. */
 
 # ifdef SGGC_AUX1_SIZE
-    if (sggc_aux1[index] == NULL)
+    if (new)
     {
 #     ifdef SGGC_AUX1_READ_ONLY
-        sggc_aux1[index] = kind_aux1_read_only[kind];
+      if (read_only_aux1)
+      { sggc_aux1[index] = read_only_aux1;
         if (SGGC_DEBUG)
-        { if (sggc_aux1[index] != NULL)
-          { printf("sggc_alloc: used read-only aux1 for %x\n", v);
-          }
+        { printf("sggc_alloc: used read-only aux1 for %x\n", v);
         }
+      }
+      else
 #     endif
-      if (sggc_aux1[index] == NULL)
-      { if (kind_aux1_block[kind] == NULL)
-        { kind_aux1_block[kind] = sggc_alloc_zeroed
-                                   (SGGC_CHUNKS_IN_SMALL_SEGMENT
-                                     * SGGC_AUX1_BLOCK_SIZE * SGGC_AUX1_SIZE);
-          if (SGGC_DEBUG)
-          { printf(
-             "sggc_alloc: called alloc_zeroed for aux1 block (kind %d):: %p\n", 
-              kind, kind_aux1_block[kind]);
-          }
-          kind_aux1_block_pos[kind] = 0;
-          if (kind_aux1_block[kind] == NULL) 
-          { goto fail;
-          }
-        }
-        sggc_aux1[index] = kind_aux1_block[kind] 
+      { sggc_aux1[index] = kind_aux1_block[kind] 
                             + kind_aux1_block_pos[kind] * SGGC_AUX1_SIZE;
         if (!seg->x.small.big)
         { seg->x.small.aux1_off = kind_aux1_block_pos[kind];
@@ -546,36 +600,25 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
         next_aux_pos (kind, &kind_aux1_block[kind], &kind_aux1_block_pos[kind],
                       SGGC_AUX1_BLOCK_SIZE);
       }
+#     if SGGC_USE_OFFSET_POINTERS
+        sggc_aux1[index] -= (SGGC_AUX1_SIZE << SET_OFFSET_BITS) * index;
+#     endif
     }
 # endif
 
 # ifdef SGGC_AUX2_SIZE
-    if (sggc_aux2[index] == NULL)
+    if (new)
     {
 #     ifdef SGGC_AUX2_READ_ONLY
-        sggc_aux2[index] = kind_aux2_read_only[kind];
+      if (read_only_aux2)
+      { sggc_aux2[index] = read_only_aux2;
         if (SGGC_DEBUG)
-        { if (sggc_aux2[index] != NULL)
-          { printf("sggc_alloc: used read-only aux2 for %x\n", v);
-          }
+        { printf("sggc_alloc: used read-only aux2 for %x\n", v);
         }
+      }
+      else
 #     endif
-      if (sggc_aux2[index] == NULL)
-      { if (kind_aux2_block[kind] == NULL)
-        { kind_aux2_block[kind] = sggc_alloc_zeroed
-                                    (SGGC_CHUNKS_IN_SMALL_SEGMENT
-                                      * SGGC_AUX2_BLOCK_SIZE * SGGC_AUX2_SIZE);
-          if (SGGC_DEBUG)
-          { printf(
-             "sggc_alloc: called alloc_zeroed for aux2 block (kind %d):: %p\n", 
-              kind, kind_aux2_block[kind]);
-          }
-          kind_aux2_block_pos[kind] = 0;
-          if (kind_aux2_block[kind] == NULL) 
-          { goto fail;
-          }
-        }
-        sggc_aux2[index] = kind_aux2_block[kind] 
+      { sggc_aux2[index] = kind_aux2_block[kind] 
                             + kind_aux2_block_pos[kind] * SGGC_AUX2_SIZE;
         if (!seg->x.small.big)
         { seg->x.small.aux2_off = kind_aux2_block_pos[kind];
@@ -588,41 +631,28 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
         next_aux_pos (kind, &kind_aux2_block[kind], &kind_aux2_block_pos[kind],
                       SGGC_AUX2_BLOCK_SIZE);
       }
+#     if SGGC_USE_OFFSET_POINTERS
+        sggc_aux2[index] -= (SGGC_AUX2_SIZE << SET_OFFSET_BITS) * index;
+#     endif
     }
 # endif
 
-  /* Allocate data for the segment, if not already there.  Update sggc_info. */
 
-  if (sggc_data[index] == NULL)
+  /* Set up data pointer for the segment, if not already there.  Update 
+     sggc_info. */
+
+  if (data != NULL)  /* data area was allocated above, already zeroed. */
   {
     if (seg->x.big.big) /* big segment */
-    { 
-      sggc_nchunks_t nch = sggc_nchunks (type, length);
-      seg->x.big.max_chunks = (nch >> SGGC_CHUNK_BITS) == 0 ? nch : 0;
-
-      sggc_data[index] = sggc_alloc_zeroed ((size_t) SGGC_CHUNK_SIZE * nch);
-      if (SGGC_DEBUG) 
-      { printf (
-         "sggc_alloc: called alloc_zeroed for %x (big %d, %d chunks):: %p\n", 
-          v, kind, (int)nch, sggc_data[index]);
-      }
-
+    { seg->x.big.max_chunks = (nch >> SGGC_CHUNK_BITS) == 0 ? nch : 0;
       sggc_info.big_chunks += nch;
     }
-    else /* small segment */
-    { 
-      sggc_data[index] = sggc_alloc_zeroed ((size_t) SGGC_CHUNK_SIZE 
-                                             * SGGC_CHUNKS_IN_SMALL_SEGMENT);
-      if (SGGC_DEBUG) 
-      { printf (
-         "sggc_alloc: called alloc_zeroed for %x (small %d, %d chunks):: %p\n",
-          v, kind, (int)SGGC_CHUNKS_IN_SMALL_SEGMENT, sggc_data[index]);
-      }
-    }
 
-    if (sggc_data[index] == NULL) 
-    { goto fail;
-    }
+    sggc_data[index] = data;
+
+#   if SGGC_USE_OFFSET_POINTERS
+      sggc_data[index] -= (SGGC_CHUNK_SIZE << SET_OFFSET_BITS) * index;
+#   endif
   }
 
   else /* Using existing data area in small segment, so just set to zeros. */
@@ -637,8 +667,10 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
 
 fail: 
 
-  /* Segment obtained, but couldn't allocate aux info or data for segment. */
+  /* Some allocation failed.  Return SGGC_NO_OBJECT, after freeing
+     'data' if it was allocated. */
 
+  if (data != NULL) sggc_free(data);
   return SGGC_NO_OBJECT;
 }
 
