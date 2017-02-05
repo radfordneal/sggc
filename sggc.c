@@ -735,12 +735,21 @@ sggc_cptr_t sggc_constant (sggc_type_t type, sggc_kind_t kind, int n_objects,
 
   sggc_type[index] = type;
   sggc_data[index] = data;
+# if SGGC_USE_OFFSET_POINTERS
+    sggc_data[index] -= (SGGC_CHUNK_SIZE << SET_OFFSET_BITS) * index;
+# endif
 # ifdef SGGC_AUX1_SIZE
     sggc_aux1[index] = aux1;
+#   if SGGC_USE_OFFSET_POINTERS
+      sggc_aux1[index] -= (SGGC_AUX1_SIZE << SET_OFFSET_BITS) * index;
+#   endif
     seg->x.small.aux1_off = 0;
 # endif
 # ifdef SGGC_AUX2_SIZE
     sggc_aux2[index] = aux2;
+#   if SGGC_USE_OFFSET_POINTERS
+      sggc_aux2[index] -= (SGGC_AUX2_SIZE << SET_OFFSET_BITS) * index;
+#   endif
     seg->x.small.aux2_off = 0;
 # endif
     
