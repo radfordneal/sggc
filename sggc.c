@@ -1005,8 +1005,12 @@ void sggc_collect (int level)
         { printf ("sggc_collect: calling free for data for %x:: %p\n", 
                    v, SGGC_DATA(v));
         }
-        sggc_free (sggc_data[index]);
-        sggc_data [index] = NULL;
+#       if SGGC_USE_OFFSET_POINTERS
+          sggc_free (sggc_data[index] 
+                      + (SGGC_CHUNK_SIZE << SET_OFFSET_BITS) * index);
+#       else
+          sggc_free (sggc_data[index]);
+#       endif
         if (SGGC_DEBUG) 
         { printf("sggc_collect: putting %x in unused\n",(unsigned)v);
         }
