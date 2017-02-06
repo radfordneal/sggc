@@ -418,9 +418,9 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
   }
 
   sggc_kind_t kind = sggc_kind(type,length);
+  sggc_nchunks_t nch = sggc_kind_chunks[kind];
   char *data = NULL;
   sggc_index_t index;
-  sggc_nchunks_t nch;
   sggc_cptr_t v;
   int from_free = 0;
   int new = 0;
@@ -428,7 +428,7 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
   /* If this object will be put in a big segment, try to allocate its
      data area now, and return SGGC_NO_OBJECT if this does not succeed. */
 
-  if (sggc_kind_chunks[kind] == 0) /* big segment */
+  if (nch == 0) /* big segment */
   { nch = sggc_nchunks (type, length);
     data = sggc_alloc_zeroed ((size_t) SGGC_CHUNK_SIZE * nch);
     if (data == NULL) 
@@ -588,7 +588,9 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
   }
   else if (!from_free) /* small segment not already in new_or_free */
   { 
-    if (next_free[kind]!=end_free[kind]) abort(); /* should be none free now */
+    if (0)  /* may be enabled for debug check */
+    { if (next_free[kind]!=end_free[kind]) abort(); /* should be none free now*/
+    }
 
     end_free[kind] = set_first (&free_or_new[kind], 0);
 
@@ -689,8 +691,16 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
 
   else /* Using existing data area in small segment, so just set to zeros. */
   {
-    if (sggc_kind_chunks[kind] == 0) abort();
-    memset (SGGC_DATA(v), 0, (size_t) sggc_kind_chunks[kind] * SGGC_CHUNK_SIZE);
+    /* Handle clearing a single 8 or 16 byte chunk specially. */
+
+    if ((SGGC_CHUNK_SIZE == 8 || SGGC_CHUNK_SIZE == 16) && nch == 1)
+    { uint64_t *p = (uint64_t *) SGGC_DATA(v);  /* should be aligned properly */
+      *p = 0;
+      if (SGGC_CHUNK_SIZE == 16) *(p+1) = 0;
+    }
+    else
+    { memset (SGGC_DATA(v), 0, (size_t) nch * SGGC_CHUNK_SIZE);
+    }
   }
 
   sggc_info.gen0_count += 1;
