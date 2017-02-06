@@ -198,9 +198,13 @@ being defined as 0 or not defined at all).
 
 A different value for SGGC_OFFSET_CAST may be used when
 SGGC_USE_OFFSET_POINTERS is 1, as may be chosen by appropriately
-editing sggc.h.  Any unsigned integer type of at least 32 bits should
-work, but whether uint32_t or uintptr_t is faster might depend on the
-machine used.
+editing sggc.h.  Any unsigned integer type of at least 32 bits
+(possibly less) should work, but whether uint32_t or uintptr_t is
+faster might depend on the machine used.  Note that consistent use of
+one unsigned type is necessary, so that overflow (which may occur, and
+produces a well-defined result for unsigned types) will always occur
+in the same manner, leading to cancellation of all but the desired
+part of the operation.
 
 
 GENERATIONAL GARBAGE COLLECTION
