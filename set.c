@@ -78,12 +78,12 @@ static int check_n_elements (struct set *set);
 /* FIND POSITION OF LOWEST-ORDER BIT.  The position returned is from 0 up.
    The argument must not be zero.
 
-   Fast for gcc, using its builtin. */
+   Fast for gcc and clang, using their builtin functions. */
 
 static inline int first_bit_pos (set_bits_t b)
 { 
   if (SET_DEBUG && b == 0) abort();
-# if __GNUC__
+# if defined(__GNUC__) || defined(__clang__)
     return sizeof b <= sizeof (unsigned) ? __builtin_ctz(b) 
          : sizeof b <= sizeof (unsigned long) ? __builtin_ctzl(b) 
          : sizeof b <= sizeof (unsigned long long) ? __builtin_ctzll(b)
@@ -102,11 +102,11 @@ static inline int first_bit_pos (set_bits_t b)
 
 /* FIND THE NUMBER OF BITS IN A SET OF BITS.  
 
-   Fast for gcc, using its builtin. */
+   Fast for gcc and clang, using their builtin functions. */
 
 static inline int bit_count (set_bits_t b)
 { 
-# if __GNUC__
+# if defined(__GNUC__) || defined(__clang__)
     return sizeof b <= sizeof (unsigned) ? __builtin_popcount(b) 
          : sizeof b <= sizeof (unsigned long) ? __builtin_popcountl(b) 
          : sizeof b <= sizeof (unsigned long long) ? __builtin_popcountll(b)
