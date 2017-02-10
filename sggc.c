@@ -417,19 +417,26 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
   { printf("sggc_alloc: type %u, length %u\n",(unsigned)type,(unsigned)length);
   }
 
-  sggc_kind_t kind = sggc_kind(type,length);
-  sggc_nchunks_t nch = sggc_kind_chunks[kind];
-  char *data = NULL;
-  sggc_index_t index;
-  sggc_cptr_t v;
-  enum { Big, From_free, New } src = New;
+  int big = 0;  /* will object go in a big segment? */
+  int new = 0;  /* will object go in a new segment? */
+
+  char *data = NULL;  /* pointer to data area for segment used */
+
+  sggc_kind_t kind = sggc_kind(type,length);   /* kind of segment needed */
+  sggc_nchunks_t nch = sggc_kind_chunks[kind]; /* number of chunks for object */
+
+  sggc_index_t index;       /* index of segment that object will be in */
+  struct set_segment *seg;  /* points to struct for segment object will be in */
+  sggc_cptr_t v;            /* pointer to object, to be returned as value */
 
   /* If this object will be put in a big segment, try to allocate its
-     data area now, and return SGGC_NO_OBJECT if this does not succeed. */
+     data area now, and return SGGC_NO_OBJECT if this does not succeed.
+     The area allocated is freed if allocation later fails for some reason.
+
+     We also set 'big' to 1 if a big segment is being used. */
 
   if (nch == 0) /* big segment */
   { nch = sggc_nchunks (type, length);
-    src = Big;
     data = sggc_alloc_zeroed ((size_t) SGGC_CHUNK_SIZE * nch);
     if (data == NULL) 
     { goto fail;
@@ -439,12 +446,16 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
        "sggc_alloc: called alloc_zeroed for data (big %d, %d chunks):: %p\n", 
         kind, (int)nch, data);
     }
+    big = 1;
   }
 
   /* Make sure we have blocks of auxiliary information 1 and 2 available 
      (if required), in case we need them (though we may not).  Return
      SGGC_NO_OBJECT if we can't allocate these blocks (freeing data
-     if it was allocated). */
+     if it was allocated).  Trying to allocate them now avoids the need to 
+     back out later operations if the allocation fails, and is not really
+     a waste since the amount allocated should be small, and will be
+     needed sooner or later, even if not now. */
 
 # ifdef SGGC_AUX1_SIZE
     char *const read_only_aux1 = 
@@ -497,13 +508,16 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
      free_or_new, but will not be between next_free and end_free, and
      so won't be taken again (at least before the next collection).
      For a big segment, the segment will be taken from 'unused', if
-     one is there, and will be added to free_or_new for this kind. */
+     one is there. */
 
-  if (src == Big) 
+  if (big) /* big segment */
   { v = set_first (&unused, 1);
     if (v != SGGC_NO_OBJECT)
     { if (SGGC_DEBUG) printf("sggc_alloc: found %x in unused\n",(unsigned)v);
       set_add (&free_or_new[kind], v);
+      index = SET_VAL_INDEX(v);
+      seg = SET_SEGMENT(index);
+      sggc_type[index] = type;  /* may reuse big segments of other types */
     }
   }
   else /* small segment */
@@ -514,24 +528,24 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
     else
     { next_free[kind] = set_next (&free_or_new[kind], v, 0);
       if (SGGC_DEBUG) printf("sggc_alloc: found %x in next_free\n",(unsigned)v);
-      src = From_free;
+      index = SET_VAL_INDEX(v);
+      seg = SET_SEGMENT(index);
+      if (EXTRA_CHECKS) 
+      { if (sggc_type[index] != type) abort();
+      }
     }
   }
 
-  /* Create a new segment for this object, if none found above.  Also set
-     'index' to the new or old segment being used.  Allocate the data block
-     if the new segment is a small one.  Will return with value SGGC_NO_OBJECT
-     if a new segment or new data block can't be created (freeing data also
-     if it was allocated). */
+  /* Create a new segment for this object, if none found above.  Also
+     allocate the data block if the new segment is a small one.  Will
+     return with value SGGC_NO_OBJECT if a new segment or new data
+     block can't be created (freeing data also if it was allocated). */
 
-  if (v != SGGC_NO_OBJECT)
-  { index = SET_VAL_INDEX(v);
-  }
-  else
+  if (v == SGGC_NO_OBJECT)  /* new segment, big or small */
   { if (next_segment == maximum_segments)
     { goto fail;
     }
-    if (data == NULL) /* small segment */
+    if (!big) /* small segment */
     { data = sggc_alloc_zeroed ((size_t) SGGC_CHUNK_SIZE 
                                   * SGGC_CHUNKS_IN_SMALL_SEGMENT);
       if (data == NULL) 
@@ -544,49 +558,33 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
     }
     index = next_segment; 
     next_segment += 1;
-    set_segment_init (SET_SEGMENT(index));
+    seg = SET_SEGMENT(index);
+    set_segment_init (seg);
+    sggc_type[index] = type;
+    seg->x.big.big = big;
+    if (!big)
+    { seg->x.small.constant = 0;
+      seg->x.small.kind = kind;
+    }
     v = SGGC_CPTR_VAL(index,0);
     if (SGGC_DEBUG) 
     { printf("sggc_alloc: created %x in new segment\n", (unsigned)v);
     }
-  }
-
-  /* Set up type and flags for the segment, or (if enabled) check that they 
-     are already what they should be. */
-
-  struct set_segment *seg = SET_SEGMENT(index);
-
-  if (src == From_free) /* small segment of the right kind found */
-  { if (EXTRA_CHECKS) 
-    { if (sggc_type[index] != type) abort();
-      if (seg->x.small.big) abort();
-      if (seg->x.small.constant) abort();
-      if (seg->x.small.kind != kind) abort();
-    }
-  }
-  else if (src == Big) /* big segment */
-  { sggc_type[index] = type;
-    seg->x.big.big = 1;
-  }
-  else /* new small segment */
-  { sggc_type[index] = type;
-    seg->x.small.big = 0;
-    seg->x.small.constant = 0;
-    seg->x.small.kind = kind;
+    new = 1;
   }
 
   /* Add the object to the free_or_new set, if not already there.  For
      small segments not from free_or_new, we also put all other
      objects in the segment into free_or_new, and use them as the
-     current set of free objects if there were none before. */
+     current set of free objects, since there were none before. */
 
-  if (src == Big)
+  if (big)  /* big segment */
   {
     set_add (&free_or_new[kind], v);
   }
-  else if (src == New)
+  else if (new)  /* new small segment */
   { 
-    if (0)  /* may be enabled for debug check */
+    if (EXTRA_CHECKS)
     { if (next_free[kind]!=end_free[kind]) abort(); /* should be none free now*/
     }
 
@@ -610,11 +608,11 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
     if (set_contains (&to_look_at, v)) abort();
   }
 
-  /* Allocate auxiliary information for the segment, if needed.  We've
-     previously guaranteed that space will be available if required. */
+  /* Allocate auxiliary information for the segment, if it's a new one.  
+     We've previously guaranteed that space will be available. */
 
 # ifdef SGGC_AUX1_SIZE
-    if (src == New)
+    if (new)
     {
 #     ifdef SGGC_AUX1_READ_ONLY
       if (read_only_aux1)
@@ -627,7 +625,7 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
 #     endif
       { sggc_aux1[index] = kind_aux1_block[kind] 
                             + kind_aux1_block_pos[kind] * SGGC_AUX1_SIZE;
-        if (!seg->x.small.big)
+        if (!big)
         { seg->x.small.aux1_off = kind_aux1_block_pos[kind];
         }
         if (SGGC_DEBUG)
@@ -643,7 +641,7 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
 # endif
 
 # ifdef SGGC_AUX2_SIZE
-    if (src == New)
+    if (new)
     {
 #     ifdef SGGC_AUX2_READ_ONLY
       if (read_only_aux2)
@@ -656,7 +654,7 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
 #     endif
       { sggc_aux2[index] = kind_aux2_block[kind] 
                             + kind_aux2_block_pos[kind] * SGGC_AUX2_SIZE;
-        if (!seg->x.small.big)
+        if (!big)
         { seg->x.small.aux2_off = kind_aux2_block_pos[kind];
         }
         if (SGGC_DEBUG)
@@ -677,7 +675,7 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
 
   if (data != NULL)  /* data area was allocated above, already zeroed. */
   {
-    if (seg->x.big.big) /* big segment */
+    if (big) /* big segment */
     { seg->x.big.max_chunks = (nch >> SGGC_CHUNK_BITS) == 0 ? nch : 0;
       sggc_info.big_chunks += nch;
     }
