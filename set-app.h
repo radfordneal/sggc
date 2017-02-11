@@ -60,6 +60,7 @@
     { unsigned big : 1;       /* 0 for a segment with several small objects */ \
       unsigned unused : 6;    /* Bits not currently in use                  */ \
       unsigned constant : 1;  /* 1 for a constant segment                   */ \
+      /* setting of aux1_off and aux2_off below may be disabled in sggc.c   */ \
       unsigned char aux1_off; /* Offset of aux1 info from start of block    */ \
       unsigned char aux2_off; /* Offset of aux2 info from start of block    */ \
       unsigned char kind;     /* The kind of segment (equal to type if big) */ \

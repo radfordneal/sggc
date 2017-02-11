@@ -467,9 +467,9 @@ include the following:
     probably increase the amount of memory used per object, but these
     blocks could be identified by scanning the 'free_or_new' and
     'unused' sets while maintaining a hash table of auxiliary data
-    block addresses.  There is current support for finding the start
-    of the auxiliary information block used by an object, via the
-    aux1_off and aux2_off fields in a segment.
+    block addresses.  There is current support (disabled by default)
+    for finding the start of the auxiliary information block used by
+    an object, via the aux1_off and aux2_off fields in a segment.
 
   o Currently, SGGC immediately frees the data area for a big segment
     once it is known to be unused.  This may be inefficient,

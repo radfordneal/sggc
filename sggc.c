@@ -625,7 +625,7 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
 #     endif
       { sggc_aux1[index] = kind_aux1_block[kind] 
                             + kind_aux1_block_pos[kind] * SGGC_AUX1_SIZE;
-        if (!big)
+        if (0 && !big)  /* could be enabled if aux1_off were ever actually used */
         { seg->x.small.aux1_off = kind_aux1_block_pos[kind];
         }
         if (SGGC_DEBUG)
@@ -654,7 +654,7 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
 #     endif
       { sggc_aux2[index] = kind_aux2_block[kind] 
                             + kind_aux2_block_pos[kind] * SGGC_AUX2_SIZE;
-        if (!big)
+        if (0 && !big)  /* could be enabled if aux2_off were ever actually used */
         { seg->x.small.aux2_off = kind_aux2_block_pos[kind];
         }
         if (SGGC_DEBUG)
