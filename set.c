@@ -435,6 +435,44 @@ SET_PROC_CLASS set_value_t set_next (struct set *set, set_value_t val,
 }
 
 
+/* FIND THE NEXT ELEMENT IN A SET THAT IS IN ANOTHER SEGMENT. */
+
+SET_PROC_CLASS set_value_t set_next_segment (struct set *set, set_value_t val)
+{
+  set_index_t index = SET_VAL_INDEX(val);
+  struct set_segment *seg = SET_SEGMENT(index);
+
+  CHK_SET(set);
+  CHK_SEGMENT(seg,set->chain);
+  CHK_SET_INDEX(set,index);
+
+  set_index_t nindex;
+  struct set_segment *nseg;
+
+  /* Go to the next segment, removing any segments that are unused. If there
+     is no next segment, return SET_NO_VALUE. */
+
+  for (;;)
+  { 
+    nindex = seg->next[set->chain];
+    if (nindex == SET_END_OF_CHAIN) 
+    { return SET_NO_VALUE;
+    }
+
+    nseg = SET_SEGMENT(nindex);
+    CHK_SEGMENT(nseg,set->chain);
+
+    set_bits_t b = nseg->bits[set->chain];
+    if (b != 0) 
+    { return SET_VAL (nindex, first_bit_pos(b));
+    }
+
+    seg->next[set->chain] = nseg->next[set->chain];
+    nseg->next[set->chain] = SET_NOT_IN_CHAIN;
+  }
+}
+
+
 /* RETURN THE BITS INDICATING MEMBERSHIP FOR THE FIRST SEGMENT OF A SET. 
    First removes empty segments at the front. */
 
@@ -561,6 +599,38 @@ SET_PROC_CLASS void set_move_next (struct set *src, set_value_t val,
 
   CHK_SET(src);
   CHK_SET(dst);
+}
+
+
+/* ADD ELEMENTS IN A SET WITHIN SOME SEGMENT TO SOME OTHER SET.  
+
+   The destination set must use a different chain than the source set,
+   and the elements added to the destination set must not be in a
+   segment that is in another set using the same chain as the destination
+   chain. */
+
+SET_PROC_CLASS void set_add_segment (struct set *dst, struct set *src, 
+                                     set_value_t val)
+{
+  CHK_SET(dst);
+  CHK_SET(src);
+
+  abort();
+}
+
+
+/* REMOVE ELEMENTS IN A SET WITHIN SOME SEGMENT AND IN ANY SET IN SOME CHAIN. */
+
+SET_PROC_CLASS void set_remove_segment (struct set *dst, set_value_t val, 
+                                        int chain)
+{
+  set_index_t index = SET_VAL_INDEX(val);
+  struct set_segment *seg = SET_SEGMENT(index);
+
+  CHK_SET(dst);
+  CHK_SET_INDEX(dst,index);
+
+  abort();
 }
 
 

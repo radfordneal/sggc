@@ -861,29 +861,35 @@ void sggc_collect (int level)
 
   if (set_first(&to_look_at, 0) != SET_NO_VALUE) abort();
 
-  /* Put objects in the old generations being collected in the free_or_new set.
-
-     This could be greatly sped up with some special facility in the set
-     module that would do it a segment at a time. */
+  /* Put objects in the old generations being collected in the 
+     free_or_new set for their kind. */
 
   if (level == 2)
   { for (v = set_first(&old_gen2, 0); 
          v != SET_NO_VALUE; 
-         v = set_next(&old_gen2,v,0))
-    { set_add (&free_or_new[SGGC_KIND(v)], v);
+         v = set_next_segment(&old_gen2,v))
+    { set_add_segment (&free_or_new[SGGC_KIND(v)], &old_gen2, v);
       if (SGGC_DEBUG) 
-      { printf("sggc_collect: put %x from old_gen2 in free\n",(unsigned)v);
+      { for (set_value_t w = v; 
+             w != SET_NO_VALUE && SET_VAL_INDEX(w) == SET_VAL_INDEX(v);
+             w = set_next (&old_gen2, w, 0))
+        { printf("sggc_collect: put %x from old_gen2 in free\n",(unsigned)w);
+        }
       }
     }
   }
 
   if (level >= 1)
-  { for (v = set_first(&old_gen1, 0);
+  { for (v = set_first(&old_gen1, 0); 
          v != SET_NO_VALUE; 
-         v = set_next(&old_gen1,v,0))
-    { set_add (&free_or_new[SGGC_KIND(v)], v);
+         v = set_next_segment(&old_gen1,v))
+    { set_add_segment (&free_or_new[SGGC_KIND(v)], &old_gen1, v);
       if (SGGC_DEBUG) 
-      { printf("sggc_collect: put %x from old_gen1 in free\n",(unsigned)v);
+      { for (set_value_t w = v; 
+             w != SET_NO_VALUE && SET_VAL_INDEX(w) == SET_VAL_INDEX(v);
+             w = set_next (&old_gen1, w, 0))
+        { printf("sggc_collect: put %x from old_gen1 in free\n",(unsigned)w);
+        }
       }
     }
   }
@@ -988,40 +994,25 @@ void sggc_collect (int level)
 
   /* Remove objects that are still in the free_or_new set from the old 
      generations that were collected.  Also remove them from the old-to-new
-     set.
-
-     This is done by scanning the old generation sets, not the free sets,
-     since this is easier, and likely faster, if lots of objects were 
-     allocated but not used for long, and hence are in the free sets.
-
-     This could be greatly sped up with some special facility in the set
-     module that would do it a segment at a time. */
+     set. */
 
   if (level == 2)
-  { v = set_first (&old_gen2, 0); 
-    while (v != SET_NO_VALUE)
-    { int remove = set_chain_contains (SET_UNUSED_FREE_NEW, v);
-      if (SGGC_DEBUG && remove) 
-      { printf("sggc_collect: %x in old_gen2 now free\n",(unsigned)v);
-      }
-      if (remove)
-      { set_remove (&old_to_new, v);
-      }
-      v = set_next (&old_gen2, v, remove);
+  { for (v = set_first(&old_gen2, 0); 
+         v != SET_NO_VALUE; 
+         v = set_next_segment(&old_gen2,v))
+    { set_remove_segment (&old_gen2, SET_UNUSED_FREE_NEW, v);
     }
   }
-
   if (level >= 1)
-  { v = set_first (&old_gen1, 0); 
-    while (v != SET_NO_VALUE)
-    { int remove = set_chain_contains (SET_UNUSED_FREE_NEW, v);
-      if (SGGC_DEBUG && remove) 
-      { printf("sggc_collect: %x in old_gen1 now free\n",(unsigned)v);
-      }
-      if (remove)
-      { set_remove (&old_to_new, v);
-      }
-      v = set_next (&old_gen1, v, remove);
+  { for (v = set_first(&old_gen1, 0); 
+         v != SET_NO_VALUE; 
+         v = set_next_segment(&old_gen1,v))
+    { set_remove_segment (&old_gen1, SET_UNUSED_FREE_NEW, v);
+    }
+    for (v = set_first(&old_to_new, 0); 
+         v != SET_NO_VALUE; 
+         v = set_next_segment(&old_to_new,v))
+    { set_remove_segment (&old_to_new, SET_UNUSED_FREE_NEW, v);
     }
   }
 
