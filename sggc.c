@@ -43,6 +43,15 @@
 #endif
 
 
+/* ENABLE/DISABLE SEGMENT-AT-A-TIME OPERATIONS.  Set to 1 to enable use of
+   set functions for segment-at-a-time operations.  If not defined, defaults
+   to 1, which is what it should be except for debugging and timing tests. */
+
+#ifndef SGGC_SEGMENT_AT_A_TIME
+#define SGGC_SEGMENT_AT_A_TIME 1
+#endif
+
+
 /* ENABLE/DISABLE EXTRA CHECKS.  These are consistency checks that take
    non-negligible time. */
 
@@ -881,7 +890,7 @@ void sggc_collect (int level)
      time, and a new one that does it a segment at a time. */
 
 
-  if (0) /* enable to do it the old way, one object at a time */
+  if (!SGGC_SEGMENT_AT_A_TIME) /* do it the old way, one object at a time */
   {
     if (level == 2)
     { for (v = set_first(&old_gen2, 0);
@@ -1040,7 +1049,7 @@ void sggc_collect (int level)
      Two versions are maintained, an old one doing it one object at a
      time, and a new one that does it a segment at a time. */
 
-  if (0) /* enable to do it the old way, one object at a time */
+  if (!SGGC_SEGMENT_AT_A_TIME) /* do it the old way, one object at a time */
   { 
     if (level == 2)
     { v = set_first (&old_gen2, 0); 
