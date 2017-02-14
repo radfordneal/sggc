@@ -11,5 +11,6 @@ interp/interp-db-offset
 interp/interp-set-static
 interp/interp-set-max-static
 interp/interp-set-max-static-offset
+interp/interp-noseg
 interp/o-e-i
 interp/o-e-r
