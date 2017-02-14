@@ -920,7 +920,7 @@ void sggc_collect (int level)
     { for (v = set_first(&old_gen2, 0); 
            v != SET_NO_VALUE; 
            v = set_next_segment(&old_gen2,v))
-      { set_add_segment (&free_or_new[SGGC_KIND(v)], &old_gen2, v);
+      { set_add_segment (&free_or_new[SGGC_KIND(v)], v, SET_OLD_GEN2_CONST);
         if (SGGC_DEBUG) 
         { DO_FOR_SEGMENT (old_gen2, v,
            printf("sggc_collect: put %x from old_gen2 in free\n",(unsigned)w));
@@ -932,7 +932,7 @@ void sggc_collect (int level)
     { for (v = set_first(&old_gen1, 0); 
            v != SET_NO_VALUE; 
            v = set_next_segment(&old_gen1,v))
-      { set_add_segment (&free_or_new[SGGC_KIND(v)], &old_gen1, v);
+      { set_add_segment (&free_or_new[SGGC_KIND(v)], v, SET_OLD_GEN1);
         if (SGGC_DEBUG) 
         { DO_FOR_SEGMENT (old_gen1, v,
            printf("sggc_collect: put %x from old_gen1 in free\n",(unsigned)w));
@@ -1089,9 +1089,9 @@ void sggc_collect (int level)
         { DO_FOR_SEGMENT (old_gen2, v, 
             printf("sggc_collect: put %x from old_gen2 in free\n",(unsigned)w));
         }
-        set_remove_segment (&old_gen2, SET_UNUSED_FREE_NEW, v);
+        set_remove_segment (&old_gen2, v, SET_UNUSED_FREE_NEW);
         if (set_chain_contains (SET_OLD_TO_NEW, v))
-        { set_remove_segment (&old_to_new, SET_UNUSED_FREE_NEW, v);
+        { set_remove_segment (&old_to_new, v, SET_UNUSED_FREE_NEW);
         }
       }
     }
@@ -1104,9 +1104,9 @@ void sggc_collect (int level)
         { DO_FOR_SEGMENT (old_gen1, v, 
             printf("sggc_collect: put %x from old_gen1 in free\n",(unsigned)w));
         }
-        set_remove_segment (&old_gen1, SET_UNUSED_FREE_NEW, v);
+        set_remove_segment (&old_gen1, v, SET_UNUSED_FREE_NEW);
         if (set_chain_contains (SET_OLD_TO_NEW, v))
-        { set_remove_segment (&old_to_new, SET_UNUSED_FREE_NEW, v);
+        { set_remove_segment (&old_to_new, v, SET_UNUSED_FREE_NEW);
         }
       }
     }
