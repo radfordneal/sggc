@@ -25,7 +25,9 @@
 
 /* CHAINS FOR LINKING SEGMENTS IN SETS.  All sets used have their own
    chain, except that the SET_UNUSED_FREE_NEW chain is shared amongst 
-   a collection of sets, one set for each possible kind of object. */
+   a collection of sets, one set for each possible kind of object, as
+   well as the unused set of segments for big objects, and SET_OLD_GEN2_CONST
+   is shared between old generation 2 and constants. */
 
 #define SET_CHAINS 5       /* Number of chains that can be used for sets */
 

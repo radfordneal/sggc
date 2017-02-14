@@ -131,8 +131,8 @@ SET_PROC_CLASS void set_assign_segment_bits (struct set *set, set_value_t val,
 SET_PROC_CLASS void set_move_first (struct set *src, struct set *dst);
 SET_PROC_CLASS void set_move_next (struct set *src, set_value_t val,
                                    struct set *dst);
-SET_PROC_CLASS void set_add_segment (struct set *dst, struct set *src, 
-                                     set_value_t val);
-SET_PROC_CLASS void set_remove_segment (struct set *dst, set_value_t val,
+SET_PROC_CLASS void set_add_segment (struct set *set, set_value_t val, 
+                                     int chain);
+SET_PROC_CLASS void set_remove_segment (struct set *set, set_value_t val,
                                         int chain);
 SET_PROC_CLASS set_value_t set_n_elements (struct set *set);

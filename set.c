@@ -609,28 +609,54 @@ SET_PROC_CLASS void set_move_next (struct set *src, set_value_t val,
    segment that is in another set using the same chain as the destination
    chain. */
 
-SET_PROC_CLASS void set_add_segment (struct set *dst, struct set *src, 
-                                     set_value_t val)
+SET_PROC_CLASS void set_add_segment (struct set *set, set_value_t val, 
+                                     int chain)
 {
-  CHK_SET(dst);
-  CHK_SET(src);
+  CHK_SET(set);
+  int dst_chain = set->chain;
 
-  abort();
+  set_index_t index = SET_VAL_INDEX(val);
+  struct set_segment *seg = SET_SEGMENT(index);
+
+  CHK_SEGMENT(seg,dst_chain);
+  CHK_SEGMENT(seg,chain);
+
+  set_bits_t added_bits = seg->bits[chain] & ~seg->bits[dst_chain];
+
+  if (added_bits != 0)
+  { 
+    seg->bits[dst_chain] |= added_bits;
+    set->n_elements += bit_count(added_bits);
+
+    if (seg->next[dst_chain] == SET_NOT_IN_CHAIN)
+    { seg->next[dst_chain] = set->first;
+      set->first = index;
+    }
+  }
 }
 
 
 /* REMOVE ELEMENTS IN A SET WITHIN SOME SEGMENT AND IN ANY SET IN SOME CHAIN. */
 
-SET_PROC_CLASS void set_remove_segment (struct set *dst, set_value_t val, 
+SET_PROC_CLASS void set_remove_segment (struct set *set, set_value_t val, 
                                         int chain)
 {
+  CHK_SET(set);
+  int dst_chain = set->chain;
+
   set_index_t index = SET_VAL_INDEX(val);
   struct set_segment *seg = SET_SEGMENT(index);
 
-  CHK_SET(dst);
-  CHK_SET_INDEX(dst,index);
+  CHK_SEGMENT(seg,dst_chain);
+  CHK_SEGMENT(seg,chain);
 
-  abort();
+  set_bits_t removed_bits = seg->bits[chain] & seg->bits[dst_chain];
+
+  if (removed_bits != 0)
+  { 
+    seg->bits[dst_chain] &= ~removed_bits;
+    set->n_elements -= bit_count(removed_bits);
+  }
 }
 
 
