@@ -12,5 +12,6 @@ interp/interp-set-static
 interp/interp-set-max-static
 interp/interp-set-max-static-offset
 interp/interp-noseg
+interp/interp-nobuiltins
 interp/o-e-i
 interp/o-e-r

@@ -25,6 +25,11 @@
 #endif
 
 
+#ifndef SET_USE_BUILTINS
+#define SET_USE_BUILTINS (defined(__GNUC__) || defined(__clang__))
+#endif
+
+
 /*   See set-doc for general documentation on this facility, and for the
  *   documentation on functions that are part of the application interface.
  */
@@ -83,7 +88,8 @@ static int check_n_elements (struct set *set);
 static inline int first_bit_pos (set_bits_t b)
 { 
   if (SET_DEBUG && b == 0) abort();
-# if defined(__GNUC__) || defined(__clang__)
+
+# if SET_USE_BUILTINS
     return sizeof b <= sizeof (unsigned) ? __builtin_ctz(b) 
          : sizeof b <= sizeof (unsigned long) ? __builtin_ctzl(b) 
          : sizeof b <= sizeof (unsigned long long) ? __builtin_ctzll(b)
@@ -97,6 +103,7 @@ static inline int first_bit_pos (set_bits_t b)
     }
     return pos;
 # endif
+
 }
 
 
@@ -106,7 +113,7 @@ static inline int first_bit_pos (set_bits_t b)
 
 static inline int bit_count (set_bits_t b)
 { 
-# if defined(__GNUC__) || defined(__clang__)
+# if SET_USE_BUILTINS
     return sizeof b <= sizeof (unsigned) ? __builtin_popcount(b) 
          : sizeof b <= sizeof (unsigned long) ? __builtin_popcountl(b) 
          : sizeof b <= sizeof (unsigned long long) ? __builtin_popcountll(b)
@@ -120,6 +127,7 @@ static inline int bit_count (set_bits_t b)
     }
     return cnt;
 # endif
+
 }
 
 

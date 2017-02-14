@@ -889,7 +889,6 @@ void sggc_collect (int level)
      Two versions are maintained, an old one doing it one object at a
      time, and a new one that does it a segment at a time. */
 
-
   if (!SGGC_SEGMENT_AT_A_TIME) /* do it the old way, one object at a time */
   {
     if (level == 2)
@@ -1087,7 +1086,7 @@ void sggc_collect (int level)
            v = set_next_segment(&old_gen2,v))
       { if (SGGC_DEBUG)
         { DO_FOR_SEGMENT (old_gen2, v, 
-            printf("sggc_collect: put %x from old_gen2 in free\n",(unsigned)w));
+            printf("sggc_collect: %x in old_gen2 now free\n",(unsigned)w));
         }
         set_remove_segment (&old_gen2, v, SET_UNUSED_FREE_NEW);
         if (set_chain_contains (SET_OLD_TO_NEW, v))
@@ -1102,7 +1101,7 @@ void sggc_collect (int level)
            v = set_next_segment(&old_gen1,v))
       { if (SGGC_DEBUG)
         { DO_FOR_SEGMENT (old_gen1, v, 
-            printf("sggc_collect: put %x from old_gen1 in free\n",(unsigned)w));
+            printf("sggc_collect: %x from old_gen1 now free\n",(unsigned)w));
         }
         set_remove_segment (&old_gen1, v, SET_UNUSED_FREE_NEW);
         if (set_chain_contains (SET_OLD_TO_NEW, v))

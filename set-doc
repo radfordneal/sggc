@@ -161,6 +161,13 @@ conflicts, and that an optimizing compiler may be able to produce
 faster code when it can see the definitions of the set facility's
 procedures (eg, sometimes inlining code).
 
+Whether the set facility tries to use fast builtin functions for
+finding and counting 1 bits in a word can be controlled by defining
+the SET_USE_BUILTINS pre-processor symbol to be 0 or 1.  If it is not
+defined, the builtin functions are used when the gcc or clang
+compilers are used (as indicated by __GNUC__ or __clang__ being
+defined).
+
 
 SETS SHARING THE SAME CHAIN
 
