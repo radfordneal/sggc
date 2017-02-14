@@ -434,12 +434,6 @@ FUTURE IMPROVEMENTS
 Possible (or likely) extensions and efficiency improvements for SGGC
 include the following:
 
-  o Additional procedures could be included in the set facility to
-    allow operations such as putting all objects in an old generation
-    into a free_or_new set to be done an entire segment at a time,
-    giving a large speed improvement for small segments that contain
-    many objects.
-
   o Currently, small segments of a given kind are never freed, nor
     reused for a different kind, which could cause problems if many
     objects of one kind are allocated, and then most of them become
@@ -457,19 +451,20 @@ include the following:
     of sggc_alloc_zeroed fails).
 
   o Currently, SGGC never frees memory used for auxiliary information,
-    though it may be reused for other objects of the same kind.  If
-    many objects of some kind are allocated, and then most of them
-    become unused, this could lead to a large amount of memory being
-    allocated but unused.  A block of memory used for auxiliary
-    information could be freed once all objects using that block are
-    no longer in use.  There is currently no data structure support
-    for identifying such blocks, and adding such support would
-    probably increase the amount of memory used per object, but these
-    blocks could be identified by scanning the 'free_or_new' and
-    'unused' sets while maintaining a hash table of auxiliary data
-    block addresses.  There is current support (disabled by default)
-    for finding the start of the auxiliary information block used by
-    an object, via the aux1_off and aux2_off fields in a segment.
+    though it may be reused for other objects of the same kind (or a
+    different kind, for big kinds).  If many objects of some kind are
+    allocated, and then most of them become unused, this could lead to
+    a large amount of memory being allocated but unused.  A block of
+    memory used for auxiliary information could be freed once all
+    objects using that block are no longer in use.  There is currently
+    no data structure support for identifying such blocks, and adding
+    such support would probably increase the amount of memory used per
+    object, but these blocks could be identified by scanning the
+    'free_or_new' and 'unused' sets while maintaining a hash table of
+    auxiliary data block addresses.  There is current support
+    (disabled by default) for finding the start of the auxiliary
+    information block used by an object, via the aux1_off and aux2_off
+    fields in a segment.
 
   o Currently, SGGC immediately frees the data area for a big segment
     once it is known to be unused.  This may be inefficient,
