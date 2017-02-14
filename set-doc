@@ -279,6 +279,12 @@ for use in an application, with prototypes (if functions) as shown:
     will either be in the same segment as 'val' or in the next
     segment.  This is of relevance if set_move_next will be used.
 
+  set_value_t set_next_segment (struct set *set, set_value_t val)
+
+    Returns the next element of 'set' after 'val' (which must be an
+    element of 'set') that is in a different segment than 'val'.
+    Returns SET_NO_VALUE if there is no such element.
+
   set_bits_t set_first_bits (struct set *set)
 
     Returns the bit vector indicating membership of all values in the
@@ -316,6 +322,16 @@ for use in an application, with prototypes (if functions) as shown:
     containing 'val' to the front of 'dst'.  It is an error for there
     to be no elements of 'src' after 'val' that are in a different
     segment from 'val', or for 'src' and 'dst' to use different chains.
+
+  void set_add_segment (struct set *set, set_value_t val, int chain)
+
+    Add to 'set' all elements of sets using the given 'chain' that are
+    in the same segment as 'val'.
+
+  void set_remove_segment (struct set *set, set_value_t val, int chain)
+
+    Removes from 'set' all elements of sets using the given 'chain'
+    that are in the same segment as 'val'.
 
   set_value_t set_n_elements (struct set *set)
 
