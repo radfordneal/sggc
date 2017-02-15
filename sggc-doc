@@ -215,6 +215,9 @@ inline definitions) for the functions documented below, some of which
 may be used by the application, others of which must be defined by the
 application for use by SGGC.
 
+See sggc-imp for how to control some aspects of the implementation,
+for which the best choice might depend on the system used.
+
 
 TYPES, LENGTHS, AND KINDS
 
