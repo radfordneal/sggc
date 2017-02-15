@@ -443,7 +443,7 @@ SET_PROC_CLASS set_value_t set_next (struct set *set, set_value_t val,
 }
 
 
-/* FIND THE NEXT ELEMENT IN A SET THAT IS IN ANOTHER SEGMENT. */
+/* FIND THE NEXT ELEMENT IN A SET THAT IS IN A DIFFERENT SEGMENT. */
 
 SET_PROC_CLASS set_value_t set_next_segment (struct set *set, set_value_t val)
 {

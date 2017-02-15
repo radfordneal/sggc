@@ -6,11 +6,11 @@ interp:	interp.c sggc.c set.c sggc-app.h sggc.h set-app.h set.h
 	gcc -g -O3 -march=native -mtune=native interp.c sggc.c set.c -o interp
 
 interp-db:	interp.c sggc.c set.c sggc-app.h sggc.h set-app.h set.h
-	gcc -g -O0 -DSGGC_DEBUG=1 -DSET_DEBUG=1 \
+	gcc -g -O0 -DSET_DEBUG=1 \
 	 interp.c sggc.c set.c -o interp-db
 
 interp-db-offset:	interp.c sggc.c set.c sggc-app.h sggc.h set-app.h set.h
-	gcc -g -O0 -DSGGC_DEBUG=1 -DSET_DEBUG=1 -DSGGC_USE_OFFSET_POINTERS=1 \
+	gcc -g -O0 -DSET_DEBUG=1 -DSGGC_USE_OFFSET_POINTERS=1 \
 	 interp.c sggc.c set.c -o interp-db-offset
 
 interp-set-static:	interp.c sggc.c set.c sggc-app.h sggc.h set-app.h set.h
