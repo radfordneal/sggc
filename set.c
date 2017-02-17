@@ -327,6 +327,22 @@ SET_PROC_CLASS int set_chain_contains (int chain, set_value_t val)
 }
 
 
+/* CHECK WHETHER ANY SET USING A GIVEN CHAIN CONATAINS ANY ELEMENT IN A SEGMENT.
+
+   This is implemented by just checking whether any bits for that chain in the
+   segment. */
+
+SET_PROC_CLASS int set_chain_contains_any_in_segment(int chain, set_value_t val)
+{
+  set_index_t index = SET_VAL_INDEX(val);
+  struct set_segment *seg = SET_SEGMENT(index);
+
+  CHK_SEGMENT(seg,chain);
+
+  return seg->bits[chain] != 0;
+}
+
+
 /* FIND AND POSSIBLY REMOVE THE FIRST ELEMENT IN A SET.  Removal with
    the function of the last value in a segment allows that segment to
    be added to another set using the same chain.

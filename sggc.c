@@ -1090,7 +1090,9 @@ void sggc_collect (int level)
         }
         sggc_cptr_t nv = set_next_segment(&old_gen2,v);
         set_remove_segment (&old_gen2, v, SET_UNUSED_FREE_NEW);
-        set_remove_segment (&old_to_new, v, SET_UNUSED_FREE_NEW);
+        if (set_chain_contains_any_in_segment (SET_UNUSED_FREE_NEW, v))
+        { set_remove_segment (&old_to_new, v, SET_UNUSED_FREE_NEW);
+        }
         v = nv;
       }
     }
@@ -1105,7 +1107,9 @@ void sggc_collect (int level)
         }
         sggc_cptr_t nv = set_next_segment(&old_gen1,v);
         set_remove_segment (&old_gen1, v, SET_UNUSED_FREE_NEW);
-        set_remove_segment (&old_to_new, v, SET_UNUSED_FREE_NEW);
+        if (set_chain_contains_any_in_segment (SET_UNUSED_FREE_NEW, v))
+        { set_remove_segment (&old_to_new, v, SET_UNUSED_FREE_NEW);
+        }
         v = nv;
       }
     }

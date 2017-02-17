@@ -118,6 +118,7 @@ SET_PROC_CLASS void set_segment_init (struct set_segment *seg);
 SET_PROC_CLASS int set_chain (struct set *set);
 SET_PROC_CLASS int set_contains (struct set *set, set_value_t val);
 SET_PROC_CLASS int set_chain_contains (int chain, set_value_t val);
+SET_PROC_CLASS int set_chain_contains_any_in_segment(int chain,set_value_t val);
 SET_PROC_CLASS int set_add (struct set *set, set_value_t val);
 SET_PROC_CLASS int set_remove (struct set *set, set_value_t val);
 SET_PROC_CLASS set_value_t set_first (struct set *set, int remove);

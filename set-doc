@@ -266,6 +266,11 @@ for use in an application, with prototypes (if functions) as shown:
     Returns 1 if 'val' is an element of any set using 'chain' (ie, is
     a member of the union of all sets using 'chain'), and 0 otherwise.
 
+  int set_chain_contains_any_in_segment (int chain, set_value_t val)
+
+    Returns 1 if any set using 'chain' contains any elements in the
+    same segment as 'val'.
+
   set_value_t set_first (struct set *set, int remove)
 
     Finds the first element in 'set', returning SET_NO_VALUE if the
