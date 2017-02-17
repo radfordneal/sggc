@@ -610,7 +610,7 @@ SET_PROC_CLASS void set_move_next (struct set *src, set_value_t val,
 }
 
 
-/* ADD ELEMENTS IN A SET WITHIN SOME SEGMENT TO SOME OTHER SET. */
+/* ADD ELEMENTS IN ANY SET USING SOME CHAIN WITHIN SOME SEGMENT TO SOME SET. */
 
 SET_PROC_CLASS void set_add_segment (struct set *set, set_value_t val, 
                                      int chain)
