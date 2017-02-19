@@ -12,5 +12,6 @@ interp/interp-no-set-static
 interp/interp-no-max-segments
 interp/interp-no-segment-at-a-time
 interp/interp-no-builtins
+interp/interp-alloc-small-kind
 interp/o-e-i
 interp/o-e-r
