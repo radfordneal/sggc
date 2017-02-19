@@ -219,14 +219,6 @@ SET_PROC_CLASS void set_segment_init (struct set_segment *seg)
 }
 
 
-/* RETURN THE CHAIN USED BY A SET. */
-
-SET_PROC_CLASS int set_chain (struct set *set)
-{ 
-  return set->chain;
-}
-
-
 /* ADD A VALUE TO A SET.  The value must not be in a segment with
    members in a different set using the same chain (or previously,
    if the segment may still be in the other set's chain).
@@ -297,49 +289,6 @@ SET_PROC_CLASS int set_remove (struct set *set, set_value_t val)
   set->n_elements -= 1;
 
   return 1;
-}
-
-
-/* CHECK WHETHER A SET, OR ANY SET USING THE SAME CHAIN, CONTAINS A VALUE. */
-
-SET_PROC_CLASS int set_contains (struct set *set, set_value_t val)
-{
-  CHK_SET(set);
-
-  return set_chain_contains (set->chain, val);
-}
-
-
-/* CHECK WHETHER A VALUE IS AN ELEMENT OF ANY SET USING A GIVEN CHAIN.
-
-   This is implemented by just looking at the right bit in the bits for
-   the chain. */
-
-SET_PROC_CLASS int set_chain_contains (int chain, set_value_t val)
-{
-  set_index_t index = SET_VAL_INDEX(val);
-  set_offset_t offset = SET_VAL_OFFSET(val);
-  struct set_segment *seg = SET_SEGMENT(index);
-
-  CHK_SEGMENT(seg,chain);
-
-  return (seg->bits[chain] >> offset) & 1;
-}
-
-
-/* CHECK WHETHER ANY SET USING A GIVEN CHAIN CONATAINS ANY ELEMENT IN A SEGMENT.
-
-   This is implemented by just checking whether any bits for that chain in the
-   segment. */
-
-SET_PROC_CLASS int set_chain_contains_any_in_segment(int chain, set_value_t val)
-{
-  set_index_t index = SET_VAL_INDEX(val);
-  struct set_segment *seg = SET_SEGMENT(index);
-
-  CHK_SEGMENT(seg,chain);
-
-  return seg->bits[chain] != 0;
 }
 
 
@@ -676,14 +625,4 @@ SET_PROC_CLASS void set_remove_segment (struct set *set, set_value_t val,
     seg->bits[dst_chain] &= ~removed_bits;
     set->n_elements -= bit_count(removed_bits);
   }
-}
-
-
-/* RETURN THE NUMBER OF ELEMENTS IN A SET. */
-
-SET_PROC_CLASS set_value_t set_n_elements (struct set *set)
-{
-  CHK_SET(set);
-
-  return set->n_elements;
 }
