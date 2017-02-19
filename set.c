@@ -412,7 +412,7 @@ SET_PROC_CLASS set_value_t set_next (struct set *set, set_value_t val,
      Also clear the bit for 'val' if we are removing it. */
 
   set_bits_t b = seg->bits[set->chain] >> offset;
-  if ((b & 1) == 0) abort();  /* 'val' isn't in 'set' */
+  if (SET_DEBUG && (b & 1) == 0) abort();  /* 'val' isn't in 'set' */
   if (remove)
   { seg->bits[set->chain] &= ~ ((set_bits_t) 1 << offset);
     set->n_elements -= 1;
@@ -563,8 +563,8 @@ SET_PROC_CLASS void set_move_first (struct set *src, struct set *dst)
   CHK_SET(src);
   CHK_SET(dst);
 
-  if (src->chain != dst->chain) abort();
-  if (src->first == SET_END_OF_CHAIN) abort();
+  if (SET_DEBUG && src->chain != dst->chain) abort();
+  if (SET_DEBUG && src->first == SET_END_OF_CHAIN) abort();
 
   remove_empty(src);
   remove_empty(dst);
@@ -572,7 +572,7 @@ SET_PROC_CLASS void set_move_first (struct set *src, struct set *dst)
   index = src->first;
   seg = SET_SEGMENT(index);
   CHK_SEGMENT(seg,src->chain);
-  if (seg->bits[src->chain] == 0) abort();
+  if (SET_DEBUG && seg->bits[src->chain] == 0) abort();
 
   cnt = bit_count(seg->bits[src->chain]);
   src->n_elements -= cnt;
@@ -602,16 +602,16 @@ SET_PROC_CLASS void set_move_next (struct set *src, set_value_t val,
   CHK_SET_INDEX(src,index);
   CHK_SET(dst);
 
-  if (src->chain != dst->chain) abort();
+  if (SET_DEBUG && src->chain != dst->chain) abort();
 
   int chain = src->chain;
   set_index_t nindex = seg->next[chain];
 
-  if (nindex == SET_END_OF_CHAIN) abort();
+  if (SET_DEBUG && nindex == SET_END_OF_CHAIN) abort();
 
   struct set_segment *nseg = SET_SEGMENT(nindex);
   CHK_SEGMENT(nseg,chain);
-  if (nseg->bits[chain] == 0) abort();
+  if (SET_DEBUG && nseg->bits[chain] == 0) abort();
 
   cnt = bit_count(nseg->bits[chain]);
   src->n_elements -= cnt;
