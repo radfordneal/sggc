@@ -240,6 +240,7 @@ int sggc_init (int max_segments);
 sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length);
 #ifdef SGGC_KIND_TYPES
 sggc_cptr_t sggc_alloc_small_kind (sggc_kind_t kind);
+sggc_cptr_t sggc_alloc_small_kind_quickly (sggc_kind_t kind);
 #endif
 void sggc_collect (int level);
 int sggc_look_at (sggc_cptr_t cptr);
