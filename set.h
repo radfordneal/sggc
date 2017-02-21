@@ -205,8 +205,7 @@ static inline int set_first_bit_pos (set_bits_t b)
 # if SET_USE_BUILTINS
     return sizeof b <= sizeof (unsigned) ? __builtin_ctz(b) 
          : sizeof b <= sizeof (unsigned long) ? __builtin_ctzl(b) 
-         : sizeof b <= sizeof (unsigned long long) ? __builtin_ctzll(b)
-         : (abort(), 0);
+         : __builtin_ctzll(b);
 # else
     int pos;
     pos = 0;
