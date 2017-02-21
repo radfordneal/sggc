@@ -240,7 +240,6 @@ int sggc_init (int max_segments);
 sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length);
 #ifdef SGGC_KIND_TYPES
 sggc_cptr_t sggc_alloc_small_kind (sggc_kind_t kind);
-/* sggc_cptr_t sggc_alloc_small_kind_quickly (sggc_kind_t kind); */
 #endif
 void sggc_collect (int level);
 void sggc_look_at (sggc_cptr_t cptr);
@@ -295,34 +294,35 @@ static inline int sggc_is_constant (sggc_cptr_t cptr)
 }
 
 
+/* QUICKLY ALLOCATE AN OBJECT WITH GIVEN KIND, WHICH MUST BE FOR SMALL SEGMENT. 
+   Returns SGGC_NO_OBJECT it can't allocate quickly in an existing segment. */
+
 static inline sggc_cptr_t sggc_alloc_small_kind_quickly (sggc_kind_t kind)
 {
-  extern sggc_cptr_t next_free_val[SGGC_N_KINDS];
-  extern set_bits_t next_free_bits[SGGC_N_KINDS];
+  extern sggc_cptr_t sggc_next_free_val[SGGC_N_KINDS];
+  extern set_bits_t sggc_next_free_bits[SGGC_N_KINDS];
 
-  set_bits_t nfb = next_free_bits[kind] >> 1;
+  set_bits_t nfb = sggc_next_free_bits[kind] >> 1;
 
   if (nfb == 0)
   { return SGGC_NO_OBJECT;
   }
 
-  sggc_cptr_t v = next_free_val[kind];
+  sggc_cptr_t v = sggc_next_free_val[kind];
 
   int o = set_first_bit_pos(nfb);
   nfb >>= o;
-  next_free_val[kind] += o+1;
-  next_free_bits[kind] = nfb;
+  sggc_next_free_val[kind] += o+1;
+  sggc_next_free_bits[kind] = nfb;
 
   sggc_nchunks_t nch = sggc_kind_chunks[kind];  /* number of chunks for object*/
   uint64_t *p = (uint64_t *) SGGC_DATA(v);      /* should be aligned properly */
 
-  if ((SGGC_CHUNK_SIZE == 8 || SGGC_CHUNK_SIZE == 16) && nch == 1)
-  { *p = 0;
-    if (SGGC_CHUNK_SIZE == 16) *(p+1) = 0;
-  }
-  else
-  { memset (p, 0, (size_t) nch * SGGC_CHUNK_SIZE);
-  }
+  do 
+  { int i;
+    for (i = 0; i <SGGC_CHUNK_SIZE; i += 8) *p++ = 0;
+    nch -= 1;
+  } while (nch > 0);
 
   sggc_info.gen0_count += 1;
 
