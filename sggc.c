@@ -161,8 +161,8 @@ static struct set constants;                  /* Prealloc'd constant segments */
    the segment of of next_free_val[k]. */
 
 static sggc_cptr_t next_free_seg[SGGC_N_KINDS];
-static sggc_cptr_t next_free_val[SGGC_N_KINDS];
-static set_bits_t next_free_bits[SGGC_N_KINDS];
+/* static */ sggc_cptr_t next_free_val[SGGC_N_KINDS];
+/* static */ set_bits_t next_free_bits[SGGC_N_KINDS];
 
 
 /* MAXIMUM NUMBER OF SEGMENTS, AND INDEX OF NEXT SEGMENT TO USE. */
@@ -789,6 +789,7 @@ sggc_cptr_t sggc_alloc_small_kind (sggc_kind_t kind)
 
    Not defined if the application did not provide SGGC_KIND_TYPES. */
 
+#if 0
 #ifdef SGGC_KIND_TYPES
 
 sggc_cptr_t sggc_alloc_small_kind_quickly (sggc_kind_t kind)
@@ -798,7 +799,7 @@ sggc_cptr_t sggc_alloc_small_kind_quickly (sggc_kind_t kind)
             (int) kind, (unsigned) sggc_kind_types[kind]);
   }
 
-  set_bits_t nfb = next_free_bits[kind];
+  set_bits_t nfb = next_free_bits[kind] >> 1;
 
   if (nfb == 0)
   { return SGGC_NO_OBJECT;
@@ -811,19 +812,10 @@ sggc_cptr_t sggc_alloc_small_kind_quickly (sggc_kind_t kind)
            (unsigned)v);
   }
 
-  nfb >>= 1;
-  if (nfb != 0)  /* more available in same segment */
-  { int o = set_first_bit_pos(nfb);
-    nfb >>= o;
-    next_free_val[kind] += o+1;
-  }
-  else if (next_free_seg[kind] != SGGC_NO_OBJECT)  /* more in next_free */
-  { set_value_t nfs = next_free_seg[kind];
-    next_free_val[kind] = nfs;
-    nfb = set_segment_bits (&free_or_new[kind], nfs);
-    nfb >>= SET_VAL_OFFSET(nfs);
-    next_free_seg[kind] = set_next_segment (&free_or_new[kind], nfs);
-  }
+  int o = set_first_bit_pos(nfb);
+  nfb >>= o;
+  next_free_val[kind] += o+1;
+  next_free_bits[kind] = nfb;
 
   if (SGGC_DEBUG)
   { printf("sggc_alloc_small_kind_quickly: next_free_val[%d]=%x next_free_bits[%d]=%016llx\n",
@@ -844,12 +836,11 @@ sggc_cptr_t sggc_alloc_small_kind_quickly (sggc_kind_t kind)
 
   sggc_info.gen0_count += 1;
 
-  next_free_bits[kind] = nfb;
   return v;
 }
 
 #endif
-
+#endif
 
 /* REGISTER A CONSTANT SEGMENT.  Called with the type and kind of the
    segment (must not be big), the set of bits indicating which objects
