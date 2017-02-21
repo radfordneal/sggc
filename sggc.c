@@ -832,14 +832,14 @@ sggc_cptr_t sggc_alloc_small_kind_quickly (sggc_kind_t kind)
   }
 
   sggc_nchunks_t nch = sggc_kind_chunks[kind];  /* number of chunks for object*/
+  uint64_t *p = (uint64_t *) SGGC_DATA(v);      /* should be aligned properly */
 
   if ((SGGC_CHUNK_SIZE == 8 || SGGC_CHUNK_SIZE == 16) && nch == 1)
-  { uint64_t *p = (uint64_t *) SGGC_DATA(v);  /* should be aligned properly */
-    *p = 0;
+  { *p = 0;
     if (SGGC_CHUNK_SIZE == 16) *(p+1) = 0;
   }
   else
-  { memset (SGGC_DATA(v), 0, (size_t) nch * SGGC_CHUNK_SIZE);
+  { memset (p, 0, (size_t) nch * SGGC_CHUNK_SIZE);
   }
 
   sggc_info.gen0_count += 1;
