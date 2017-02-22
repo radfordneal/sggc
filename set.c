@@ -75,29 +75,6 @@ static int check_n_elements (struct set *set);
   } while (0)
 
 
-/* FIND THE NUMBER OF BITS IN A SET OF BITS.  
-
-   Fast for gcc and clang, using their builtin functions. */
-
-static inline int bit_count (set_bits_t b)
-{ 
-# if SET_USE_BUILTINS
-    return sizeof b <= sizeof (unsigned) ? __builtin_popcount(b) 
-         : sizeof b <= sizeof (unsigned long) ? __builtin_popcountl(b) 
-         : __builtin_popcountll(b);
-# else
-    int cnt;
-    cnt = 0;
-    while (b != 0)
-    { cnt += (b & 1);
-      b >>= 1;
-    }
-    return cnt;
-# endif
-
-}
-
-
 /* REMOVE ANY EMPTY SEGMENTS AT THE FRONT OF A SET. */
 
 static inline void remove_empty (struct set *set)
@@ -136,7 +113,7 @@ static int check_n_elements (struct set *set)
 
   while (index != SET_END_OF_CHAIN)
   { seg = SET_SEGMENT(index);
-    cnt -= bit_count (seg->bits[chain]);
+    cnt -= set_bit_count (seg->bits[chain]);
     index = seg->next[chain];
   }
 
@@ -377,7 +354,7 @@ SET_PROC_CLASS set_value_t set_next (struct set *set, set_value_t val,
 
 /* FIND THE NEXT ELEMENT IN A SET THAT IS IN A DIFFERENT SEGMENT. */
 
-SET_PROC_CLASS set_value_t set_next_segment (struct set *set, set_value_t val)
+set_value_t set_next_segment (struct set *set, set_value_t val)
 {
   set_index_t index = SET_VAL_INDEX(val);
   struct set_segment *seg = SET_SEGMENT(index);
@@ -431,43 +408,6 @@ SET_PROC_CLASS set_bits_t set_first_bits (struct set *set)
 }
 
 
-/* RETURN BITS INDICATING MEMBERSHIP FOR THE SEGMENT CONTAINING AN ELEMENT. */
-
-SET_PROC_CLASS set_bits_t set_segment_bits (struct set *set, set_value_t val)
-{
-  set_index_t index = SET_VAL_INDEX(val);
-  set_offset_t offset = SET_VAL_OFFSET(val);
-  struct set_segment *seg = SET_SEGMENT(index);
-
-  CHK_SET(set);
-  CHK_SEGMENT(seg,set->chain);
-  CHK_SET_INDEX(set,index);
-
-  return seg->bits[set->chain];
-}
-
-
-/* ASSIGN BITS INDICATING MEMBERSHIP FOR THE SEGMENT CONTAINING AN ELEMENT. */
-
-SET_PROC_CLASS void set_assign_segment_bits (struct set *set, set_value_t val,
-                                             set_bits_t b)
-{
-  set_index_t index = SET_VAL_INDEX(val);
-  set_offset_t offset = SET_VAL_OFFSET(val);
-  struct set_segment *seg = SET_SEGMENT(index);
-
-  CHK_SET(set);
-  CHK_SEGMENT(seg,set->chain);
-  CHK_SET_INDEX(set,index);
-
-  set->n_elements -= bit_count(seg->bits[set->chain]);
-  seg->bits[set->chain] = b;
-  set->n_elements += bit_count(b);
-
-  CHK_SET(set);
-}
-
-
 /* MOVE THE FIRST SEGMENT OF A SET TO ANOTHER SET USING THE SAME CHAIN. */
 
 SET_PROC_CLASS void set_move_first (struct set *src, struct set *dst)
@@ -490,7 +430,7 @@ SET_PROC_CLASS void set_move_first (struct set *src, struct set *dst)
   CHK_SEGMENT(seg,src->chain);
   if (SET_DEBUG && seg->bits[src->chain] == 0) abort();
 
-  cnt = bit_count(seg->bits[src->chain]);
+  cnt = set_bit_count(seg->bits[src->chain]);
   src->n_elements -= cnt;
   dst->n_elements += cnt;
 
@@ -529,7 +469,7 @@ SET_PROC_CLASS void set_move_next (struct set *src, set_value_t val,
   CHK_SEGMENT(nseg,chain);
   if (SET_DEBUG && nseg->bits[chain] == 0) abort();
 
-  cnt = bit_count(nseg->bits[chain]);
+  cnt = set_bit_count(nseg->bits[chain]);
   src->n_elements -= cnt;
   dst->n_elements += cnt;
 
@@ -561,7 +501,7 @@ SET_PROC_CLASS void set_add_segment (struct set *set, set_value_t val,
   if (added_bits != 0)
   { 
     seg->bits[dst_chain] |= added_bits;
-    set->n_elements += bit_count(added_bits);
+    set->n_elements += set_bit_count(added_bits);
 
     if (seg->next[dst_chain] == SET_NOT_IN_CHAIN)
     { seg->next[dst_chain] = set->first;
@@ -590,6 +530,6 @@ SET_PROC_CLASS void set_remove_segment (struct set *set, set_value_t val,
   if (removed_bits != 0)
   { 
     seg->bits[dst_chain] &= ~removed_bits;
-    set->n_elements -= bit_count(removed_bits);
+    set->n_elements -= set_bit_count(removed_bits);
   }
 }

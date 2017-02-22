@@ -125,11 +125,8 @@ SET_PROC_CLASS int set_remove (struct set *set, set_value_t val);
 SET_PROC_CLASS set_value_t set_first (struct set *set, int remove);
 SET_PROC_CLASS set_value_t set_next (struct set *set, set_value_t val, 
                                      int remove);
-SET_PROC_CLASS set_value_t set_next_segment (struct set *set, set_value_t val);
+set_value_t set_next_segment (struct set *set, set_value_t val);
 SET_PROC_CLASS set_bits_t set_first_bits (struct set *set);
-SET_PROC_CLASS set_bits_t set_segment_bits (struct set *set, set_value_t val);
-SET_PROC_CLASS void set_assign_segment_bits (struct set *set, set_value_t val,
-                                             set_bits_t b);
 SET_PROC_CLASS void set_move_first (struct set *src, struct set *dst);
 SET_PROC_CLASS void set_move_next (struct set *src, set_value_t val,
                                    struct set *dst);
@@ -195,6 +192,29 @@ static inline set_value_t set_n_elements (struct set *set)
 }
 
 
+/* FIND THE NUMBER OF 1 BITS IN A SET OF BITS.  
+
+   Fast for gcc and clang, using their builtin functions. */
+
+static inline int set_bit_count (set_bits_t b)
+{ 
+# if SET_USE_BUILTINS
+    return sizeof b <= sizeof (unsigned) ? __builtin_popcount(b) 
+         : sizeof b <= sizeof (unsigned long) ? __builtin_popcountl(b) 
+         : __builtin_popcountll(b);
+# else
+    int cnt;
+    cnt = 0;
+    while (b != 0)
+    { cnt += (b & 1);
+      b >>= 1;
+    }
+    return cnt;
+# endif
+
+}
+
+
 /* FIND POSITION OF LOWEST-ORDER BIT.  The position returned is from 0 up.
    The argument must not be zero.
 
@@ -216,4 +236,29 @@ static inline int set_first_bit_pos (set_bits_t b)
     return pos;
 # endif
 
+}
+
+
+/* RETURN BITS INDICATING MEMBERSHIP FOR THE SEGMENT CONTAINING AN ELEMENT. */
+
+static inline set_bits_t set_segment_bits (struct set *set, set_value_t val)
+{
+  set_index_t index = SET_VAL_INDEX(val);
+  struct set_segment *seg = SET_SEGMENT(index);
+
+  return seg->bits[set->chain];
+}
+
+
+/* ASSIGN BITS INDICATING MEMBERSHIP FOR THE SEGMENT CONTAINING AN ELEMENT. */
+
+static inline void set_assign_segment_bits (struct set *set, set_value_t val,
+                                            set_bits_t b)
+{
+  set_index_t index = SET_VAL_INDEX(val);
+  struct set_segment *seg = SET_SEGMENT(index);
+
+  set->n_elements -= set_bit_count(seg->bits[set->chain]);
+  seg->bits[set->chain] = b;
+  set->n_elements += set_bit_count(b);
 }

@@ -299,24 +299,40 @@ static inline int sggc_is_constant (sggc_cptr_t cptr)
 
 static inline sggc_cptr_t sggc_alloc_small_kind_quickly (sggc_kind_t kind)
 {
+  extern struct set sggc_free_or_new[SGGC_N_KINDS];
+  extern sggc_cptr_t sggc_next_free_seg[SGGC_N_KINDS];
   extern sggc_cptr_t sggc_next_free_val[SGGC_N_KINDS];
   extern set_bits_t sggc_next_free_bits[SGGC_N_KINDS];
 
-  set_bits_t nfb = sggc_next_free_bits[kind] >> 1;
+  set_bits_t nfb = sggc_next_free_bits[kind];
 
   if (nfb == 0)
   { return SGGC_NO_OBJECT;
   }
 
-  sggc_cptr_t v = sggc_next_free_val[kind];
+  sggc_cptr_t nfv = sggc_next_free_val[kind];
 
-  int o = set_first_bit_pos(nfb);
-  nfb >>= o;
-  sggc_next_free_val[kind] += o+1;
+  nfb >>= 1;
+  if (nfb == 0)
+  { sggc_cptr_t nfs = sggc_next_free_seg[kind];
+    if (nfs != SGGC_NO_OBJECT)
+    { sggc_next_free_val[kind] = nfs;
+      sggc_next_free_bits[kind] = 
+        set_segment_bits (&sggc_free_or_new[kind], nfs) >> SET_VAL_OFFSET(nfs);
+      sggc_next_free_seg[kind] = 
+        set_next_segment (&sggc_free_or_new[kind], nfs);
+    }
+  }
+  else
+  { int o = set_first_bit_pos(nfb);
+    nfb >>= o;
+    sggc_next_free_val[kind] = nfv + o + 1;
+  }
+
   sggc_next_free_bits[kind] = nfb;
 
-  sggc_nchunks_t nch = sggc_kind_chunks[kind];  /* number of chunks for object*/
-  uint64_t *p = (uint64_t *) SGGC_DATA(v);      /* should be aligned properly */
+  sggc_nchunks_t nch = sggc_kind_chunks[kind]; /* number of chunks for object */
+  uint64_t *p = (uint64_t *) SGGC_DATA(nfv);   /* should be aligned properly  */
 
   do 
   { int i;
@@ -326,5 +342,5 @@ static inline sggc_cptr_t sggc_alloc_small_kind_quickly (sggc_kind_t kind)
 
   sggc_info.gen0_count += 1;
 
-  return v;
+  return nfv;
 }
