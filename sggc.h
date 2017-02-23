@@ -256,7 +256,7 @@ sggc_cptr_t sggc_constant (sggc_type_t type, sggc_kind_t kind, int n_objects,
 );
 
 
-/* Functions below are defined here as "static inline" for speed. */
+/**** Functions below are defined here as "static inline" for speed. ****/
 
 
 /* CHECK WHETHER AN OBJECT IS IN THE YOUNGEST GENERATION.  */
@@ -295,38 +295,37 @@ static inline int sggc_is_constant (sggc_cptr_t cptr)
 
 
 /* QUICKLY ALLOCATE AN OBJECT WITH GIVEN KIND, WHICH MUST BE FOR SMALL SEGMENT. 
-   Returns SGGC_NO_OBJECT it can't allocate quickly in an existing segment. */
+   Returns SGGC_NO_OBJECT if can't allocate quickly in an existing segment. */
 
 static inline sggc_cptr_t sggc_alloc_small_kind_quickly (sggc_kind_t kind)
 {
-  extern struct set sggc_free_or_new[SGGC_N_KINDS];
-  extern sggc_cptr_t sggc_next_free_seg[SGGC_N_KINDS];
   extern sggc_cptr_t sggc_next_free_val[SGGC_N_KINDS];
   extern set_bits_t sggc_next_free_bits[SGGC_N_KINDS];
-
-  set_bits_t nfb = sggc_next_free_bits[kind];
-
-  if (nfb == 0)
-  { return SGGC_NO_OBJECT;
-  }
+  extern int sggc_next_segment_not_free[SGGC_N_KINDS];
 
   sggc_cptr_t nfv = sggc_next_free_val[kind];
 
-  nfb >>= 1;
-  if (nfb == 0)
-  { sggc_cptr_t nfs = sggc_next_free_seg[kind];
-    if (nfs != SGGC_NO_OBJECT)
-    { sggc_next_free_val[kind] = nfs;
-      sggc_next_free_bits[kind] = 
-        set_segment_bits (&sggc_free_or_new[kind], nfs) >> SET_VAL_OFFSET(nfs);
-      sggc_next_free_seg[kind] = 
-        set_next_segment (&sggc_free_or_new[kind], nfs);
-    }
+  if (nfv == SGGC_NO_OBJECT)
+  { return SGGC_NO_OBJECT;
   }
-  else
+
+  set_bits_t nfb = sggc_next_free_bits[kind];
+
+  nfb >>= 1;
+  if (nfb != 0)
   { int o = set_first_bit_pos(nfb);
     nfb >>= o;
     sggc_next_free_val[kind] = nfv + o + 1;
+  }
+  else if (!sggc_next_segment_not_free[kind])
+  { sggc_cptr_t n = set_next_segment (SET_UNUSED_FREE_NEW, nfv);
+    sggc_next_free_val[kind] = n;
+    if (n != SGGC_NO_OBJECT)
+    { nfb = set_segment_bits (SET_UNUSED_FREE_NEW, n) >> SET_VAL_OFFSET(n);
+    }
+  }
+  else
+  { sggc_next_free_val[kind] = SGGC_NO_OBJECT;
   }
 
   sggc_next_free_bits[kind] = nfb;
