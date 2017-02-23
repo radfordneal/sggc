@@ -618,7 +618,7 @@ static sggc_cptr_t sggc_alloc_kind_type_length (sggc_kind_t kind,
 
     if (SGGC_DEBUG)
     { printf("sggc_alloc: new segment has bits %016llx\n", 
-              (unsigned long long) set_segment_bits (SET_UNUSED_FREE_NEW, v));
+              (unsigned long long) set_chain_segment_bits (SET_UNUSED_FREE_NEW, v));
     }
 
     sggc_next_free_val[kind] = v + sggc_kind_chunks[kind];
@@ -939,7 +939,7 @@ void sggc_collect (int level)
     if (level == 2)
     { for (v = set_first(&old_gen2, 0); 
            v != SET_NO_VALUE; 
-           v = set_next_segment(SET_OLD_GEN2_CONST,v))
+           v = set_chain_next_segment(SET_OLD_GEN2_CONST,v))
       { set_add_segment (&free_or_new[SGGC_KIND(v)], v, SET_OLD_GEN2_CONST);
         if (SGGC_DEBUG) 
         { DO_FOR_SEGMENT (old_gen2, v,
@@ -951,7 +951,7 @@ void sggc_collect (int level)
     if (level >= 1)
     { for (v = set_first(&old_gen1, 0); 
            v != SET_NO_VALUE; 
-           v = set_next_segment(SET_OLD_GEN1,v))
+           v = set_chain_next_segment(SET_OLD_GEN1,v))
       { set_add_segment (&free_or_new[SGGC_KIND(v)], v, SET_OLD_GEN1);
         if (SGGC_DEBUG) 
         { DO_FOR_SEGMENT (old_gen1, v,
@@ -1111,7 +1111,7 @@ void sggc_collect (int level)
             if (set_chain_contains(SET_UNUSED_FREE_NEW,w))
               printf("sggc_collect: %x in old_gen2 now free\n",(unsigned)w));
         }
-        sggc_cptr_t nv = set_next_segment(SET_OLD_GEN2_CONST,v);
+        sggc_cptr_t nv = set_chain_next_segment(SET_OLD_GEN2_CONST,v);
         set_remove_segment (&old_gen2, v, SET_UNUSED_FREE_NEW);
         if (set_chain_contains_any_in_segment (SET_UNUSED_FREE_NEW, v))
         { set_remove_segment (&old_to_new, v, SET_UNUSED_FREE_NEW);
@@ -1128,7 +1128,7 @@ void sggc_collect (int level)
             if (set_chain_contains(SET_UNUSED_FREE_NEW,w))
               printf("sggc_collect: %x in old_gen1 now free\n",(unsigned)w));
         }
-        sggc_cptr_t nv = set_next_segment(SET_OLD_GEN1,v);
+        sggc_cptr_t nv = set_chain_next_segment(SET_OLD_GEN1,v);
         set_remove_segment (&old_gen1, v, SET_UNUSED_FREE_NEW);
         if (set_chain_contains_any_in_segment (SET_UNUSED_FREE_NEW, v))
         { set_remove_segment (&old_to_new, v, SET_UNUSED_FREE_NEW);
@@ -1174,7 +1174,7 @@ void sggc_collect (int level)
       { sggc_next_free_bits[k] = 0;
       }
       else 
-      { sggc_next_free_bits[k] = set_segment_bits (SET_UNUSED_FREE_NEW, n) 
+      { sggc_next_free_bits[k] = set_chain_segment_bits (SET_UNUSED_FREE_NEW, n) 
                                    >> SET_VAL_OFFSET(n);
       }
       sggc_next_segment_not_free[k] = 0;

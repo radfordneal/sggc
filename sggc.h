@@ -318,10 +318,10 @@ static inline sggc_cptr_t sggc_alloc_small_kind_quickly (sggc_kind_t kind)
     sggc_next_free_val[kind] = nfv + o + 1;
   }
   else if (!sggc_next_segment_not_free[kind])
-  { sggc_cptr_t n = set_next_segment (SET_UNUSED_FREE_NEW, nfv);
+  { sggc_cptr_t n = set_chain_next_segment (SET_UNUSED_FREE_NEW, nfv);
     sggc_next_free_val[kind] = n;
     if (n != SGGC_NO_OBJECT)
-    { nfb = set_segment_bits (SET_UNUSED_FREE_NEW, n) >> SET_VAL_OFFSET(n);
+    { nfb = set_chain_segment_bits (SET_UNUSED_FREE_NEW, n) >> SET_VAL_OFFSET(n);
     }
   }
   else

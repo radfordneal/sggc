@@ -240,7 +240,7 @@ static inline int set_first_bit_pos (set_bits_t b)
 
 /* RETURN BITS INDICATING MEMBERSHIP FOR THE SEGMENT CONTAINING AN ELEMENT. */
 
-static inline set_bits_t set_segment_bits (int chain, set_value_t val)
+static inline set_bits_t set_chain_segment_bits (int chain, set_value_t val)
 {
   set_index_t index = SET_VAL_INDEX(val);
   struct set_segment *seg = SET_SEGMENT(index);
@@ -265,7 +265,7 @@ static inline void set_assign_segment_bits (struct set *set, set_value_t val,
 
 /* FIND THE NEXT ELEMENT IN A SET THAT IS IN A DIFFERENT SEGMENT. */
 
-static inline set_value_t set_next_segment (int chain, set_value_t val)
+static inline set_value_t set_chain_next_segment (int chain, set_value_t val)
 {
   set_index_t index = SET_VAL_INDEX(val);
   struct set_segment *seg = SET_SEGMENT(index);
