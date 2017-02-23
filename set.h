@@ -125,7 +125,6 @@ SET_PROC_CLASS int set_remove (struct set *set, set_value_t val);
 SET_PROC_CLASS set_value_t set_first (struct set *set, int remove);
 SET_PROC_CLASS set_value_t set_next (struct set *set, set_value_t val, 
                                      int remove);
-set_value_t set_next_segment (struct set *set, set_value_t val);
 SET_PROC_CLASS set_bits_t set_first_bits (struct set *set);
 SET_PROC_CLASS void set_move_first (struct set *src, struct set *dst);
 SET_PROC_CLASS void set_move_next (struct set *src, set_value_t val,
@@ -136,7 +135,7 @@ SET_PROC_CLASS void set_remove_segment (struct set *set, set_value_t val,
                                         int chain);
 
 
-/* Functions below are defined here as "static inline" for speed. */
+/**** Functions below are defined here as "static inline" for speed. ****/
 
 
 /* RETURN THE CHAIN USED BY A SET. */
@@ -241,12 +240,12 @@ static inline int set_first_bit_pos (set_bits_t b)
 
 /* RETURN BITS INDICATING MEMBERSHIP FOR THE SEGMENT CONTAINING AN ELEMENT. */
 
-static inline set_bits_t set_segment_bits (struct set *set, set_value_t val)
+static inline set_bits_t set_segment_bits (int chain, set_value_t val)
 {
   set_index_t index = SET_VAL_INDEX(val);
   struct set_segment *seg = SET_SEGMENT(index);
 
-  return seg->bits[set->chain];
+  return seg->bits[chain];
 }
 
 
@@ -261,4 +260,37 @@ static inline void set_assign_segment_bits (struct set *set, set_value_t val,
   set->n_elements -= set_bit_count(seg->bits[set->chain]);
   seg->bits[set->chain] = b;
   set->n_elements += set_bit_count(b);
+}
+
+
+/* FIND THE NEXT ELEMENT IN A SET THAT IS IN A DIFFERENT SEGMENT. */
+
+static inline set_value_t set_next_segment (int chain, set_value_t val)
+{
+  set_index_t index = SET_VAL_INDEX(val);
+  struct set_segment *seg = SET_SEGMENT(index);
+
+  set_index_t nindex;
+  struct set_segment *nseg;
+
+  /* Go to the next segment, removing any segments that are unused. If there
+     is no next segment, return SET_NO_VALUE. */
+
+  for (;;)
+  { 
+    nindex = seg->next[chain];
+    if (nindex == SET_END_OF_CHAIN) 
+    { return SET_NO_VALUE;
+    }
+
+    nseg = SET_SEGMENT(nindex);
+
+    set_bits_t b = nseg->bits[chain];
+    if (b != 0) 
+    { return SET_VAL (nindex, set_first_bit_pos(b));
+    }
+
+    seg->next[chain] = nseg->next[chain];
+    nseg->next[chain] = SET_NOT_IN_CHAIN;
+  }
 }
