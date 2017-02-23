@@ -1,31 +1,31 @@
 STARTING TEST: segs = 5, iters = 50
 
 ABOUT TO CALL sggc_init
-test_calloc: 1 in use after:: 0x7ff6fb403230
-test_calloc: 2 in use after:: 0x7ff6fb403260
-test_calloc: 3 in use after:: 0x7ff6fb403290
+test_calloc: 1 in use after:: 0x7f8918c02780
+test_calloc: 2 in use after:: 0x7f8918c027b0
+test_calloc: 3 in use after:: 0x7f8918c027e0
 DONE sggc_init
 ALLOCATING nil
 sggc_alloc: type 0, length 0
-test_calloc: 4 in use after:: 0x7ff6fb4032a0
-sggc_alloc: called alloc_zeroed for data (big 0, 1 chunks):: 0x7ff6fb4032a0
-test_calloc: 5 in use after:: 0x7ff6fb4032b0
+test_calloc: 4 in use after:: 0x7f8918c027f0
+sggc_alloc: called alloc_zeroed for data (big 0, 1 chunks):: 0x7f8918c027f0
+test_calloc: 5 in use after:: 0x7f8918c02800
 sggc_alloc: created 0 in new segment
 ALLOC RETURNING 0
 
 ITERATION 1
 ALLOCATING a, leaving contents as nil
 sggc_alloc: type 1, length 2
-test_calloc: 6 in use after:: 0x7ff6fb800600
-test_calloc: 7 in use after:: 0x7ff6fb4032f0
+test_calloc: 6 in use after:: 0x7f8919002000
+test_calloc: 7 in use after:: 0x7f8918c02840
 sggc_alloc: created 40 in new segment
 sggc_alloc: new segment has bits ffffffffffffffff
 sggc_alloc: next_free_val[1]=41, next_free_bits[1]=7fffffffffffffff
 ALLOC RETURNING 40
 ALLOCATING b, setting contents to 100*i .. 100*i+9
 sggc_alloc: type 2, length 10
-test_calloc: 8 in use after:: 0x7ff6fb800a00
-test_calloc: 9 in use after:: 0x7ff6fb403330
+test_calloc: 8 in use after:: 0x7f8919002400
+test_calloc: 9 in use after:: 0x7f8918c02880
 sggc_alloc: created 80 in new segment
 sggc_alloc: new segment has bits 1249249249249249
 sggc_alloc: next_free_val[5]=83, next_free_bits[5]=0249249249249249
@@ -37,8 +37,8 @@ sggc_alloc: next_free_val[1]=42, next_free_bits[1]=3fffffffffffffff
 ALLOC RETURNING 41
 ALLOCATING d, setting contents to 7777
 sggc_alloc: type 2, length 1
-test_calloc: 10 in use after:: 0x7ff6fb803600
-test_calloc: 11 in use after:: 0x7ff6fb403370
+test_calloc: 10 in use after:: 0x7f8919002800
+test_calloc: 11 in use after:: 0x7f8918c028c0
 sggc_alloc: created c0 in new segment
 sggc_alloc: new segment has bits ffffffffffffffff
 sggc_alloc: next_free_val[3]=c1, next_free_bits[3]=7fffffffffffffff

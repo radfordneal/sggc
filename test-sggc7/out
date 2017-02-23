@@ -1,25 +1,25 @@
 STARTING TEST: segs = 100, iters = 50
 
 ABOUT TO CALL sggc_init
-test_calloc: 1 in use after:: 0x7f92c1403330
-test_calloc: 2 in use after:: 0x7f92c1403650
-test_calloc: 3 in use after:: 0x7f92c1403230
-test_calloc: 4 in use after:: 0x7f92c1403970
-test_calloc: 5 in use after:: 0x7f92c1403c90
+test_calloc: 1 in use after:: 0x7fbee9402880
+test_calloc: 2 in use after:: 0x7fbee9402ba0
+test_calloc: 3 in use after:: 0x7fbee9402780
+test_calloc: 4 in use after:: 0x7fbee9402ec0
+test_calloc: 5 in use after:: 0x7fbee94031e0
 DONE sggc_init
 
 CREATING CONSTANT SEGMENT FOR nil
-test_calloc: 6 in use after:: 0x7f92c14032a0
+test_calloc: 6 in use after:: 0x7fbee94027f0
 sggc_constant: first object in segment is 0
 CONSTANT OBJECT RETURNED: 0
 
 ITERATION 1
 ALLOCATING a, leaving contents as nil
 sggc_alloc: type 1, length 2
-test_calloc: 7 in use after:: 0x7f92c1800600
-sggc_alloc: called alloc_zeroed for aux2 block (kind 1):: 0x7f92c1800600
-test_calloc: 8 in use after:: 0x7f92c1800a00
-test_calloc: 9 in use after:: 0x7f92c14032e0
+test_calloc: 7 in use after:: 0x7fbee9802000
+test_calloc: 8 in use after:: 0x7fbee9802400
+sggc_alloc: called alloc_zeroed for aux2 block (kind 1):: 0x7fbee9802400
+test_calloc: 9 in use after:: 0x7fbee9402830
 sggc_alloc: created 40 in new segment
 sggc_alloc: new segment has bits ffffffffffffffff
 sggc_alloc: next_free_val[1]=41, next_free_bits[1]=7fffffffffffffff
@@ -28,12 +28,12 @@ sggc_alloc: aux2 block for 40 has pos 0 in block for kind 1
 ALLOC RETURNING 40
 ALLOCATING b, setting contents to 100*i .. 100*i+9
 sggc_alloc: type 2, length 10
-test_calloc: 10 in use after:: 0x7f92c1803600
-sggc_alloc: called alloc_zeroed for aux1 block (kind 5):: 0x7f92c1803600
-test_calloc: 11 in use after:: 0x7f92c1803a00
-sggc_alloc: called alloc_zeroed for aux2 block (kind 5):: 0x7f92c1803a00
-test_calloc: 12 in use after:: 0x7f92c1803e00
-test_calloc: 13 in use after:: 0x7f92c1403fb0
+test_calloc: 10 in use after:: 0x7fbee9802800
+test_calloc: 11 in use after:: 0x7fbee9802c00
+sggc_alloc: called alloc_zeroed for aux1 block (kind 5):: 0x7fbee9802c00
+test_calloc: 12 in use after:: 0x7fbee9803000
+sggc_alloc: called alloc_zeroed for aux2 block (kind 5):: 0x7fbee9803000
+test_calloc: 13 in use after:: 0x7fbee9403500
 sggc_alloc: created 80 in new segment
 sggc_alloc: new segment has bits 1249249249249249
 sggc_alloc: next_free_val[5]=83, next_free_bits[5]=0249249249249249
@@ -47,12 +47,12 @@ sggc_alloc: next_free_val[1]=42, next_free_bits[1]=3fffffffffffffff
 ALLOC RETURNING 41
 ALLOCATING d, setting contents to 7777
 sggc_alloc: type 2, length 1
-test_calloc: 14 in use after:: 0x7f92c1804200
-sggc_alloc: called alloc_zeroed for aux1 block (kind 3):: 0x7f92c1804200
-test_calloc: 15 in use after:: 0x7f92c1804600
-sggc_alloc: called alloc_zeroed for aux2 block (kind 3):: 0x7f92c1804600
-test_calloc: 16 in use after:: 0x7f92c1804a00
-test_calloc: 17 in use after:: 0x7f92c1403ff0
+test_calloc: 14 in use after:: 0x7fbee9803400
+test_calloc: 15 in use after:: 0x7fbee9803800
+sggc_alloc: called alloc_zeroed for aux1 block (kind 3):: 0x7fbee9803800
+test_calloc: 16 in use after:: 0x7fbee9803c00
+sggc_alloc: called alloc_zeroed for aux2 block (kind 3):: 0x7fbee9803c00
+test_calloc: 17 in use after:: 0x7fbee9403540
 sggc_alloc: created c0 in new segment
 sggc_alloc: new segment has bits ffffffffffffffff
 sggc_alloc: next_free_val[3]=c1, next_free_bits[3]=7fffffffffffffff
@@ -149,13 +149,13 @@ sggc_alloc: next_free_val[1]=47, next_free_bits[1]=01ffffffffffffff
 ALLOC RETURNING 46
 ALLOCATING VECTOR OF LENGTH 20
 sggc_alloc: type 2, length 20
-test_calloc: 18 in use after:: 0x7f92c1404030
-sggc_alloc: called alloc_zeroed for data (big 2, 5 chunks):: 0x7f92c1404030
-test_calloc: 19 in use after:: 0x7f92c1804e00
-sggc_alloc: called alloc_zeroed for aux1 block (kind 2):: 0x7f92c1804e00
-test_calloc: 20 in use after:: 0x7f92c1805200
-sggc_alloc: called alloc_zeroed for aux2 block (kind 2):: 0x7f92c1805200
-test_calloc: 21 in use after:: 0x7f92c1404080
+test_calloc: 18 in use after:: 0x7fbee9403580
+sggc_alloc: called alloc_zeroed for data (big 2, 5 chunks):: 0x7fbee9403580
+test_calloc: 19 in use after:: 0x7fbee9804000
+sggc_alloc: called alloc_zeroed for aux1 block (kind 2):: 0x7fbee9804000
+test_calloc: 20 in use after:: 0x7fbee9804400
+sggc_alloc: called alloc_zeroed for aux2 block (kind 2):: 0x7fbee9804400
+test_calloc: 21 in use after:: 0x7fbee94035d0
 sggc_alloc: created 100 in new segment
 sggc_alloc: aux1 block for 100 has pos 0 in block for kind 2
 sggc_alloc: aux2 block for 100 has pos 0 in block for kind 2
@@ -437,9 +437,9 @@ next_free_val [0]: ---  [1]:  40^ [2]: ---  [3]:  c2^ [4]: ---  [5]:  83^
               00000000  ffffffff  00000000  3fffffff  00000000  02492492 
               00000000  fffff101  00000000  fffffffd  00000000  49249201 
 sggc_alloc: type 2, length 20
-test_calloc: 22 in use after:: 0x7f92c14040c0
-sggc_alloc: called alloc_zeroed for data (big 2, 5 chunks):: 0x7f92c14040c0
-test_calloc: 23 in use after:: 0x7f92c1404110
+test_calloc: 22 in use after:: 0x7fbee9403610
+sggc_alloc: called alloc_zeroed for data (big 2, 5 chunks):: 0x7fbee9403610
+test_calloc: 23 in use after:: 0x7fbee9403660
 sggc_alloc: created 140 in new segment
 sggc_alloc: aux1 block for 140 has pos 1 in block for kind 2
 sggc_alloc: aux2 block for 140 has pos 1 in block for kind 2
@@ -716,9 +716,9 @@ sggc_alloc: next_free_val[1]=44, next_free_bits[1]=0fffffffffff8dd3
 ALLOC RETURNING 42
 ALLOCATING VECTOR OF LENGTH 20
 sggc_alloc: type 2, length 20
-test_calloc: 24 in use after:: 0x7f92c1404150
-sggc_alloc: called alloc_zeroed for data (big 2, 5 chunks):: 0x7f92c1404150
-test_calloc: 25 in use after:: 0x7f92c14041a0
+test_calloc: 24 in use after:: 0x7fbee94036a0
+sggc_alloc: called alloc_zeroed for data (big 2, 5 chunks):: 0x7fbee94036a0
+test_calloc: 25 in use after:: 0x7fbee94036f0
 sggc_alloc: created 180 in new segment
 sggc_alloc: aux1 block for 180 has pos 2 in block for kind 2
 sggc_alloc: aux2 block for 180 has pos 2 in block for kind 2
@@ -917,9 +917,9 @@ sggc_alloc: next_free_val[1]=55, next_free_bits[1]=000007ffffffffff
 ALLOC RETURNING 54
 ALLOCATING VECTOR OF LENGTH 20
 sggc_alloc: type 2, length 20
-test_calloc: 26 in use after:: 0x7f92c14041e0
-sggc_alloc: called alloc_zeroed for data (big 2, 5 chunks):: 0x7f92c14041e0
-test_calloc: 27 in use after:: 0x7f92c1404230
+test_calloc: 26 in use after:: 0x7fbee9403730
+sggc_alloc: called alloc_zeroed for data (big 2, 5 chunks):: 0x7fbee9403730
+test_calloc: 27 in use after:: 0x7fbee9403780
 sggc_alloc: created 1c0 in new segment
 sggc_alloc: aux1 block for 1c0 has pos 3 in block for kind 2
 sggc_alloc: aux2 block for 1c0 has pos 3 in block for kind 2
@@ -1224,9 +1224,9 @@ sggc_alloc: next_free_val[1]=56, next_free_bits[1]=000003ffffffffff
 ALLOC RETURNING 44
 ALLOCATING VECTOR OF LENGTH 20
 sggc_alloc: type 2, length 20
-test_calloc: 28 in use after:: 0x7f92c1404270
-sggc_alloc: called alloc_zeroed for data (big 2, 5 chunks):: 0x7f92c1404270
-test_calloc: 29 in use after:: 0x7f92c14042c0
+test_calloc: 28 in use after:: 0x7fbee94037c0
+sggc_alloc: called alloc_zeroed for data (big 2, 5 chunks):: 0x7fbee94037c0
+test_calloc: 29 in use after:: 0x7fbee9403810
 sggc_alloc: created 200 in new segment
 sggc_alloc: aux1 block for 200 has pos 4 in block for kind 2
 sggc_alloc: aux2 block for 200 has pos 4 in block for kind 2
@@ -1571,9 +1571,9 @@ sggc_alloc: next_free_val[1]=55, next_free_bits[1]=000007ffffffffe1
 ALLOC RETURNING 53
 ALLOCATING VECTOR OF LENGTH 20
 sggc_alloc: type 2, length 20
-test_calloc: 30 in use after:: 0x7f92c1404300
-sggc_alloc: called alloc_zeroed for data (big 2, 5 chunks):: 0x7f92c1404300
-test_calloc: 31 in use after:: 0x7f92c1404350
+test_calloc: 30 in use after:: 0x7fbee9403850
+sggc_alloc: called alloc_zeroed for data (big 2, 5 chunks):: 0x7fbee9403850
+test_calloc: 31 in use after:: 0x7fbee94038a0
 sggc_alloc: created 240 in new segment
 sggc_alloc: aux1 block for 240 has pos 5 in block for kind 2
 sggc_alloc: aux2 block for 240 has pos 5 in block for kind 2
@@ -1835,9 +1835,9 @@ sggc_alloc: next_free_val[1]=56, next_free_bits[1]=000003ffffffff17
 ALLOC RETURNING 55
 ALLOCATING VECTOR OF LENGTH 20
 sggc_alloc: type 2, length 20
-test_calloc: 32 in use after:: 0x7f92c1404390
-sggc_alloc: called alloc_zeroed for data (big 2, 5 chunks):: 0x7f92c1404390
-test_calloc: 33 in use after:: 0x7f92c14043e0
+test_calloc: 32 in use after:: 0x7fbee94038e0
+sggc_alloc: called alloc_zeroed for data (big 2, 5 chunks):: 0x7fbee94038e0
+test_calloc: 33 in use after:: 0x7fbee9403930
 sggc_alloc: created 280 in new segment
 sggc_alloc: aux1 block for 280 has pos 6 in block for kind 2
 sggc_alloc: aux2 block for 280 has pos 6 in block for kind 2
@@ -2290,9 +2290,9 @@ sggc_alloc: next_free_val[1]=51, next_free_bits[1]=00007ffffffc7ce1
 ALLOC RETURNING 4c
 ALLOCATING VECTOR OF LENGTH 20
 sggc_alloc: type 2, length 20
-test_calloc: 34 in use after:: 0x7f92c1404420
-sggc_alloc: called alloc_zeroed for data (big 2, 5 chunks):: 0x7f92c1404420
-test_calloc: 35 in use after:: 0x7f92c1404470
+test_calloc: 34 in use after:: 0x7fbee9403970
+sggc_alloc: called alloc_zeroed for data (big 2, 5 chunks):: 0x7fbee9403970
+test_calloc: 35 in use after:: 0x7fbee94039c0
 sggc_alloc: created 2c0 in new segment
 sggc_alloc: aux1 block for 2c0 has pos 7 in block for kind 2
 sggc_alloc: aux2 block for 2c0 has pos 7 in block for kind 2
@@ -2496,9 +2496,9 @@ sggc_alloc: next_free_val[1]=64, next_free_bits[1]=000000000fffffff
 ALLOC RETURNING 63
 ALLOCATING VECTOR OF LENGTH 20
 sggc_alloc: type 2, length 20
-test_calloc: 36 in use after:: 0x7f92c14044b0
-sggc_alloc: called alloc_zeroed for data (big 2, 5 chunks):: 0x7f92c14044b0
-test_calloc: 37 in use after:: 0x7f92c1404500
+test_calloc: 36 in use after:: 0x7fbee9403a00
+sggc_alloc: called alloc_zeroed for data (big 2, 5 chunks):: 0x7fbee9403a00
+test_calloc: 37 in use after:: 0x7fbee9403a50
 sggc_alloc: created 300 in new segment
 sggc_alloc: aux1 block for 300 has pos 8 in block for kind 2
 sggc_alloc: aux2 block for 300 has pos 8 in block for kind 2
@@ -2808,9 +2808,9 @@ next_free_val [0]: ---  [1]:  51^ [2]: ---  [3]:  cc^ [4]: ---  [5]:  a4^
               00000000  00007fff  00000000  000fffff  00000000  00000000 
               00000000  ffe00001  00000000  ffffffff  00000000  01249249 
 sggc_alloc: type 2, length 20
-test_calloc: 38 in use after:: 0x7f92c1404540
-sggc_alloc: called alloc_zeroed for data (big 2, 5 chunks):: 0x7f92c1404540
-test_calloc: 39 in use after:: 0x7f92c1404590
+test_calloc: 38 in use after:: 0x7fbee9403a90
+sggc_alloc: called alloc_zeroed for data (big 2, 5 chunks):: 0x7fbee9403a90
+test_calloc: 39 in use after:: 0x7fbee9403ae0
 sggc_alloc: created 340 in new segment
 sggc_alloc: aux1 block for 340 has pos 9 in block for kind 2
 sggc_alloc: aux2 block for 340 has pos 9 in block for kind 2
@@ -3274,9 +3274,9 @@ sggc_alloc: next_free_val[1]=61, next_free_bits[1]=000000007ffffe4b
 ALLOC RETURNING 5b
 ALLOCATING VECTOR OF LENGTH 20
 sggc_alloc: type 2, length 20
-test_calloc: 40 in use after:: 0x7f92c14045d0
-sggc_alloc: called alloc_zeroed for data (big 2, 5 chunks):: 0x7f92c14045d0
-test_calloc: 41 in use after:: 0x7f92c1404620
+test_calloc: 40 in use after:: 0x7fbee9403b20
+sggc_alloc: called alloc_zeroed for data (big 2, 5 chunks):: 0x7fbee9403b20
+test_calloc: 41 in use after:: 0x7fbee9403b70
 sggc_alloc: created 380 in new segment
 sggc_alloc: aux1 block for 380 has pos 10 in block for kind 2
 sggc_alloc: aux2 block for 380 has pos 10 in block for kind 2
@@ -3541,9 +3541,9 @@ sggc_alloc: next_free_val[1]=61, next_free_bits[1]=000000007ffff123
 ALLOC RETURNING 5f
 ALLOCATING VECTOR OF LENGTH 20
 sggc_alloc: type 2, length 20
-test_calloc: 42 in use after:: 0x7f92c1404660
-sggc_alloc: called alloc_zeroed for data (big 2, 5 chunks):: 0x7f92c1404660
-test_calloc: 43 in use after:: 0x7f92c14046b0
+test_calloc: 42 in use after:: 0x7fbee9403bb0
+sggc_alloc: called alloc_zeroed for data (big 2, 5 chunks):: 0x7fbee9403bb0
+test_calloc: 43 in use after:: 0x7fbee9403c00
 sggc_alloc: created 3c0 in new segment
 sggc_alloc: aux1 block for 3c0 has pos 11 in block for kind 2
 sggc_alloc: aux2 block for 3c0 has pos 11 in block for kind 2
@@ -4109,9 +4109,9 @@ sggc_alloc: next_free_val[1]=58, next_free_bits[1]=000000fffe2e8241
 ALLOC RETURNING 51
 ALLOCATING VECTOR OF LENGTH 20
 sggc_alloc: type 2, length 20
-test_calloc: 44 in use after:: 0x7f92c14046f0
-sggc_alloc: called alloc_zeroed for data (big 2, 5 chunks):: 0x7f92c14046f0
-test_calloc: 45 in use after:: 0x7f92c1404740
+test_calloc: 44 in use after:: 0x7fbee9403c40
+sggc_alloc: called alloc_zeroed for data (big 2, 5 chunks):: 0x7fbee9403c40
+test_calloc: 45 in use after:: 0x7fbee9403c90
 sggc_alloc: created 400 in new segment
 sggc_alloc: aux1 block for 400 has pos 12 in block for kind 2
 sggc_alloc: aux2 block for 400 has pos 12 in block for kind 2
@@ -4318,9 +4318,9 @@ sggc_alloc: next_free_val[1]=74, next_free_bits[1]=0000000000000fff
 ALLOC RETURNING 73
 ALLOCATING VECTOR OF LENGTH 20
 sggc_alloc: type 2, length 20
-test_calloc: 46 in use after:: 0x7f92c1404780
-sggc_alloc: called alloc_zeroed for data (big 2, 5 chunks):: 0x7f92c1404780
-test_calloc: 47 in use after:: 0x7f92c14047d0
+test_calloc: 46 in use after:: 0x7fbee9403cd0
+sggc_alloc: called alloc_zeroed for data (big 2, 5 chunks):: 0x7fbee9403cd0
+test_calloc: 47 in use after:: 0x7fbee9403d20
 sggc_alloc: created 440 in new segment
 sggc_alloc: aux1 block for 440 has pos 13 in block for kind 2
 sggc_alloc: aux2 block for 440 has pos 13 in block for kind 2
@@ -4582,9 +4582,9 @@ sggc_alloc: next_free_val[1]=71, next_free_bits[1]=0000000000007fe3
 ALLOC RETURNING 70
 ALLOCATING VECTOR OF LENGTH 20
 sggc_alloc: type 2, length 20
-test_calloc: 48 in use after:: 0x7f92c1404810
-sggc_alloc: called alloc_zeroed for data (big 2, 5 chunks):: 0x7f92c1404810
-test_calloc: 49 in use after:: 0x7f92c1404860
+test_calloc: 48 in use after:: 0x7fbee9403d60
+sggc_alloc: called alloc_zeroed for data (big 2, 5 chunks):: 0x7fbee9403d60
+test_calloc: 49 in use after:: 0x7fbee9403db0
 sggc_alloc: created 480 in new segment
 sggc_alloc: aux1 block for 480 has pos 14 in block for kind 2
 sggc_alloc: aux2 block for 480 has pos 14 in block for kind 2
@@ -5218,9 +5218,9 @@ sggc_alloc: next_free_val[1]=6f, next_free_bits[1]=000000000001fce1
 ALLOC RETURNING 69
 ALLOCATING VECTOR OF LENGTH 20
 sggc_alloc: type 2, length 20
-test_calloc: 50 in use after:: 0x7f92c14048a0
-sggc_alloc: called alloc_zeroed for data (big 2, 5 chunks):: 0x7f92c14048a0
-test_calloc: 51 in use after:: 0x7f92c14048f0
+test_calloc: 50 in use after:: 0x7fbee9403df0
+sggc_alloc: called alloc_zeroed for data (big 2, 5 chunks):: 0x7fbee9403df0
+test_calloc: 51 in use after:: 0x7fbee9403e40
 sggc_alloc: created 4c0 in new segment
 sggc_alloc: aux1 block for 4c0 has pos 15 in block for kind 2
 sggc_alloc: aux2 block for 4c0 has pos 15 in block for kind 2
@@ -5484,9 +5484,9 @@ sggc_alloc: next_free_val[1]=71, next_free_bits[1]=000000000000729b
 ALLOC RETURNING 6f
 ALLOCATING VECTOR OF LENGTH 20
 sggc_alloc: type 2, length 20
-test_calloc: 52 in use after:: 0x7f92c1404930
-sggc_alloc: called alloc_zeroed for data (big 2, 5 chunks):: 0x7f92c1404930
-test_calloc: 53 in use after:: 0x7f92c1404980
+test_calloc: 52 in use after:: 0x7fbee9403e80
+sggc_alloc: called alloc_zeroed for data (big 2, 5 chunks):: 0x7fbee9403e80
+test_calloc: 53 in use after:: 0x7fbee9403ed0
 sggc_alloc: created 500 in new segment
 sggc_alloc: aux1 block for 500 has pos 16 in block for kind 2
 sggc_alloc: aux2 block for 500 has pos 16 in block for kind 2
@@ -5721,56 +5721,56 @@ sggc_collect: 7b in old_gen1 now free
 sggc_collect: 7c in old_gen1 now free
 sggc_collect: b6 in old_gen1 now free
 sggc_collect: d3 in old_gen1 now free
-sggc_collect: calling free for data for 100:: 0x7f92c1404030
-test_free: 52 in use after:: 0x7f92c1404030
+sggc_collect: calling free for data for 100:: 0x7fbee9403580
+test_free: 52 in use after:: 0x7fbee9403580
 sggc_collect: putting 100 in unused
-sggc_collect: calling free for data for 140:: 0x7f92c14040c0
-test_free: 51 in use after:: 0x7f92c14040c0
+sggc_collect: calling free for data for 140:: 0x7fbee9403610
+test_free: 51 in use after:: 0x7fbee9403610
 sggc_collect: putting 140 in unused
-sggc_collect: calling free for data for 180:: 0x7f92c1404150
-test_free: 50 in use after:: 0x7f92c1404150
+sggc_collect: calling free for data for 180:: 0x7fbee94036a0
+test_free: 50 in use after:: 0x7fbee94036a0
 sggc_collect: putting 180 in unused
-sggc_collect: calling free for data for 1c0:: 0x7f92c14041e0
-test_free: 49 in use after:: 0x7f92c14041e0
+sggc_collect: calling free for data for 1c0:: 0x7fbee9403730
+test_free: 49 in use after:: 0x7fbee9403730
 sggc_collect: putting 1c0 in unused
-sggc_collect: calling free for data for 240:: 0x7f92c1404300
-test_free: 48 in use after:: 0x7f92c1404300
+sggc_collect: calling free for data for 240:: 0x7fbee9403850
+test_free: 48 in use after:: 0x7fbee9403850
 sggc_collect: putting 240 in unused
-sggc_collect: calling free for data for 200:: 0x7f92c1404270
-test_free: 47 in use after:: 0x7f92c1404270
+sggc_collect: calling free for data for 200:: 0x7fbee94037c0
+test_free: 47 in use after:: 0x7fbee94037c0
 sggc_collect: putting 200 in unused
-sggc_collect: calling free for data for 280:: 0x7f92c1404390
-test_free: 46 in use after:: 0x7f92c1404390
+sggc_collect: calling free for data for 280:: 0x7fbee94038e0
+test_free: 46 in use after:: 0x7fbee94038e0
 sggc_collect: putting 280 in unused
-sggc_collect: calling free for data for 2c0:: 0x7f92c1404420
-test_free: 45 in use after:: 0x7f92c1404420
+sggc_collect: calling free for data for 2c0:: 0x7fbee9403970
+test_free: 45 in use after:: 0x7fbee9403970
 sggc_collect: putting 2c0 in unused
-sggc_collect: calling free for data for 300:: 0x7f92c14044b0
-test_free: 44 in use after:: 0x7f92c14044b0
+sggc_collect: calling free for data for 300:: 0x7fbee9403a00
+test_free: 44 in use after:: 0x7fbee9403a00
 sggc_collect: putting 300 in unused
-sggc_collect: calling free for data for 380:: 0x7f92c14045d0
-test_free: 43 in use after:: 0x7f92c14045d0
+sggc_collect: calling free for data for 380:: 0x7fbee9403b20
+test_free: 43 in use after:: 0x7fbee9403b20
 sggc_collect: putting 380 in unused
-sggc_collect: calling free for data for 340:: 0x7f92c1404540
-test_free: 42 in use after:: 0x7f92c1404540
+sggc_collect: calling free for data for 340:: 0x7fbee9403a90
+test_free: 42 in use after:: 0x7fbee9403a90
 sggc_collect: putting 340 in unused
-sggc_collect: calling free for data for 3c0:: 0x7f92c1404660
-test_free: 41 in use after:: 0x7f92c1404660
+sggc_collect: calling free for data for 3c0:: 0x7fbee9403bb0
+test_free: 41 in use after:: 0x7fbee9403bb0
 sggc_collect: putting 3c0 in unused
-sggc_collect: calling free for data for 400:: 0x7f92c14046f0
-test_free: 40 in use after:: 0x7f92c14046f0
+sggc_collect: calling free for data for 400:: 0x7fbee9403c40
+test_free: 40 in use after:: 0x7fbee9403c40
 sggc_collect: putting 400 in unused
-sggc_collect: calling free for data for 480:: 0x7f92c1404810
-test_free: 39 in use after:: 0x7f92c1404810
+sggc_collect: calling free for data for 480:: 0x7fbee9403d60
+test_free: 39 in use after:: 0x7fbee9403d60
 sggc_collect: putting 480 in unused
-sggc_collect: calling free for data for 440:: 0x7f92c1404780
-test_free: 38 in use after:: 0x7f92c1404780
+sggc_collect: calling free for data for 440:: 0x7fbee9403cd0
+test_free: 38 in use after:: 0x7fbee9403cd0
 sggc_collect: putting 440 in unused
-sggc_collect: calling free for data for 4c0:: 0x7f92c14048a0
-test_free: 37 in use after:: 0x7f92c14048a0
+sggc_collect: calling free for data for 4c0:: 0x7fbee9403df0
+test_free: 37 in use after:: 0x7fbee9403df0
 sggc_collect: putting 4c0 in unused
-sggc_collect: calling free for data for 500:: 0x7f92c1404930
-test_free: 36 in use after:: 0x7f92c1404930
+sggc_collect: calling free for data for 500:: 0x7fbee9403e80
+test_free: 36 in use after:: 0x7fbee9403e80
 sggc_collect: putting 500 in unused
 sggc_collect: done
   unused: 17, old_gen1: 0, old_gen2: 0, old_to_new: 0, to_look_at: 0, const: 1

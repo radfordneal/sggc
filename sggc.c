@@ -457,41 +457,28 @@ static sggc_cptr_t sggc_alloc_kind_type_length (sggc_kind_t kind,
   int big = 0;  /* will object go in a big segment? */
   int new = 0;  /* will object go in a new segment? */
 
-  char *data = NULL;  /* pointer to data area for segment used */
-
   sggc_nchunks_t nch = sggc_kind_chunks[kind]; /* number of chunks for object */
+
+  char *data;               /* pointer to data area for segment used */
 
   sggc_index_t index;       /* index of segment that object will be in */
   struct set_segment *seg;  /* points to struct for segment object will be in */
   sggc_cptr_t v;            /* pointer to object, to be returned as value */
 
-  /* If this object will be put in a big segment, try to allocate its
-     data area now, and return SGGC_NO_OBJECT if this does not succeed.
-     The area allocated is freed if allocation later fails for some reason.
+  /* Look for an existing segment for this object to go in.  For a
+     small segment, just call sggc_alloc_small_kind_quickly, and
+     return the result directly if it succeeds.  For a big segment,
+     take a segment from 'unused', if one is there.
 
-     We also set 'big' to 1 if a big segment is being used. */
+     Also, for a big segment, or if no existing small segment is found,
+     allocate the data area for the (big or small) segment.  Return
+     with failure indication if this allocation fails. */
 
   if (nch == 0) /* big segment */
-  { nch = sggc_nchunks (type, length);
-    data = sggc_alloc_zeroed ((size_t) SGGC_CHUNK_SIZE * nch);
-    if (data == NULL) 
-    { goto fail;
-    }
-    if (SGGC_DEBUG) 
-    { printf (
-       "sggc_alloc: called alloc_zeroed for data (big %d, %d chunks):: %p\n", 
-        kind, (int)nch, data);
-    }
+  { 
     big = 1;
-  }
 
-  /* Look for an existing segment for this object to go in (and offset
-     within).  For a small segment, just call sggc_alloc_small_kind_quickly,
-     and return the result directly if it succeeds.  For a big segment, 
-     take a segment from 'unused', if one is there. */
-
-  if (big) /* big segment */
-  { v = set_first (&unused, 1);
+    v = set_first (&unused, 1);
     if (v != SGGC_NO_OBJECT)
     { if (SGGC_DEBUG) printf("sggc_alloc: found %x in unused\n",(unsigned)v);
       set_add (&free_or_new[kind], v);
@@ -499,9 +486,19 @@ static sggc_cptr_t sggc_alloc_kind_type_length (sggc_kind_t kind,
       seg = SET_SEGMENT(index);
       sggc_type[index] = type;  /* may reuse big segments of other types */
     }
+
+    nch = sggc_nchunks (type, length);
+    data = sggc_alloc_zeroed ((size_t) SGGC_CHUNK_SIZE * nch);
+    if (SGGC_DEBUG) 
+    { printf (
+       "sggc_alloc: called alloc_zeroed for data (big %d, %d chunks):: %p\n", 
+        kind, (int)nch, data);
+    }
   }
+
   else /* small segment */
-  { v = sggc_alloc_small_kind_quickly(kind);
+  {
+    v = sggc_alloc_small_kind_quickly(kind);
     if (v != SGGC_NO_OBJECT)
     { if (SGGC_DEBUG)
       { printf("sggc_alloc: found %x in next_free\n",(unsigned)v);
@@ -511,6 +508,13 @@ static sggc_cptr_t sggc_alloc_kind_type_length (sggc_kind_t kind,
       }
       return v;
     }
+
+    data = sggc_alloc_zeroed ((size_t) SGGC_CHUNK_SIZE 
+                                        * SGGC_CHUNKS_IN_SMALL_SEGMENT);
+  }
+
+  if (data == NULL) 
+  { return SGGC_NO_OBJECT;
   }
 
   /* Make sure we have blocks of auxiliary information 1 and 2 available 
@@ -576,13 +580,6 @@ static sggc_cptr_t sggc_alloc_kind_type_length (sggc_kind_t kind,
   { if (next_segment == maximum_segments)
     { goto fail;
     }
-    if (!big) /* small segment */
-    { data = sggc_alloc_zeroed ((size_t) SGGC_CHUNK_SIZE 
-                                  * SGGC_CHUNKS_IN_SMALL_SEGMENT);
-      if (data == NULL) 
-      { goto fail;
-      }
-    }
     sggc_segment[next_segment] = sggc_alloc_zeroed (sizeof **sggc_segment);
     if (sggc_segment[next_segment] == NULL)
     { goto fail;
@@ -604,10 +601,11 @@ static sggc_cptr_t sggc_alloc_kind_type_length (sggc_kind_t kind,
     new = 1;
   }
 
-  /* Add the object to the free_or_new set, if not already there.  For
-     small segments not from free_or_new, we also put all other
-     objects in the segment into free_or_new, and use them as the
-     current set of free objects, since there were none before. */
+  /* Add the object to the free_or_new set for the kind, if not
+     already there.  For small segments not from free_or_new, we also
+     put all other objects in the segment into free_or_new, and use
+     them as the current set of free objects, since there were none
+     before. */
 
   if (big)  /* big segment */
   {
@@ -702,30 +700,27 @@ static sggc_cptr_t sggc_alloc_kind_type_length (sggc_kind_t kind,
     }
 # endif
 
-  /* Set up data pointer for the segment, if not already there.  Update 
-     sggc_info. */
+  /* Set up the data pointer for the segment. */
 
-  if (data != NULL)  /* data area was allocated above, already zeroed. */
-  {
-    if (big) /* big segment */
-    { seg->x.big.max_chunks = (nch >> SGGC_CHUNK_BITS) == 0 ? nch : 0;
-      sggc_info.big_chunks += nch;
-    }
-
-    sggc_data[index] = data;
-
-    OFFSET(sggc_data,index,SGGC_CHUNK_SIZE);
+  if (big) /* big segment */
+  { seg->x.big.max_chunks = (nch >> SGGC_CHUNK_BITS) == 0 ? nch : 0;
+    sggc_info.big_chunks += nch;
   }
+
+  sggc_data[index] = data;
+
+  OFFSET(sggc_data,index,SGGC_CHUNK_SIZE);
+
+  /* Update info and return newly allocated object. */
 
   sggc_info.gen0_count += 1;
   return v;
 
 fail: 
 
-  /* Some allocation failed.  Return SGGC_NO_OBJECT, after freeing
-     'data' if it was allocated. */
+  /* Some allocation failed.  Return SGGC_NO_OBJECT, after freeing 'data'. */
 
-  if (data != NULL) sggc_free(data);
+  sggc_free(data);
   return SGGC_NO_OBJECT;
 }
 
