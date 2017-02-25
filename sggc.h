@@ -106,7 +106,7 @@ SGGC_EXTERN sggc_dptr *sggc_aux2;  /* Pointer to array of pointers to arrays of
 #if SGGC_USE_OFFSET_POINTERS
 
 #ifndef SGGC_OFFSET_CAST
-#define SGGC_OFFSET_CAST (uintptr_t) /* either (uint32_t) or (unitptr_t) */
+#define SGGC_OFFSET_CAST (uintptr_t) /* either (uint32_t) or (uintptr_t) */
 #endif
 
 static inline char *SGGC_DATA (sggc_cptr_t cptr)
