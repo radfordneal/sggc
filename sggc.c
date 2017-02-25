@@ -1162,6 +1162,7 @@ void sggc_collect (int level)
         { printf("sggc_collect: putting %x in unused\n",(unsigned)v);
         }
         set_add (&unused, v); /* allowed because v was removed with set_first */
+                              /*   and it was the only value in its segment   */
       }
     }
   }
@@ -1177,7 +1178,7 @@ void sggc_collect (int level)
       { sggc_next_free_bits[k] = 0;
       }
       else 
-      { sggc_next_free_bits[k] = set_chain_segment_bits (SET_UNUSED_FREE_NEW, n) 
+      { sggc_next_free_bits[k] = set_chain_segment_bits (SET_UNUSED_FREE_NEW, n)
                                    >> SET_VAL_OFFSET(n);
       }
       sggc_next_segment_not_free[k] = 0;
