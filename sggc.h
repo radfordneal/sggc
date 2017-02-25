@@ -122,9 +122,9 @@ static inline char *SGGC_AUX2 (sggc_cptr_t cptr)
 }
 #endif
 
-#else
+#else /* not using offset pointers */
 
-#ifndef SGGC_OFFSET_CASE
+#ifndef SGGC_OFFSET_CAST
 #define SGGC_OFFSET_CAST (uint32_t) /* may be (uint32_t), (uintptr_t), (int) */
 #endif
 
