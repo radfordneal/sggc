@@ -243,7 +243,6 @@ sggc_cptr_t sggc_alloc_small_kind (sggc_kind_t kind);
 #endif
 void sggc_collect (int level);
 void sggc_look_at (sggc_cptr_t cptr);
-void sggc_old_to_new_check (sggc_cptr_t from_ptr, sggc_cptr_t to_ptr);
 
 sggc_cptr_t sggc_constant (sggc_type_t type, sggc_kind_t kind, int n_objects,
                            char *data
@@ -342,4 +341,51 @@ static inline sggc_cptr_t sggc_alloc_small_kind_quickly (sggc_kind_t kind)
   sggc_info.gen0_count += 1;
 
   return nfv;
+}
+
+
+/* RECORD AN OLD-TO-NEW REFERENCE IF NECESSARY. */
+
+static inline void sggc_old_to_new_check (sggc_cptr_t from_ptr,
+                                          sggc_cptr_t to_ptr)
+{
+  /* If from_ptr is youngest generation, no need to check anything else. */
+
+  if (set_chain_contains (SET_UNUSED_FREE_NEW, from_ptr))
+  { return;
+  }
+
+  /* Can quit now if from_ptr is already in the old-to-new set (which is
+     the only one using the SET_OLD_TO_NEW chain). */
+
+  if (set_chain_contains (SET_OLD_TO_NEW, from_ptr))
+  { return;
+  }
+
+  /* Note:  from_ptr shouldn't be constant, so below can look in whole chain. */
+
+  if (set_chain_contains (SET_OLD_GEN2_CONST, from_ptr))
+  { 
+    /* If from_ptr is in old generation 2, only others in old generation 2
+       and constants can be referenced without using old-to-new. */
+
+    if (set_chain_contains (SET_OLD_GEN2_CONST, to_ptr))
+    { return;
+    }
+  }
+  else
+  { 
+    /* If from_ptr is in old generation 1, only references to newly 
+       allocated objects require using old-to-new. */
+
+    if (!set_chain_contains (SET_UNUSED_FREE_NEW, to_ptr))
+    { return;
+    }
+  }
+
+  /* If we get here, we need to record the existence of an old-to-new
+     reference in from_ptr. */
+
+  extern struct set sggc_old_to_new_set;
+  set_add (&sggc_old_to_new_set, from_ptr);
 }

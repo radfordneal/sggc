@@ -144,11 +144,13 @@ static set_bits_t kind_full[SGGC_N_KINDS];
 
 /* SETS OF OBJECTS. */
 
+#define old_to_new sggc_old_to_new_set  /* External for inline use in sggc.h */
+
 static struct set free_or_new[SGGC_N_KINDS];  /* Free or newly allocated */
 static struct set unused;                     /* Big segments not being used */
 static struct set old_gen1;                   /* Survived collection once */
 static struct set old_gen2;                   /* Survived collection >1 time */
-static struct set old_to_new;                 /* May have old->new references */
+struct set old_to_new;                        /* May have old->new references */
 static struct set to_look_at;                 /* Not yet looked at in sweep */
 static struct set constants;                  /* Prealloc'd constant segments */
 
@@ -1263,46 +1265,4 @@ void sggc_look_at (sggc_cptr_t ptr)
       if (SGGC_DEBUG) printf("sggc_look_at: will look at %x\n",(unsigned)ptr);
     }
   }
-}
-
-
-/* RECORD AN OLD-TO-NEW REFERENCE IF NECESSARY. */
-
-void sggc_old_to_new_check (sggc_cptr_t from_ptr, sggc_cptr_t to_ptr)
-{
-  /* If from_ptr is youngest generation, no need to check anything else. */
-
-  if (set_chain_contains (SET_UNUSED_FREE_NEW, from_ptr))
-  { return;
-  }
-
-  /* Can quit now if from_ptr is already in the old-to-new set. */
-
-  if (set_contains (&old_to_new, from_ptr))
-  { return;
-  }
-
-  if (set_contains (&old_gen2, from_ptr))
-  { 
-    /* If from_ptr is in old generation 2, only others in old generation 2
-       and constants can be referenced without using old-to-new. */
-
-    if (set_chain_contains (SET_OLD_GEN2_CONST, to_ptr))
-    { return;
-    }
-  }
-  else
-  { 
-    /* If from_ptr is in old generation 1, only references to newly 
-       allocated objects require using old-to-new. */
-
-    if (!set_chain_contains (SET_UNUSED_FREE_NEW, to_ptr))
-    { return;
-    }
-  }
-
-  /* If we get here, we need to record the existence of an old-to-new
-     reference in from_ptr. */
-
-  set_add (&old_to_new, from_ptr);
 }
