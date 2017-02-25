@@ -649,15 +649,15 @@ static sggc_cptr_t sggc_alloc_kind_type_length (sggc_kind_t kind,
     {
 #     ifdef SGGC_AUX1_READ_ONLY
       if (read_only_aux1)
-      { sggc_aux1[index] = read_only_aux1;
+      { sggc_aux1[index] = (sggc_dptr) read_only_aux1;
         if (SGGC_DEBUG)
         { printf("sggc_alloc: used read-only aux1 for %x\n", v);
         }
       }
       else
 #     endif
-      { sggc_aux1[index] = kind_aux1_block[kind] 
-                            + kind_aux1_block_pos[kind] * SGGC_AUX1_SIZE;
+      { sggc_aux1[index] = (sggc_dptr) (kind_aux1_block[kind] 
+                             + kind_aux1_block_pos[kind] * SGGC_AUX1_SIZE);
         if (0 && !big)  /* could be enabled if aux1_off were ever actually used */
         { seg->x.small.aux1_off = kind_aux1_block_pos[kind];
         }
@@ -678,15 +678,15 @@ static sggc_cptr_t sggc_alloc_kind_type_length (sggc_kind_t kind,
     {
 #     ifdef SGGC_AUX2_READ_ONLY
       if (read_only_aux2)
-      { sggc_aux2[index] = read_only_aux2;
+      { sggc_aux2[index] = (sggc_dptr) read_only_aux2;
         if (SGGC_DEBUG)
         { printf("sggc_alloc: used read-only aux2 for %x\n", v);
         }
       }
       else
 #     endif
-      { sggc_aux2[index] = kind_aux2_block[kind] 
-                            + kind_aux2_block_pos[kind] * SGGC_AUX2_SIZE;
+      { sggc_aux2[index] = (sggc_dptr) (kind_aux2_block[kind] 
+                             + kind_aux2_block_pos[kind] * SGGC_AUX2_SIZE);
         if (0 && !big)  /* could be enabled if aux2_off were ever actually used */
         { seg->x.small.aux2_off = kind_aux2_block_pos[kind];
         }
@@ -709,7 +709,7 @@ static sggc_cptr_t sggc_alloc_kind_type_length (sggc_kind_t kind,
     sggc_info.big_chunks += nch;
   }
 
-  sggc_data[index] = data;
+  sggc_data[index] = (sggc_dptr) data;
 
   OFFSET(sggc_data,index,SGGC_CHUNK_SIZE);
 
@@ -817,17 +817,17 @@ sggc_cptr_t sggc_constant (sggc_type_t type, sggc_kind_t kind, int n_objects,
 
   sggc_type[index] = type;
 
-  sggc_data[index] = data;
+  sggc_data[index] = (sggc_dptr) data;
   OFFSET(sggc_data,index,SGGC_CHUNK_SIZE);
 
 # ifdef SGGC_AUX1_SIZE
-    sggc_aux1[index] = aux1;
+    sggc_aux1[index] = (sggc_dptr) aux1;
     OFFSET(sggc_aux1,index,SGGC_AUX1_SIZE);
     seg->x.small.aux1_off = 0;
 # endif
 
 # ifdef SGGC_AUX2_SIZE
-    sggc_aux2[index] = aux2;
+    sggc_aux2[index] = (sggc_dptr) aux2;
     OFFSET(sggc_aux2,index,SGGC_AUX2_SIZE);
     seg->x.small.aux2_off = 0;
 # endif
@@ -1156,7 +1156,7 @@ void sggc_collect (int level)
                    v, SGGC_DATA(v));
         }
         UNDO_OFFSET(sggc_data,index,SGGC_CHUNK_SIZE);
-        sggc_free (sggc_data[index]);
+        sggc_free ((char *) sggc_data[index]);
         if (SGGC_DEBUG) 
         { printf("sggc_collect: putting %x in unused\n",(unsigned)v);
         }

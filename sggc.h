@@ -61,31 +61,37 @@ typedef set_value_t sggc_cptr_t;  /* Type of compressed pointer (index,offset)*/
    'small' segment, having total number of chunks no more than given by
    SGGC_CHUNKS_IN_SMALL_SEGMENT. */
 
+#ifdef SGGC_USE_OFFSET_POINTERS
+typedef uintptr_t sggc_dptr;       /* So out-of-bounds arithmetic well-defined*/
+#else
+typedef char *sggc_dptr;           /* Ordinary pointer arithmetic */
+#endif
+
 #ifdef SGGC_MAX_SEGMENTS
 
-SGGC_EXTERN char *sggc_data[SGGC_MAX_SEGMENTS]; /* Pointers to arrays of data
-                                                   blocks for objects in seg */
+SGGC_EXTERN sggc_dptr sggc_data[SGGC_MAX_SEGMENTS]; /* Pointers to arrays of 
+                                                       blocks for objs in seg */
 
 #ifdef SGGC_AUX1_SIZE
-SGGC_EXTERN char *sggc_aux1[SGGC_MAX_SEGMENTS]; /* Pointers to aux1 data */
+SGGC_EXTERN sggc_dptr sggc_aux1[SGGC_MAX_SEGMENTS]; /* Pointers to aux1 data */
 #endif
 
 #ifdef SGGC_AUX2_SIZE
-SGGC_EXTERN char *sggc_aux2[SGGC_MAX_SEGMENTS]; /* Pointers to aux2 data */
+SGGC_EXTERN sggc_dptr sggc_aux2[SGGC_MAX_SEGMENTS]; /* Pointers to aux2 data */
 #endif
 
-#else
+#else  /* max number of segments determined at run time */
 
-SGGC_EXTERN char **sggc_data;      /* Pointer to array of pointers to arrays of 
+SGGC_EXTERN sggc_dptr *sggc_data;  /* Pointer to array of pointers to arrays of 
                                       data blocks for objects within segments */
 
 #ifdef SGGC_AUX1_SIZE
-SGGC_EXTERN char **sggc_aux1;      /* Pointer to array of pointers to arrays of 
+SGGC_EXTERN sggc_dptr *sggc_aux1;  /* Pointer to array of pointers to arrays of 
                                       auxiliary info for objects in segments */
 #endif
 
 #ifdef SGGC_AUX2_SIZE
-SGGC_EXTERN char **sggc_aux2;      /* Pointer to array of pointers to arrays of 
+SGGC_EXTERN sggc_dptr *sggc_aux2;  /* Pointer to array of pointers to arrays of 
                                       auxiliary info for objects in segments */
 #endif
 
@@ -104,21 +110,21 @@ SGGC_EXTERN char **sggc_aux2;      /* Pointer to array of pointers to arrays of
 #endif
 
 static inline char *SGGC_DATA (sggc_cptr_t cptr)
-{ return sggc_data[SET_VAL_INDEX(cptr)] 
-          + SGGC_CHUNK_SIZE * SGGC_OFFSET_CAST cptr;
+{ return ((char *) (sggc_data[SET_VAL_INDEX(cptr)] 
+                     + SGGC_CHUNK_SIZE * SGGC_OFFSET_CAST cptr));
 }
 
 #ifdef SGGC_AUX1_SIZE
 static inline char *SGGC_AUX1 (sggc_cptr_t cptr)
-{ return sggc_aux1[SET_VAL_INDEX(cptr)] 
-           + SGGC_AUX1_SIZE * SGGC_OFFSET_CAST cptr;
+{ return ((char *) (sggc_aux1[SET_VAL_INDEX(cptr)] 
+                     + SGGC_AUX1_SIZE * SGGC_OFFSET_CAST cptr));
 }
 #endif
 
 #ifdef SGGC_AUX2_SIZE
 static inline char *SGGC_AUX2 (sggc_cptr_t cptr)
-{ return sggc_aux2[SET_VAL_INDEX(cptr)] 
-           + SGGC_AUX2_SIZE * SGGC_OFFSET_CAST cptr;
+{ return ((char *) (sggc_aux2[SET_VAL_INDEX(cptr)] 
+                     + SGGC_AUX2_SIZE * SGGC_OFFSET_CAST cptr));
 }
 #endif
 
