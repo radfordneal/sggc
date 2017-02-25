@@ -979,7 +979,7 @@ void sggc_collect (int level)
     { printf ("sggc_collect: old->new for %x (gen%d)\n", (unsigned)v,
         set_contains(&old_gen2,v) ? 2 : set_contains(&old_gen1,v) ? 1 : 0);
     }
-    if (set_contains (&old_gen2, v)) /* v is in old generation 2 */
+    if (set_chain_contains (SET_OLD_GEN2_CONST, v)) /* v in old generation 2 */
     { old_to_new_check = 2;
     }
     else /* v is in old generation 1 */
@@ -1048,7 +1048,8 @@ void sggc_collect (int level)
         { set_add (&old_gen2, v);
           if (SGGC_DEBUG) printf("sggc_collect: %x now old_gen2\n",(unsigned)v);
         }
-        else if (!set_contains (&old_gen2, v)) /* must be in generation 0 */
+        else if (!set_chain_contains (SET_OLD_GEN2_CONST, v))
+                    /* must be in generation 0 */
         { set_add (&old_gen1, v);
           if (SGGC_DEBUG) printf("sggc_collect: %x now old_gen1\n",(unsigned)v);
         }
@@ -1248,13 +1249,13 @@ void sggc_look_at (sggc_cptr_t ptr)
       }
       else if (collect_level == 1 && old_to_new_check == 2)
       { if (!set_chain_contains (SET_OLD_GEN2_CONST, ptr) 
-              && !set_contains (&old_gen1, ptr))
+              && !set_chain_contains (SET_OLD_GEN1, ptr))
         { old_to_new_check = 0;
         }
       }
       else /* collect_level==2 || collect_level == 1 && old_to_new_check == 1 */
       { if (!set_chain_contains (SET_OLD_GEN2_CONST, ptr) 
-              && !set_contains (&old_gen1, ptr))
+              && !set_chain_contains (SET_OLD_GEN1, ptr))
         { old_to_new_check = -1;
         }
         return;
