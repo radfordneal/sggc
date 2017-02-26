@@ -14,5 +14,6 @@ interp/interp-no-segment-at-a-time
 interp/interp-no-builtins
 interp/interp-alloc-small-kind
 interp/interp-alloc-small-kind-quickly
+interp/interp-memset-quickly
 interp/o-e-i
 interp/o-e-r
