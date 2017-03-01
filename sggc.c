@@ -203,12 +203,12 @@ static int old_to_new_check;   /* 1 if should look for old-to-new reference */
 /* NUMBER OF CHUNKS FOR A "HUGE" OBJECT.  For such objects, the number
    of chunks is increased if necessary to a multiple of 2^SGGC_HUGE_SHIFT,
    so that the maximum number of chunks can be recorded in the available 
-   space after shifting it right by SGGC_HUGE_HUGE_SHIFT bits. */
+   space after shifting it right by SGGC_HUGE_SHIFT bits. */
 
 #define HUGE_CHUNKS (1 << 21)  /* Number of chunks where object becomes huge */
 
 #ifndef SGGC_HUGE_SHIFT
-#define SGGC_HUGE_SHIFT 13     /* Amount to shift to try to get # in range */
+#define SGGC_HUGE_SHIFT 11     /* Amount to shift to try to get # in range */
 #endif
 
 
@@ -461,7 +461,7 @@ static void next_aux_pos (sggc_kind_t kind, char **block, unsigned char *pos,
    is used only for big kinds. The value returned is SGGC_NO_OBJECT if
    allocation fails (but note that it might succeed if retried after
    garbage collection is done), or if the number of chunks required 
-   is greater than can be stored in max_chunks.
+   is greater than can be stored in alloc_chunks.
 
    Used to implement sggc_alloc and sggc_alloc_small_kind. */
 
@@ -724,10 +724,10 @@ static sggc_cptr_t sggc_alloc_kind_type_length (sggc_kind_t kind,
 
   if (big)
   { if (nch < HUGE_CHUNKS)
-    { seg->x.big.max_chunks = nch;
+    { seg->x.big.alloc_chunks = nch;
     }
     else
-    { seg->x.big.max_chunks = nch >> SGGC_HUGE_SHIFT;
+    { seg->x.big.alloc_chunks = nch >> SGGC_HUGE_SHIFT;
       seg->x.big.huge = 1;
     }
     sggc_info.big_chunks += nch;

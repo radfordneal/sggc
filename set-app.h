@@ -59,8 +59,8 @@
       unsigned constant : 1;  /* 1 for a constant segment                   */ \
       unsigned big : 1;       /* 1 for a big segment with one large object  */ \
       unsigned huge : 1;      /* 1 if maximum cnunks not less than 2^21     */ \
-      unsigned max_chunks : 21;/* Maximum chunks fitting in allocated space */ \
-    } big;                     /* if huge is 0, else that >> by HUGE_SHIFT  */ \
+      unsigned alloc_chunks : 21; /* Chunks that fit in allocated space, if */ \
+    } big;                     /* huge is 0, else that >> by HUGE_SHIFT     */ \
     struct                 /* For small segments... */ \
     { unsigned char kind;     /* The kind of segment (equal to type if big) */ \
       unsigned constant : 1;  /* 1 for a constant segment                   */ \

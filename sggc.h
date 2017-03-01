@@ -200,7 +200,7 @@ SGGC_EXTERN struct sggc_info
   unsigned gen2_count;       /* Number of objects in old generation 2.
                                 Does not include constants */
 
-  sggc_nchunks_t big_chunks; /* # of chunks in newly-allocated big objects */
+  size_t big_chunks;         /* # of chunks in newly-allocated big objects */
 
 } sggc_info;
 
