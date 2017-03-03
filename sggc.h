@@ -68,7 +68,7 @@ typedef set_value_t sggc_cptr_t;  /* Type of compressed pointer (index,offset)*/
 #ifdef SGGC_USE_OFFSET_POINTERS
 typedef uintptr_t sggc_dptr;       /* So out-of-bounds arithmetic well-defined*/
 #else
-typedef char *sggc_dptr;           /* Ordinary pointer arithmetic */
+typedef char * restrict sggc_dptr; /* Ordinary pointer arithmetic */
 #endif
 
 #ifdef SGGC_MAX_SEGMENTS
@@ -86,17 +86,17 @@ SGGC_EXTERN sggc_dptr sggc_aux2[SGGC_MAX_SEGMENTS]; /* Pointers to aux2 data */
 
 #else  /* max number of segments determined at run time */
 
-SGGC_EXTERN sggc_dptr *sggc_data;  /* Pointer to array of pointers to arrays of 
-                                      data blocks for objects within segments */
+SGGC_EXTERN sggc_dptr * restrict sggc_data;   /* Pointer to array of pointers 
+                         to arrays of data blocks for objects within segments */
 
 #ifdef SGGC_AUX1_SIZE
-SGGC_EXTERN sggc_dptr *sggc_aux1;  /* Pointer to array of pointers to arrays of 
-                                      auxiliary info for objects in segments */
+SGGC_EXTERN sggc_dptr * restrict sggc_aux1;   /* Pointer to array of pointers
+                                  to auxiliary info 1 for objects in segments */
 #endif
 
 #ifdef SGGC_AUX2_SIZE
-SGGC_EXTERN sggc_dptr *sggc_aux2;  /* Pointer to array of pointers to arrays of 
-                                      auxiliary info for objects in segments */
+SGGC_EXTERN sggc_dptr * restrict sggc_aux2;   /* Pointer to array of pointers
+                                  to auxiliary info 2 for objects in segments */
 #endif
 
 #endif

@@ -252,23 +252,23 @@ int sggc_init (int max_segments)
 
     sggc_data = sggc_alloc_zeroed (max_segments * sizeof *sggc_data);
     if (sggc_data == NULL)
-    { sggc_free(sggc_segment);
+    { sggc_free((void*)sggc_segment);
       return 2;
     }
 
     sggc_type = sggc_alloc_zeroed (max_segments * sizeof *sggc_type);
     if (sggc_type == NULL)
-    { sggc_free(sggc_segment);
-      sggc_free(sggc_data);
+    { sggc_free((void*)sggc_segment);
+      sggc_free((void*)sggc_data);
       return 3;
     }
 
 #   ifdef SGGC_AUX1_SIZE
       sggc_aux1 = sggc_alloc_zeroed (max_segments * sizeof *sggc_aux1);
       if (sggc_aux1 == NULL)
-      { sggc_free(sggc_segment);
-        sggc_free(sggc_data);
-        sggc_free(sggc_type);
+      { sggc_free((void*)sggc_segment);
+        sggc_free((void*)sggc_data);
+        sggc_free((void*)sggc_type);
         return 4;
       }
 #   endif
@@ -276,11 +276,11 @@ int sggc_init (int max_segments)
 #   ifdef SGGC_AUX2_SIZE
       sggc_aux2 = sggc_alloc_zeroed (max_segments * sizeof *sggc_aux2);
       if (sggc_aux2 == NULL)
-      { sggc_free(sggc_segment);
-        sggc_free(sggc_data);
-        sggc_free(sggc_type);
+      { sggc_free((void*)sggc_segment);
+        sggc_free((void*)sggc_data);
+        sggc_free((void*)sggc_type);
 #       ifdef SGGC_AUX1_SIZE
-          sggc_free(sggc_aux1);
+          sggc_free((void*)sggc_aux1);
 #       endif
         return 5;
       }
