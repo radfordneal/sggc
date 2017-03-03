@@ -902,25 +902,22 @@ static void collect_debug (void)
 }
 
 
-/* DO A GARBAGE COLLECTION AT THE SPECIFIED LEVEL. */
+/* DO A GARBAGE COLLECTION AT THE SPECIFIED LEVEL. 
 
-void sggc_collect (int level)
-{ 
-  sggc_cptr_t v;
-  int k;
-
-  if (SGGC_DEBUG) printf("sggc_collect: level %d\n",level);
-  if (SGGC_DEBUG) collect_debug();
-
-  collect_level = level;
-
-  if (set_first(&to_look_at, 0) != SET_NO_VALUE) abort();
+   This is done using several sub-procedures, primarily so that profiling
+   will show how much time is spent in each.  (Accordingly, they have
+   external scope even though only used here, to discourage inlining.) 
+ */
 
   /* Put objects in the old generations being collected in the 
      free_or_new set for their kind. 
 
      Two versions are maintained, an old one doing it one object at a
      time, and a new one that does it a segment at a time. */
+
+void sggc_collect_put_in_free_or_new (int level)
+{
+  sggc_cptr_t v;
 
   if (!SGGC_SEGMENT_AT_A_TIME) /* do it the old way, one object at a time */
   {
@@ -972,6 +969,7 @@ void sggc_collect (int level)
       }
     }
   }
+}
 
   /* Handle old-to-new references.  Done in cooperation with
      sggc_look_at, using the global variables collect_level (the level
@@ -980,6 +978,10 @@ void sggc_collect (int level)
      is cleared to 0 to indicate that further special processing is
      unnecessary.  (That may also mean that the old-to-new entry is 
      still needed). */
+
+void sggc_collect_old_to_new (int level)
+{
+  sggc_cptr_t v;
 
   v = set_first(&old_to_new, 0);
 
@@ -1015,18 +1017,16 @@ void sggc_collect (int level)
     }
     v = set_next (&old_to_new, v, remove);
   }
-
-  old_to_new_check = 0;  /* no special old-to-new processing in sggc_look_at */
-
-  /* Get the application to take root pointers out of the free_or_new set,
-     and put them in the to_look_at set. */
-
-  sggc_find_root_ptrs();
+}
 
   /* Keep looking at objects in the to_look_at set, putting them in
      the correct old generation, and getting the application to find
      any pointers they contain (which may add to the to_look_at set),
      until there are no more in the set. */
+
+void sggc_collect_look_at (int level)
+{
+  sggc_cptr_t v;
 
 # ifdef SGGC_AFTER_MARKING
   int rep = 0;
@@ -1073,6 +1073,7 @@ void sggc_collect (int level)
 #   endif
 
   } while (set_first (&to_look_at, 0) != SGGC_NO_OBJECT);
+}
 
   /* Remove objects still in the free_or_new set from the old generations 
      that were collected.  Also remove them from the old-to-new set.
@@ -1083,6 +1084,10 @@ void sggc_collect (int level)
 
      Two versions are maintained, an old one doing it one object at a
      time, and a new one that does it a segment at a time. */
+
+void sggc_collect_remove_free (int level)
+{
+  sggc_cptr_t v;
 
   if (!SGGC_SEGMENT_AT_A_TIME) /* do it the old way, one object at a time */
   { 
@@ -1150,6 +1155,7 @@ void sggc_collect (int level)
       }
     }
   }
+}
 
   /* Move big segments to the 'unused' set, while freeing their data
      storage.  Auxiliary information is not freed (and should not be
@@ -1157,6 +1163,11 @@ void sggc_collect (int level)
 
      Note that all big kinds are equal to their types, so we stop the
      loop at SGGC_N_TYPES. */
+
+void sggc_collect_move_to_unused (int level)
+{
+  sggc_cptr_t v;
+  int k;
 
   for (k = 0; k < SGGC_N_TYPES; k++)
   { if (sggc_kind_chunks[k] == 0)
@@ -1176,6 +1187,31 @@ void sggc_collect (int level)
       }
     }
   }
+}
+
+void sggc_collect (int level)
+{ 
+  int k;
+
+  if (SGGC_DEBUG) printf("sggc_collect: level %d\n",level);
+  if (SGGC_DEBUG) collect_debug();
+
+  collect_level = level;
+
+  if (set_first(&to_look_at, 0) != SET_NO_VALUE) abort();
+
+  sggc_collect_put_in_free_or_new (level);
+  sggc_collect_old_to_new (level);
+
+  /* Get the application to take root pointers out of the free_or_new set,
+     and put them in the to_look_at set. */
+
+  old_to_new_check = 0;  /* no special old-to-new processing in sggc_look_at */
+  sggc_find_root_ptrs();
+
+  sggc_collect_look_at (level);
+  sggc_collect_remove_free (level);
+  sggc_collect_move_to_unused (level);
 
   /* For each kind, set up sggc_next_free_val, and sggc_next_free_bits to 
      use all of free_or_new. */
