@@ -162,7 +162,7 @@ static inline char *SGGC_AUX2 (sggc_cptr_t cptr)
 
 /* TYPES AND KINDS OF SEGMENTS.  Types and kinds must fit in 8 bits,
    with the kind being equal to the type if it is for a "big" segment.
-   The kind of a small segment is recorded in the segment description.
+   The kind of a segment is recorded in the segment description.
    The array of types for segments is allocated at initialization, or
    statically if SGGC_MAX_SEGMENTS is defined. */
 
