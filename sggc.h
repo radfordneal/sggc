@@ -105,55 +105,62 @@ SGGC_EXTERN sggc_dptr * restrict sggc_aux2;   /* Pointer to array of pointers
 
 
 /* INLINE FUNCTION TO GET DATA POINTER FOR AN OBJECT, and similarly
-   for auxiliary information (if present). */
+   for auxiliary information (if present). 
+
+   This is done differently if pointers are offset or not offset.  
+   In both cases, the computation of the segment offset times the
+   chunk size may be done with various integer types, with the
+   same end result.  The type used is SGGC_OFFSET_CALC, which may
+   be set by a compiler flag or left to default as below. */
 
 #if SGGC_USE_OFFSET_POINTERS
 
-#ifndef SGGC_OFFSET_CAST
-#define SGGC_OFFSET_CAST (uintptr_t) /* either (uint32_t) or (uintptr_t) */
+#ifndef SGGC_OFFSET_CALC
+#define SGGC_OFFSET_CALC uint16_t  /* uint16_t, uint32_t, or uintptr_t */
 #endif
 
 static inline char *SGGC_DATA (sggc_cptr_t cptr)
 { return ((char *) (sggc_data[SET_VAL_INDEX(cptr)] 
-                     + SGGC_CHUNK_SIZE * SGGC_OFFSET_CAST cptr));
+                     + SGGC_CHUNK_SIZE * (SGGC_OFFSET_CALC) cptr));
 }
 
 #ifdef SGGC_AUX1_SIZE
 static inline char *SGGC_AUX1 (sggc_cptr_t cptr)
 { return ((char *) (sggc_aux1[SET_VAL_INDEX(cptr)] 
-                     + SGGC_AUX1_SIZE * SGGC_OFFSET_CAST cptr));
+                     + SGGC_AUX1_SIZE * (SGGC_OFFSET_CALC) cptr));
 }
 #endif
 
 #ifdef SGGC_AUX2_SIZE
 static inline char *SGGC_AUX2 (sggc_cptr_t cptr)
 { return ((char *) (sggc_aux2[SET_VAL_INDEX(cptr)] 
-                     + SGGC_AUX2_SIZE * SGGC_OFFSET_CAST cptr));
+                     + SGGC_AUX2_SIZE * (SGGC_OFFSET_CALC) cptr));
 }
 #endif
 
 #else /* not using offset pointers */
 
-#ifndef SGGC_OFFSET_CAST
-#define SGGC_OFFSET_CAST (uint32_t) /* may be (uint32_t), (uintptr_t), (int) */
+#ifndef SGGC_OFFSET_CALC
+#define SGGC_OFFSET_CALC uint16_t   /* uint16_t, uint32_t, uintptr_t, 
+                                       short, int, or intptr_t */
 #endif
 
 static inline char *SGGC_DATA (sggc_cptr_t cptr)
 { return sggc_data[SET_VAL_INDEX(cptr)] 
-          + SGGC_CHUNK_SIZE * SGGC_OFFSET_CAST SET_VAL_OFFSET(cptr);
+          + SGGC_CHUNK_SIZE * (SGGC_OFFSET_CALC) SET_VAL_OFFSET(cptr);
 }
 
 #ifdef SGGC_AUX1_SIZE
 static inline char *SGGC_AUX1 (sggc_cptr_t cptr)
 { return sggc_aux1[SET_VAL_INDEX(cptr)] 
-           + SGGC_AUX1_SIZE * SGGC_OFFSET_CAST SET_VAL_OFFSET(cptr);
+           + SGGC_AUX1_SIZE * (SGGC_OFFSET_CALC) SET_VAL_OFFSET(cptr);
 }
 #endif
 
 #ifdef SGGC_AUX2_SIZE
 static inline char *SGGC_AUX2 (sggc_cptr_t cptr)
 { return sggc_aux2[SET_VAL_INDEX(cptr)] 
-           + SGGC_AUX2_SIZE * SGGC_OFFSET_CAST SET_VAL_OFFSET(cptr);
+           + SGGC_AUX2_SIZE * (SGGC_OFFSET_CALC) SET_VAL_OFFSET(cptr);
 }
 #endif
 

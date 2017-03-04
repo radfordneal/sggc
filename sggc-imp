@@ -182,11 +182,12 @@ MORE ON OFFSET ARITHMETIC
 
 In step (2) of finding the location of the data for an object (or
 similarly, the auxiliary information), the multiplication done will
-result in a small integer, which could be held in 32 bits.  However,
-depending on the machine used, it may be faster to do arithmetic in
-the same bit width as a pointer.  The SGGC_OFFSET_CAST symbol in
-sggc.h is defined to be a cast to whichever size of arithemtic is
-chosen (or this may be set by a compiler option).
+result in a small integer, which could be held in as few as 16 bits.
+However, depending on the machine used, it may be faster to do
+arithmetic in some other integer type, perhaps with the same bit width
+as a pointer.  The SGGC_OFFSET_CALC symbol may be defined (and has a
+default in sggc.h) to be a cast to whichever size of arithemtic is
+chosen.
 
 The need to mask out just the offset part of a compressed pointer when
 computing the address of its data or auxiliary information may be
@@ -194,17 +195,15 @@ eliminated by adjusting the pointers to data or auxiliary information
 for a segment so that the correct result is obtained when the unmasked
 index is present along with the offset.  This method is enabled if
 SGGC is compiled with SGGC_USE_OFFSET_POINTERS defined as 1 (versus
-being defined as 0 or not defined at all).  
-
-A different value for SGGC_OFFSET_CAST may be used when
-SGGC_USE_OFFSET_POINTERS is 1, as may be chosen by appropriately
-editing sggc.h (or setting a compiler option).  Any unsigned integer
-type of at least 32 bits (possibly less) should work, but whether
-uint32_t or uintptr_t is faster might depend on the machine used.
-Note that consistent use of one unsigned type is necessary, so that
-overflow (which may happen, and produces a well-defined result for
-unsigned types) will always occur in the same manner, leading to
-cancellation of all but the desired part of the operation.
+being defined as 0 or not defined at all).  A different
+SGGC_OFFSET_CALC type might be best when SGGC_USE_OFFSET_POINTERS is
+1.  Any unsigned integer type of at least 16 bits should work, but
+whether uint16_t, uint32_t, or uintptr_t is faster might depend on the
+machine used.  Note that consistent use of one unsigned type is
+necessary, so that overflow (which may happen, and produces a
+well-defined result for unsigned types) will always occur in the same
+manner, leading to cancellation of all but the desired part of the
+operation.
 
 
 GENERATIONAL GARBAGE COLLECTION
@@ -426,7 +425,7 @@ level are summarized below:
 IMPLEMENTATION OPTIONS
 
 In additon to the SGGC_MAX_SEGMENTS, SGGC_USE_OFFSET_POINTERS, and
-SGGC_OFFSET_CAST symbols mentioned above, several other pre-processor
+SGGC_OFFSET_CALC symbols mentioned above, several other pre-processor
 symbols may be defined (eg, with a compiler flag) in order to select
 different implementation options.  The first two below are primarily
 useful for debugging and performance evaluation, since the default is
