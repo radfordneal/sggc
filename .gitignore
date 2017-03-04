@@ -16,5 +16,7 @@ interp/interp-no-builtins
 interp/interp-alloc-small-kind
 interp/interp-alloc-small-kind-quickly
 interp/interp-memset-quickly
+interp/interp-seg-direct
+interp/interp-seg-direct-no-max
 interp/o-e-i
 interp/o-e-r

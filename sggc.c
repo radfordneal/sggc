@@ -616,12 +616,16 @@ static sggc_cptr_t sggc_alloc_kind_type_length (sggc_kind_t kind,
     { goto fail;
     }
 
-    seg = sggc_alloc_zeroed (sizeof **sggc_segment);  /* flags initially zero */
-    if (seg == NULL)
-    { goto fail;
-    }
+#   ifdef SGGC_SEG_DIRECT
+      seg = sggc_segment+next_segment;
+#   else
+      seg = sggc_alloc_zeroed (sizeof **sggc_segment);  /* flags initially 0 */
+      if (seg == NULL)
+      { goto fail;
+      }
+      sggc_segment[next_segment] = seg;
+#   endif
 
-    sggc_segment[next_segment] = seg;
     index = next_segment; 
     next_segment += 1;
     set_segment_init (seg);
@@ -812,13 +816,19 @@ sggc_cptr_t sggc_constant (sggc_type_t type, sggc_kind_t kind, int n_objects,
   { return SGGC_NO_OBJECT;
   }
 
-  sggc_segment[next_segment] = sggc_alloc_zeroed (sizeof **sggc_segment);
-  if (sggc_segment[next_segment] == NULL)
-  { return SGGC_NO_OBJECT;
-  }
+  struct set_segment *seg;
+
+# ifdef SGGC_SEG_DIRECT
+    seg = sggc_segment+next_segment;
+# else
+    seg = sggc_alloc_zeroed (sizeof **sggc_segment);  /* flags initially 0 */
+    if (seg == NULL)
+    { return SGGC_NO_OBJECT;
+    }
+    sggc_segment[next_segment] = seg;
+# endif
 
   set_index_t index = next_segment; 
-  struct set_segment *seg = SET_SEGMENT(index);
   sggc_cptr_t v = SGGC_CPTR_VAL(index,0);
 
   next_segment += 1;
