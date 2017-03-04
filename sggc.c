@@ -90,10 +90,10 @@ static const sggc_type_t sggc_kind_types[SGGC_N_KINDS] = SGGC_KIND_TYPES;
 
 #if SGGC_USE_OFFSET_POINTERS
 
-#define OFFSET(ptrs,ix,sz) \
-  ((ptrs)[ix] -= ((sz) << SET_OFFSET_BITS) * (SGGC_OFFSET_CALC) (ix))
-#define UNDO_OFFSET(ptrs,ix,sz) \
-  ((ptrs)[ix] += ((sz) << SET_OFFSET_BITS) * (SGGC_OFFSET_CALC) (ix))
+#define OFFSET(ptrs,ix,sz) ((ptrs)[ix] -= \
+  ((SGGC_OFFSET_CALC) (sz) << SET_OFFSET_BITS) * (SGGC_OFFSET_CALC) (ix))
+#define UNDO_OFFSET(ptrs,ix,sz) ((ptrs)[ix] += \
+  ((SGGC_OFFSET_CALC) (sz) << SET_OFFSET_BITS) * (SGGC_OFFSET_CALC) (ix))
 
 #else
 
