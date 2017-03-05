@@ -172,11 +172,11 @@ char *sggc_aux1_read_only (sggc_kind_t kind)
 
 void sggc_find_root_ptrs (void)
 { 
-  sggc_look_at (nil);  
+  sggc_mark (nil);  
 
   int i;
   for (i = 0; symbol_chars[i]; i++)
-  { sggc_look_at (symbols[i]);
+  { sggc_mark (symbols[i]);
   }
 
   struct ptr_var *p;
