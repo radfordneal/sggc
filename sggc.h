@@ -116,7 +116,7 @@ SGGC_EXTERN sggc_dptr * restrict sggc_aux2;   /* Pointer to array of pointers
 #if SGGC_USE_OFFSET_POINTERS
 
 #ifndef SGGC_OFFSET_CALC
-#define SGGC_OFFSET_CALC uint32_t  /* uint16_t, uint32_t, or uintptr_t */
+#define SGGC_OFFSET_CALC uintptr_t /* uint16_t, uint32_t, or uintptr_t */
 #endif
 
 static inline char *SGGC_DATA (sggc_cptr_t cptr)
@@ -141,7 +141,7 @@ static inline char *SGGC_AUX2 (sggc_cptr_t cptr)
 #else /* not using offset pointers */
 
 #ifndef SGGC_OFFSET_CALC
-#define SGGC_OFFSET_CALC uint32_t   /* uint16_t, uint32_t, uintptr_t, 
+#define SGGC_OFFSET_CALC uintptr_t  /* uint16_t, uint32_t, uintptr_t, 
                                        short, int, or intptr_t */
 #endif
 

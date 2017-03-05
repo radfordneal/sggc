@@ -658,7 +658,7 @@ int main (void)
 }
 
 
-/* CODE GENERATION TEST.  Not actually exectured, but compiled here to
+/* CODE GENERATION TEST.  Not actually executed, but compiled here to
    be disassembled to see what code gets generated. */
 
 ptr_t code_gen_test (ptr_t a, ptr_t b)
