@@ -545,6 +545,12 @@ macros) below, which have (if functions) prototypes as shown:
     segments will have indexes 0, 1, 2, etc., which fact may be used
     when setting up their contents if they reference each other.
 
+    Note that although this function is primarily meant for creating
+    objects that are actually unchanging constants, an application is
+    allowed to change the data or auxiliary information in the object,
+    as long as no references to other objects that need to be found by
+    the garbage collector are stored there.
+
 
 FUNCTIONS THE APPLICATION MUST PROVIDE TO SGGC
 
