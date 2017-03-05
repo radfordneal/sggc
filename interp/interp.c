@@ -233,6 +233,10 @@ static ptr_t alloc (sggc_type_t type)
     }
 # elif USE_ALLOC_SMALL_KIND
     a = sggc_alloc_small_kind(type);  /* kind always same as type in this app */
+# elif NEW_BINDING_IN_OLD_GEN==1
+    a = type == TYPE_BINDING ? sggc_alloc_gen1(type,1) : sggc_alloc(type,1); 
+# elif NEW_BINDING_IN_OLD_GEN==2
+    a = type == TYPE_BINDING ? sggc_alloc_gen2(type,1) : sggc_alloc(type,1); 
 # else
     a = sggc_alloc(type,1); /* length argument is ignored */
 # endif
