@@ -296,6 +296,12 @@ for use in an application, with prototypes (if functions) as shown:
     will either be in the same segment as 'val' or in the next
     segment.  This is of relevance if set_move_next will be used.
 
+  set_value_t set_chain_next (int chain, set_value_t val)
+
+    Like set_next, except that the set is specified by a chain ('val'
+    must be an element of a set using that chain), and there is no
+    option to remove the element.
+
   set_value_t set_chain_next_segment (int chain, set_value_t val)
 
     Returns the next element after 'val' that is in a different
