@@ -1384,3 +1384,11 @@ void sggc_mark (sggc_cptr_t cptr)
   set_remove (&free_or_new[SGGC_KIND(cptr)], cptr);
   if (SGGC_DEBUG) printf("sggc_mark: %x\n",(unsigned)cptr);
 }
+
+
+/* FIND THE FIRST FREE OBJECT OF A GIVEN KIND. */
+
+sggc_cptr_t sggc_first_free_of_kind (sggc_kind_t kind)
+{
+  return set_first (&free_or_new[kind], 0);
+}
