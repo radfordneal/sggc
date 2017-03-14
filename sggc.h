@@ -286,14 +286,6 @@ static inline int sggc_youngest_generation (sggc_cptr_t from_ptr)
 }
 
 
-/* CHECK WHETHER AN OBJECT IS IN THE OLDEST GENERATION, OR IS A CONSTANT. */
-
-static inline int sggc_oldest_generation (sggc_cptr_t to_ptr)
-{
-  return set_chain_contains (SET_OLD_GEN2_CONST, to_ptr);
-}
-
-
 /* TEST WHETHER AN OBJECT IS NOT (YET) MARKED AS IN USE.  May only be 
    called during a garbage collection. */
 

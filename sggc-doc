@@ -353,14 +353,7 @@ other calls of sggc_alloc since then).  An application can also
 enquire with the sggc_youngest_generation function whether an object
 is of the youngest generation, in which case modifications to it do
 not have to be signaled with sggc_check_old_to_new (as long as
-sggc_alloc is not called).  Similarly, an application can enquire with
-the sggc_oldest_generation function whether an object is of the oldest
-generation (or a constant), in which case modifications of any object
-to refer to it do not have to be signaled with sggc_check_old_to_new.
-The sggc_youngest_generation and sggc_oldest_generation functions are
-useful only if more than one modification is to be made, since
-sggc_old_to_new_check is a faster way of handling a single
-modification.
+sggc_alloc is not called).
 
 
 FUNCTIONS PROVIDED BY SGGC TO THE APPLICATION
@@ -514,14 +507,11 @@ macros) below, which have (if functions) prototypes as shown:
     The application must call this procedure whenever (ie, just after)
     a reference to another object is stored in an object, unless
     from_ptr can be guaranteed to be in the youngest generation of
-    objects or to_ptr can be guaranteed to be in the oldest
-    generation, or is a constant.  It is guaranteed that from_ptr is
-    in the youngest generation if it has just been allocated, or if
-    sggc_youngest_generation says it is in the youngest generation, as
-    long as there has been no subsequent call of sggc_collect.  An
-    object is guaranteed to be in the oldest generation (or constant)
-    if sggc_oldest_generation (or sggc_is_constant) indicates that it
-    is, and if so, it will remain so thereafter.
+    objects or to_ptr is a constant.  It is guaranteed that from_ptr
+    is in the youngest generation if it has just been allocated with
+    sggc_alloc, or if sggc_youngest_generation says it is in the
+    youngest generation, as long as there has been no subsequent call
+    of sggc_collect. 
 
   int sggc_youngest_generation (sggc_cptr_t from_ptr)
 
@@ -529,13 +519,6 @@ macros) below, which have (if functions) prototypes as shown:
     generation - ie, was allocated since the last call of sggc_collect
     - and 0 otherwise.  Note that the object may cease to be in the
     youngest generation after the next call of sggc_collect.
-
-  int sggc_oldest_generation (sggc_cptr_t to_ptr)
-
-    Returns 1 if the object pointed to by from_ptr is in the oldest
-    generation, or is a constant object, and 0 otherwise.  If an
-    object is in the oldest generation (or a constant) it will remain
-    so thereafter.
 
   int sggc_not_marked (sggc_cptr_t cptr)
 
