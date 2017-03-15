@@ -447,19 +447,6 @@ macros) below, which have (if functions) prototypes as shown:
     application should try calling sggc_alloc_small_kind or sggc_alloc
     instead.  Does not require that SGGC_KIND_TYPE be defined.
 
-  sggc_cptr_t sggc_alloc_gen1 (sggc_type_t type, sggc_length_t length)
-
-    Like sggc_alloc, except that the object is immediately placed in
-    old generation 1.  This may be desirable if it is thought that the
-    object will be long-lived.
-
-  sggc_cptr_t sggc_alloc_gen2 (sggc_type_t type, sggc_length_t length)
-
-    Like sggc_alloc, except that the object is immediately placed in
-    old generation 2.  This may be desirable if it is thought that the
-    object will be even longer-lived than when sggc_alloc_gen1 is
-    used.
-
   void sggc_collect (int level)
 
     Performs a garbage collection operation, at the specified level.

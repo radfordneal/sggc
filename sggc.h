@@ -254,8 +254,6 @@ void sggc_after_marking (int level, int rep);
 
 int sggc_init (int max_segments);
 sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length);
-sggc_cptr_t sggc_alloc_gen1 (sggc_type_t type, sggc_length_t length);
-sggc_cptr_t sggc_alloc_gen2 (sggc_type_t type, sggc_length_t length);
 #ifdef SGGC_KIND_TYPES
 sggc_cptr_t sggc_alloc_small_kind (sggc_kind_t kind);
 #endif
