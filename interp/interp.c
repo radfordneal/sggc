@@ -233,17 +233,15 @@ static ptr_t alloc (sggc_type_t type)
     }
 # elif USE_ALLOC_SMALL_KIND
     a = sggc_alloc_small_kind(type);  /* kind always same as type in this app */
+# elif USE_ALLOC_KIND
+    a = sggc_alloc_kind(type,1);      /* kind always same as type in this app */
 # else
     a = sggc_alloc(type,1); /* length argument is ignored */
 # endif
 
   if (a == SGGC_NO_OBJECT)
   { sggc_collect(2);
-#   if USE_ALLOC_SMALL_KIND
-      a = sggc_alloc_small_kind(type);/* kind always same as type in this app */
-#   else
-      a = sggc_alloc(type,1); /* length argument is ignored */
-#   endif
+    a = sggc_alloc(type,1); /* length argument is ignored */
     if (a == SGGC_NO_OBJECT)
     { printf("CAN'T ALLOCATE\n");
       abort();

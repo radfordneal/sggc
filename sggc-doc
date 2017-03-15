@@ -89,8 +89,8 @@ before it includes sggc.h:
                         chunks for each kind of object, 0 if the kind uses
                         "big" segments (with variable numbers of chunks).
 
-The following constant must be defined if the sggc_alloc_small_kind
-function is used (see below):
+The following constant must be defined if the sggc_alloc_kind or
+sggc_alloc_small_kind function is used (see below):
 
   SGGC_KIND_TYPES       An array initializer giving the type for each
                         kind of object.
@@ -431,21 +431,28 @@ macros) below, which have (if functions) prototypes as shown:
     zero bits, but any auxiliary information for the object will have
     undefined contents.
 
-  sggc_cptr_t sggc_alloc_small_kind (sggc_kind_t)
+  sggc_cptr_t sggc_alloc_kind (sggc_kind_t kind, sggc_length_t length)
 
     A faster alternative to sggc_alloc, which exists only if the
     application has defined SGGC_KIND_TYPE (see above).  It takes a
-    kind of an object as its argument, which must not be a kind for a
-    big segment.  The type and number of chunks needed are determined
-    by this kind.  The function otherwise acts the same as sggc_alloc.
+    kind of an object and a length as its arguments.  The type and
+    number of chunks needed are determined by this kind and length.
+    Note that the length is used only if the kind uses big segments.
+    The function otherwise acts the same as sggc_alloc.
 
-  sggc_cptr_t sggc_alloc_small_kind_quickly (sggc_kind_t)
+  sggc_cptr_t sggc_alloc_small_kind (sggc_kind_t kind)
+
+    Like sggc_alloc_kind, except no length is specified.  The kind
+    passed must therefore use small segments.
+
+  sggc_cptr_t sggc_alloc_small_kind_quickly (sggc_kind_t kind)
 
     Like sggc_alloc_small_kind, except that it tries to do the
     allocation very quickly, using only existing segments, and may
     return SGGC_NO_OBJECT if this is not possible, in which case the
-    application should try calling sggc_alloc_small_kind or sggc_alloc
-    instead.  Does not require that SGGC_KIND_TYPE be defined.
+    application should try calling either sggc_alloc_small_kind,
+    sggc_alloc_kind, or sggc_alloc instead.  Does not require that
+    SGGC_KIND_TYPE be defined.
 
   void sggc_collect (int level)
 

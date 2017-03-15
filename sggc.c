@@ -463,7 +463,9 @@ static void next_aux_pos (sggc_kind_t kind, char **block, unsigned char *pos,
    garbage collection is done), or if the number of chunks required 
    is greater than can be stored in alloc_chunks.
 
-   Used to implement sggc_alloc and sggc_alloc_small_kind. */
+   Used to implement sggc_alloc, sggc_alloc_kind, and sggc_alloc_small_kind. 
+
+   Uses sggc_alloc_small_kind_quickly when possible. */
 
 static sggc_cptr_t sggc_alloc_kind_type_length (sggc_kind_t kind, 
                                                 sggc_type_t type,
@@ -770,25 +772,39 @@ sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
 }
 
 
+/* ALLOCATE AN OBJECT WITH GIVEN KIND AND LENGTH.  
+  
+   Not defined if the application did not provide SGGC_KIND_TYPES. */
+
+#ifdef SGGC_KIND_TYPES
+
+sggc_cptr_t sggc_alloc_kind (sggc_kind_t kind, sggc_length_t length)
+{
+  if (SGGC_DEBUG) 
+  { printf("sggc_alloc_kind: kind %d (type %u), length %u\n", 
+            (int) kind, (unsigned) sggc_kind_types[kind], (unsigned) length);
+  }
+
+  return sggc_alloc_kind_type_length (kind, sggc_kind_types[kind], length);
+}
+
+#endif
+
+
 /* ALLOCATE AN OBJECT WITH GIVEN KIND, WHICH MUST BE FOR A SMALL SEGMENT. 
+
    Not defined if the application did not provide SGGC_KIND_TYPES. */
 
 #ifdef SGGC_KIND_TYPES
 
 sggc_cptr_t sggc_alloc_small_kind (sggc_kind_t kind)
 {
-  sggc_cptr_t r;
-
   if (SGGC_DEBUG) 
   { printf("sggc_alloc_small_kind: kind %d (type %u)\n", 
             (int) kind, (unsigned) sggc_kind_types[kind]);
   }
 
-  r = sggc_alloc_kind_type_length (kind, sggc_kind_types[kind], 0);
-  if (r != SGGC_NO_OBJECT) 
-  { sggc_info.gen0_count += 1;
-  }
-  return r;
+  return sggc_alloc_kind_type_length (kind, sggc_kind_types[kind], 0);
 }
 
 #endif
