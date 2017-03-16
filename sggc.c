@@ -291,13 +291,11 @@ int sggc_init (int max_segments)
   /* Compute numbers of objects in segments of each kind, and
      initialize bit vectors that indicate when segments of different
      kinds are full, and are also used to initialize segments as full.
-     Along the way, check that all big kinds correspond to types, and
-     that small segments aren't too big. */
+     Along the way, check that small segments aren't too big. */
 
   for (k = 0; k < SGGC_N_KINDS; k++)
   { if (sggc_kind_chunks[k] == 0) /* big segment */
-    { if (k >= SGGC_N_TYPES) abort();
-      kind_full[k] = 1;
+    { kind_full[k] = 1;
       kind_objects[k] = 1;
       kind_chunk_end[k] = 0;  /* ends when only object ends */
     }
@@ -825,7 +823,6 @@ sggc_cptr_t sggc_constant (sggc_type_t type, sggc_kind_t kind, int n_objects,
   set_bits_t bits;
   int i;
 
-  if (sggc_kind_chunks[kind] == 0) abort(); /* big segments are not allowed */
   if (n_objects < 1) abort();          /* must be at least one object */
   if (n_objects > kind_objects[kind]) abort(); /* too many objects */
 
@@ -857,7 +854,9 @@ sggc_cptr_t sggc_constant (sggc_type_t type, sggc_kind_t kind, int n_objects,
 
   set_segment_init (seg);
 
-  seg->x.small.big = 0;
+  /* The seg->x.small fields below coincide with the seg->x.big fields. */
+
+  seg->x.small.big = sggc_kind_chunks[kind] == 0;
   seg->x.small.constant = 1;
   seg->x.small.kind = kind;
 
@@ -1191,18 +1190,15 @@ void sggc_collect_remove_free (int level)
 
   /* Move big segments to the 'unused' set, while freeing their data
      storage.  Auxiliary information is not freed (and should not be
-     read-only).
-
-     Note that all big kinds are equal to their types, so we stop the
-     loop at SGGC_N_TYPES. */
+     read-only). */
 
 void sggc_collect_move_to_unused (int level)
 {
   sggc_cptr_t v;
   int k;
 
-  for (k = 0; k < SGGC_N_TYPES; k++)
-  { if (sggc_kind_chunks[k] == 0)
+  for (k = 0; k < SGGC_N_KINDS; k++)
+  { if (sggc_kind_chunks[k] == 0)  /* kind uses big segments */
     { while ((v = set_first (&free_or_new[k], 1)) != SGGC_NO_OBJECT)
       { set_index_t index = SET_VAL_INDEX(v);
         if (SGGC_DEBUG) 
@@ -1249,7 +1245,7 @@ void sggc_collect (int level)
      use all of free_or_new. */
 
   for (k = 0; k < SGGC_N_KINDS; k++)
-  { if (sggc_kind_chunks[k] != 0)
+  { if (sggc_kind_chunks[k] != 0)  /* kind uses small segments */
     { set_value_t n = set_first (&free_or_new[k], 0);
       sggc_next_free_val[k] = n;
       if (n == SGGC_NO_OBJECT)
