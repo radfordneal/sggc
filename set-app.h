@@ -23,11 +23,18 @@
 #define SET_OFFSET_BITS 6  /* Max is 6 for using 64-bit shift/mask operations */
 
 
-/* CHAINS FOR LINKING SEGMENTS IN SETS.  All sets used have their own
-   chain, except that the SET_UNUSED_FREE_NEW chain is shared amongst 
-   a collection of sets, one set for each possible kind of object, as
-   well as the unused set of segments for big objects, and SET_OLD_GEN2_CONST
-   is shared between old generation 2 and constants. */
+/* CHAINS FOR LINKING SEGMENTS IN SETS.  Chains are shared as follows:
+
+   - the SET_UNUSED_FREE_NEW chain is shared amongst a collection of
+     sets of free or newly-allocated object, one set for each possible
+     kind of object, and the unused set of segments for big objects.
+
+   - the SET_OLD_GEN2_CONST chain is shared between old generation 2 
+     and constants.
+
+   - the SET_LOOK_AT_UNCOLLECTED chain is shared between a set of
+     objects that need to be looked at for references and a collection
+     of sets of uncollected objects, one for each kind.  */
 
 #define SET_CHAINS 5       /* Number of chains that can be used for sets */
 
@@ -40,15 +47,20 @@
 
 #  define SET_OLD_TO_NEW 3       /* Objects maybe with old-to-new references */
 
-#  define SET_TO_LOOK_AT 4       /* Objects that still need to be looked at 
-                                    in order to mark objects still in use */
+#  define SET_LOOK_AT_UNCOLLECTED 4  /* Objects that still need to be looked at
+                                        in order to mark objects still in use,
+                                        plus objects of uncollected kinds */
 
 
 /* EXTRA INFORMATION STORED IN A SET_SEGMENT STRUCTURE.  Putting it
    here takes advantage of what might otherwise be 32 bits of unused
    padding, and makes the set_segment struct be exactly 64 bytes in
    size (maybe advantageous for index computation (if needed), and
-   perhaps for cache behaviour). */
+   perhaps for cache behaviour).
+
+   The info is a union of fields for small segments and for big
+   segments, but the first few fields are the same for both kinds (and
+   may be referenced either way). */
 
 #define SGGC_CHUNK_BITS 31 /* Bits used to record the number of chunks */
 

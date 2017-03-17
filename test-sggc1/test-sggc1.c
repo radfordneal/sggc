@@ -146,24 +146,6 @@ static ptr_t alloc (sggc_type_t type, sggc_length_t length)
 }
 
 
-/* PROCEDURE CALLED BY GARBAGE COLLECTOR AFTER MARKING OBJECTS IN USE. */
-
-void sggc_after_marking (int level, int rep)
-{
-  sggc_cptr_t v;
-  for (v = sggc_first_free_of_kind(1); 
-       v != SGGC_NO_OBJECT; 
-       v = sggc_next_free_of_kind(v))
-  { printf ("Free object of kind 1: %x\n", v);
-  }
-  for (v = sggc_first_free_of_kind(2); 
-       v != SGGC_NO_OBJECT; 
-       v = sggc_next_free_of_kind(v))
-  { printf ("Free object of kind 2: %x\n", v);
-  }
-}
-
-
 /* MAIN TEST PROGRAM. */
 
 int main (int argc, char **argv)

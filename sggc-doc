@@ -502,9 +502,8 @@ macros) below, which have (if functions) prototypes as shown:
     signals that sggc_find_object_ptrs should be called (sometime
     later) to look for references within the object.
 
-    It is not necessary (but is allowed, though inefficient) to call
-    sggc_look_at for a pointer to a constant object, or an object of
-    an uncollected kind.
+    It is not necessary (but is allowed) to call sggc_look_at for a
+    pointer to a constant object, or an object of an uncollected kind.
 
   void sggc_mark (sggc_cptr_t cptr)
 
@@ -544,29 +543,18 @@ macros) below, which have (if functions) prototypes as shown:
     the object may cease to be in the youngest generation after the
     next call of sggc_collect.
 
-  int sggc_not_marked (sggc_cptr_t cptr)
+  sggc_cptr_t sggc_first_uncollected_of_kind (sggc_kind_t kind)
 
-    Returns 1 if the object with compressed pointer cptr has not been
-    marked as in use during the garbage collection currently under
-    way, and 0 otherwise (including for objects of uncollected kinds).
-    This function may be called only from the sggc_after_marking
-    procedure, which an application may supply, to be called after
-    preliminary marking of objects in use.
+    Returns a compressed pointer to the first uncollected object of
+    the specified kind, in some arbitrary order, or SGGC_NO_OBJECT if
+    there are no uncollected objects of that kind.
 
-  sggc_cptr_t sggc_first_free_of_kind (sggc_kind_t kind)
+  sggc_cptr_t sggc_next_uncollected_of_kind (sggc_cptr_t cptr)
 
-    Returns a compressed pointer to the first newly-free object of the
-    specified kind, or SGGC_NO_OBJECT if there is none.  It should be
-    called only from the sggc_after_marking procedure, and there
-    probably only once sggc_after_marking has marked all objects that
-    it will mark (so what is free is now known).
-
-  sggc_cptr_t sggc_next_free_of_kind (sggc_cptr_t cptr)
-
-    Returns the next newly-free object of the same kind as cptr, in
-    some arbitrary ordering, or SGGC_NO_OBJECT if cptr is the last
-    object of this kind.  It should be called only from the
-    sggc_after_marking procedure (see sggc_first_free_of_kind).
+    Returns the next uncollected object of the same kind as cptr, in
+    some arbitrary ordering (as for sggc_first_uncollected_of_kind),
+    or SGGC_NO_OBJECT if cptr is the last uncollected object of this
+    kind.
 
   sggc_cptr_t sggc_constant (sggc_type_t type, sggc_kind_t kind, 
                              int n_objects, char *data, 
@@ -598,13 +586,35 @@ macros) below, which have (if functions) prototypes as shown:
     objects that are actually unchanging constants, an application is
     allowed to change the data or auxiliary information in the object,
     as long as no references to other objects that need to be found by
-    the garbage collector are stored there.  If an application does
-    not modify a constant segment, it might arrange for it to be in 
+    the garbage collector are stored there.  If an application never
+    modifies a constant segment, it might arrange for it to be in
     read-only memory.
 
   int sggc_is_constant (sggc_cptr_t cptr)
 
     Returns 1 if the object is a constant, 0 otherwise.
+
+  int sggc_not_marked (sggc_cptr_t cptr)
+
+    Returns 1 if the object with compressed pointer cptr has not been
+    marked as in use during the garbage collection currently under
+    way, and 0 otherwise (including for objects of uncollected kinds).
+    This function may be called only from the sggc_after_marking
+    procedure, which an application may supply, to be called after
+    preliminary marking of objects in use.
+
+  void sggc_call_for_newly_freed_object (sggc_kind_t kind, 
+                                         void (*proc) (sggc_cptr_t))
+
+    This procedure tells the garbage collector that after every
+    garbage collection (ie, at the end of sggc_collect) the procedure
+    'proc' should be called for every newly-freed object of the
+    specified kind (in some arbitrary order).  Calling this procedure
+    with 0 for 'proc' cancels any previously set up procedure for the
+    given kind.
+
+    The procedure that is called for each freed object must not call
+    sggc_collect, or sggc_alloc or related functions.
 
 
 FUNCTIONS THE APPLICATION MUST PROVIDE TO SGGC
@@ -668,9 +678,9 @@ before sggc.h is included):
     as in use, using sggc_not_marked, and perhaps indicating that
     further objects are in use by calling sggc_look_at or sggc_mark.
 
-    If any new objects are looked at, sggc_find_object_ptrs will
-    be called to trace further references from these objects, and
-    sggc_after_marking will then be called again.  
+    If any new objects are looked at, sggc_find_object_ptrs will be
+    called to trace further references from these objects, and after
+    sggc_after_marking returns, it will then be called again.
 
     The arguments to sggc_after_marking give the level of garbage
     collection (0, 1, or 2) and the number of previous times that

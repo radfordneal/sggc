@@ -147,6 +147,7 @@ static set_bits_t kind_full[SGGC_N_KINDS];
 #define old_to_new sggc_old_to_new_set  /* External for inline use in sggc.h */
 
 static struct set free_or_new[SGGC_N_KINDS];  /* Free or newly allocated */
+static struct set uncollected[SGGC_N_KINDS];  /* Objects never collected */
 static struct set unused;                     /* Big segments not being used */
 static struct set old_gen1;                   /* Survived collection once */
 static struct set old_gen2;                   /* Survived collection >1 time */
@@ -368,11 +369,12 @@ int sggc_init (int max_segments)
   set_init(&unused,SET_UNUSED_FREE_NEW);
   for (k = 0; k < SGGC_N_KINDS; k++) 
   { set_init(&free_or_new[k],SET_UNUSED_FREE_NEW);
+    set_init(&uncollected[k],SET_UNUSED_FREE_NEW);
   }
   set_init(&old_gen1,SET_OLD_GEN1);
   set_init(&old_gen2,SET_OLD_GEN2_CONST);
   set_init(&old_to_new,SET_OLD_TO_NEW);
-  set_init(&to_look_at,SET_TO_LOOK_AT);
+  set_init(&to_look_at,SET_LOOK_AT_UNCOLLECTED);
   set_init(&constants,SET_OLD_GEN2_CONST);
 
   /* Initialize to no free objects of each kind. */
@@ -1353,9 +1355,9 @@ void sggc_mark (sggc_cptr_t cptr)
 }
 
 
-/* FIND THE FIRST FREE OBJECT OF A GIVEN KIND. */
+/* FIND THE FIRST UNCOLLECTED OBJECT OF A GIVEN KIND. */
 
 sggc_cptr_t sggc_first_free_of_kind (sggc_kind_t kind)
 {
-  return set_first (&free_or_new[kind], 0);
+  return set_first (&uncollected[kind], 0);
 }

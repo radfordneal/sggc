@@ -261,8 +261,9 @@ sggc_cptr_t sggc_alloc_small_kind (sggc_kind_t kind);
 void sggc_collect (int level);
 void sggc_look_at (sggc_cptr_t cptr);
 void sggc_mark (sggc_cptr_t cptr);
-sggc_cptr_t sggc_first_free_of_kind (sggc_kind_t kind);
-
+sggc_cptr_t sggc_first_uncollected_of_kind (sggc_kind_t kind);
+void sggc_call_for_newly_freed_object (sggc_kind_t kind,
+                                       void (*proc) (sggc_cptr_t));
 sggc_cptr_t sggc_constant (sggc_type_t type, sggc_kind_t kind, int n_objects,
                            char *data
 #ifdef SGGC_AUX1_SIZE
@@ -405,9 +406,9 @@ static inline void sggc_old_to_new_check (sggc_cptr_t from_ptr,
 }
 
 
-/* FIND THE NEXT FREE OBJECT OF THE SAME KIND. */
+/* FIND THE NEXT UNCOLLECTED OBJECT OF THE SAME KIND. */
 
 static inline sggc_cptr_t sggc_next_free_of_kind (sggc_cptr_t obj)
 {
-  return set_chain_next (SET_UNUSED_FREE_NEW, obj);
+  return set_chain_next (SET_LOOK_AT_UNCOLLECTED, obj);
 }

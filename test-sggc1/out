@@ -1,52 +1,52 @@
 STARTING TEST: segs = 11, iters = 15
 
 ABOUT TO CALL sggc_init
-test_calloc: 1 in use after:: 0x7fe348402760
-test_calloc: 2 in use after:: 0x7fe3484027c0
-test_calloc: 3 in use after:: 0x7fe348402820
+test_calloc: 1 in use after:: 0x7fbfd2c03190
+test_calloc: 2 in use after:: 0x7fbfd2c031f0
+test_calloc: 3 in use after:: 0x7fbfd2c03250
 DONE sggc_init
 ALLOCATING nil
 sggc_alloc: type 0, length 0, kind 0
-test_calloc: 4 in use after:: 0x7fe348402830
-sggc_alloc: called alloc_zeroed for data (big 0, 1 chunks):: 0x7fe348402830
-test_calloc: 5 in use after:: 0x7fe348402860
+test_calloc: 4 in use after:: 0x7fbfd2c03260
+sggc_alloc: called alloc_zeroed for data (big 0, 1 chunks):: 0x7fbfd2c03260
+test_calloc: 5 in use after:: 0x7fbfd2c03290
 sggc_alloc: created 0 in new segment
 ALLOC RETURNING 0
 
 ITERATION 1
 ALLOCATING a, leaving contents as nil
 sggc_alloc: type 1, length 2, kind 1
-test_calloc: 6 in use after:: 0x7fe348402840
-sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fe348402840
-test_calloc: 7 in use after:: 0x7fe3484028a0
+test_calloc: 6 in use after:: 0x7fbfd2c03270
+sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fbfd2c03270
+test_calloc: 7 in use after:: 0x7fbfd2c032d0
 sggc_alloc: created 40 in new segment
 ALLOC RETURNING 40
 ALLOCATING b, setting contents to 100*i .. 100*i+9
 sggc_alloc: type 2, length 10, kind 2
-test_calloc: 8 in use after:: 0x7fe3484028e0
-sggc_alloc: called alloc_zeroed for data (big 2, 3 chunks):: 0x7fe3484028e0
-test_calloc: 9 in use after:: 0x7fe348402910
+test_calloc: 8 in use after:: 0x7fbfd2c03310
+sggc_alloc: called alloc_zeroed for data (big 2, 3 chunks):: 0x7fbfd2c03310
+test_calloc: 9 in use after:: 0x7fbfd2c03340
 sggc_alloc: created 80 in new segment
 ALLOC RETURNING 80
 ALLOCATING c, setting its contents to a and b
 sggc_alloc: type 1, length 2, kind 1
-test_calloc: 10 in use after:: 0x7fe348402850
-sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fe348402850
-test_calloc: 11 in use after:: 0x7fe348402950
+test_calloc: 10 in use after:: 0x7fbfd2c03280
+sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fbfd2c03280
+test_calloc: 11 in use after:: 0x7fbfd2c03380
 sggc_alloc: created c0 in new segment
 ALLOC RETURNING c0
 ALLOCATING d, setting contents to 7777
 sggc_alloc: type 2, length 1, kind 2
-test_calloc: 12 in use after:: 0x7fe348402990
-sggc_alloc: called alloc_zeroed for data (big 2, 1 chunks):: 0x7fe348402990
-test_calloc: 13 in use after:: 0x7fe3484029a0
+test_calloc: 12 in use after:: 0x7fbfd2c033c0
+sggc_alloc: called alloc_zeroed for data (big 2, 1 chunks):: 0x7fbfd2c033c0
+test_calloc: 13 in use after:: 0x7fbfd2c033d0
 sggc_alloc: created 100 in new segment
 ALLOC RETURNING 100
 ALLOCATING a AGAIN, leaving contents as nil
 sggc_alloc: type 1, length 2, kind 1
-test_calloc: 14 in use after:: 0x7fe3484029e0
-sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fe3484029e0
-test_calloc: 15 in use after:: 0x7fe3484029f0
+test_calloc: 14 in use after:: 0x7fbfd2c03410
+sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fbfd2c03410
+test_calloc: 15 in use after:: 0x7fbfd2c03420
 sggc_alloc: created 140 in new segment
 ALLOC RETURNING 140
 CHECKING CONTENTS
@@ -54,9 +54,9 @@ CHECKING CONTENTS
 ITERATION 2
 ALLOCATING a, leaving contents as nil
 sggc_alloc: type 1, length 2, kind 1
-test_calloc: 16 in use after:: 0x7fe348402a30
-sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fe348402a30
-test_calloc: 17 in use after:: 0x7fe348402a40
+test_calloc: 16 in use after:: 0x7fbfd2c03460
+sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fbfd2c03460
+test_calloc: 17 in use after:: 0x7fbfd2c03470
 sggc_alloc: created 180 in new segment
 ALLOC RETURNING 180
 ALLOCATING b, setting contents to 100*i .. 100*i+9
@@ -97,9 +97,8 @@ sggc_look_at: 0 0
 sggc_look_at: 0 0
 sggc_collect: looking at 0
 sggc_collect: 0 now old_gen1
-Free object of kind 1: 140
-sggc_collect: calling free for data for 140:: 0x7fe3484029e0
-test_free: 16 in use after:: 0x7fe3484029e0
+sggc_collect: calling free for data for 140:: 0x7fbfd2c03410
+test_free: 16 in use after:: 0x7fbfd2c03410
 sggc_collect: putting 140 in unused
 sggc_collect: done
   unused: 1, old_gen1: 6, old_gen2: 0, old_to_new: 0, to_look_at: 0, const: 0
@@ -109,29 +108,29 @@ next_free_val [0]: ---  [1]: ---  [2]: ---
               00000000  00000000  00000000 
 sggc_alloc: type 2, length 10, kind 2
 sggc_alloc: found 140 in unused
-test_calloc: 17 in use after:: 0x7fe348402a80
-sggc_alloc: called alloc_zeroed for data (big 2, 3 chunks):: 0x7fe348402a80
+test_calloc: 17 in use after:: 0x7fbfd2c034b0
+sggc_alloc: called alloc_zeroed for data (big 2, 3 chunks):: 0x7fbfd2c034b0
 ALLOC RETURNING 140
 ALLOCATING c, setting its contents to a and b
 sggc_alloc: type 1, length 2, kind 1
-test_calloc: 18 in use after:: 0x7fe3484029e0
-sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fe3484029e0
-test_calloc: 19 in use after:: 0x7fe348402ab0
+test_calloc: 18 in use after:: 0x7fbfd2c03410
+sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fbfd2c03410
+test_calloc: 19 in use after:: 0x7fbfd2c034e0
 sggc_alloc: created 1c0 in new segment
 ALLOC RETURNING 1c0
 ALLOCATING d, setting contents to 7777
 sggc_alloc: type 2, length 1, kind 2
-test_calloc: 20 in use after:: 0x7fe348402af0
-sggc_alloc: called alloc_zeroed for data (big 2, 1 chunks):: 0x7fe348402af0
-test_calloc: 21 in use after:: 0x7fe348402b00
+test_calloc: 20 in use after:: 0x7fbfd2c03520
+sggc_alloc: called alloc_zeroed for data (big 2, 1 chunks):: 0x7fbfd2c03520
+test_calloc: 21 in use after:: 0x7fbfd2c03530
 sggc_alloc: created 200 in new segment
 ALLOC RETURNING 200
 ALLOCATING a AGAIN, leaving contents as nil
 BUT KEEPING REFERENCE TO OLD a IN e
 sggc_alloc: type 1, length 2, kind 1
-test_calloc: 22 in use after:: 0x7fe348402b40
-sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fe348402b40
-test_calloc: 23 in use after:: 0x7fe348402b50
+test_calloc: 22 in use after:: 0x7fbfd2c03570
+sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fbfd2c03570
+test_calloc: 23 in use after:: 0x7fbfd2c03580
 sggc_alloc: created 240 in new segment
 ALLOC RETURNING 240
 CHECKING CONTENTS
@@ -139,16 +138,16 @@ CHECKING CONTENTS
 ITERATION 3
 ALLOCATING a, leaving contents as nil
 sggc_alloc: type 1, length 2, kind 1
-test_calloc: 24 in use after:: 0x7fe348402b90
-sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fe348402b90
-test_calloc: 25 in use after:: 0x7fe348402ba0
+test_calloc: 24 in use after:: 0x7fbfd2c035c0
+sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fbfd2c035c0
+test_calloc: 25 in use after:: 0x7fbfd2c035d0
 sggc_alloc: created 280 in new segment
 ALLOC RETURNING 280
 ALLOCATING b, setting contents to 100*i .. 100*i+9
 sggc_alloc: type 2, length 10, kind 2
-test_calloc: 26 in use after:: 0x7fe348402be0
-sggc_alloc: called alloc_zeroed for data (big 2, 3 chunks):: 0x7fe348402be0
-test_free: 25 in use after:: 0x7fe348402be0
+test_calloc: 26 in use after:: 0x7fbfd2c03610
+sggc_alloc: called alloc_zeroed for data (big 2, 3 chunks):: 0x7fbfd2c03610
+test_free: 25 in use after:: 0x7fbfd2c03610
 ABOUT TO CALL sggc_collect IN ALLOC BECAUSE ALLOC FAILED
 sggc_collect: level 2
   unused: 0, old_gen1: 6, old_gen2: 0, old_to_new: 0, to_look_at: 0, const: 0
@@ -192,29 +191,24 @@ sggc_look_at: 0 0
 sggc_look_at: 0 0
 sggc_collect: looking at 0
 sggc_collect: 0 now old_gen2
-Free object of kind 1: c0
-Free object of kind 1: 40
-Free object of kind 1: 240
-Free object of kind 2: 100
-Free object of kind 2: 80
 sggc_collect: 80 in old_gen1 now free
 sggc_collect: 40 in old_gen1 now free
 sggc_collect: c0 in old_gen1 now free
 sggc_collect: 100 in old_gen1 now free
-sggc_collect: calling free for data for c0:: 0x7fe348402850
-test_free: 24 in use after:: 0x7fe348402850
+sggc_collect: calling free for data for c0:: 0x7fbfd2c03280
+test_free: 24 in use after:: 0x7fbfd2c03280
 sggc_collect: putting c0 in unused
-sggc_collect: calling free for data for 40:: 0x7fe348402840
-test_free: 23 in use after:: 0x7fe348402840
+sggc_collect: calling free for data for 40:: 0x7fbfd2c03270
+test_free: 23 in use after:: 0x7fbfd2c03270
 sggc_collect: putting 40 in unused
-sggc_collect: calling free for data for 240:: 0x7fe348402b40
-test_free: 22 in use after:: 0x7fe348402b40
+sggc_collect: calling free for data for 240:: 0x7fbfd2c03570
+test_free: 22 in use after:: 0x7fbfd2c03570
 sggc_collect: putting 240 in unused
-sggc_collect: calling free for data for 100:: 0x7fe348402990
-test_free: 21 in use after:: 0x7fe348402990
+sggc_collect: calling free for data for 100:: 0x7fbfd2c033c0
+test_free: 21 in use after:: 0x7fbfd2c033c0
 sggc_collect: putting 100 in unused
-sggc_collect: calling free for data for 80:: 0x7fe3484028e0
-test_free: 20 in use after:: 0x7fe3484028e0
+sggc_collect: calling free for data for 80:: 0x7fbfd2c03310
+test_free: 20 in use after:: 0x7fbfd2c03310
 sggc_collect: putting 80 in unused
 sggc_collect: done
   unused: 5, old_gen1: 4, old_gen2: 2, old_to_new: 0, to_look_at: 0, const: 0
@@ -224,20 +218,20 @@ next_free_val [0]: ---  [1]: ---  [2]: ---
               00000000  00000000  00000000 
 sggc_alloc: type 2, length 10, kind 2
 sggc_alloc: found 80 in unused
-test_calloc: 21 in use after:: 0x7fe3484028e0
-sggc_alloc: called alloc_zeroed for data (big 2, 3 chunks):: 0x7fe3484028e0
+test_calloc: 21 in use after:: 0x7fbfd2c03310
+sggc_alloc: called alloc_zeroed for data (big 2, 3 chunks):: 0x7fbfd2c03310
 ALLOC RETURNING 80
 ALLOCATING c, setting its contents to a and b
 sggc_alloc: type 1, length 2, kind 1
 sggc_alloc: found 100 in unused
-test_calloc: 22 in use after:: 0x7fe348402990
-sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fe348402990
+test_calloc: 22 in use after:: 0x7fbfd2c033c0
+sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fbfd2c033c0
 ALLOC RETURNING 100
 ALLOCATING d, setting contents to 7777
 sggc_alloc: type 2, length 1, kind 2
 sggc_alloc: found 240 in unused
-test_calloc: 23 in use after:: 0x7fe348402b40
-sggc_alloc: called alloc_zeroed for data (big 2, 1 chunks):: 0x7fe348402b40
+test_calloc: 23 in use after:: 0x7fbfd2c03570
+sggc_alloc: called alloc_zeroed for data (big 2, 1 chunks):: 0x7fbfd2c03570
 ALLOC RETURNING 240
 ALLOCATING a AGAIN, leaving contents as nil
 ABOUT TO CALL sggc_collect IN ALLOC DUE TO 16 ALLOCATIONS
@@ -272,8 +266,8 @@ next_free_val [0]: ---  [1]: ---  [2]: ---
               00000000  00000000  00000000 
 sggc_alloc: type 1, length 2, kind 1
 sggc_alloc: found 40 in unused
-test_calloc: 24 in use after:: 0x7fe348402840
-sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fe348402840
+test_calloc: 24 in use after:: 0x7fbfd2c03270
+sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fbfd2c03270
 ALLOC RETURNING 40
 CHECKING CONTENTS
 
@@ -281,14 +275,14 @@ ITERATION 4
 ALLOCATING a, leaving contents as nil
 sggc_alloc: type 1, length 2, kind 1
 sggc_alloc: found c0 in unused
-test_calloc: 25 in use after:: 0x7fe348402850
-sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fe348402850
+test_calloc: 25 in use after:: 0x7fbfd2c03280
+sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fbfd2c03280
 ALLOC RETURNING c0
 ALLOCATING b, setting contents to 100*i .. 100*i+9
 sggc_alloc: type 2, length 10, kind 2
-test_calloc: 26 in use after:: 0x7fe348402be0
-sggc_alloc: called alloc_zeroed for data (big 2, 3 chunks):: 0x7fe348402be0
-test_free: 25 in use after:: 0x7fe348402be0
+test_calloc: 26 in use after:: 0x7fbfd2c03610
+sggc_alloc: called alloc_zeroed for data (big 2, 3 chunks):: 0x7fbfd2c03610
+test_free: 25 in use after:: 0x7fbfd2c03610
 ABOUT TO CALL sggc_collect IN ALLOC BECAUSE ALLOC FAILED
 sggc_collect: level 2
   unused: 0, old_gen1: 7, old_gen2: 2, old_to_new: 0, to_look_at: 0, const: 0
@@ -338,24 +332,20 @@ sggc_collect: c0 now old_gen1
 sggc_look_at: 0 0
 sggc_look_at: 0 0
 sggc_collect: looking at 0
-Free object of kind 1: 1c0
-Free object of kind 1: 40
-Free object of kind 2: 200
-Free object of kind 2: 140
 sggc_collect: 140 in old_gen1 now free
 sggc_collect: 1c0 in old_gen1 now free
 sggc_collect: 200 in old_gen1 now free
-sggc_collect: calling free for data for 1c0:: 0x7fe3484029e0
-test_free: 24 in use after:: 0x7fe3484029e0
+sggc_collect: calling free for data for 1c0:: 0x7fbfd2c03410
+test_free: 24 in use after:: 0x7fbfd2c03410
 sggc_collect: putting 1c0 in unused
-sggc_collect: calling free for data for 40:: 0x7fe348402840
-test_free: 23 in use after:: 0x7fe348402840
+sggc_collect: calling free for data for 40:: 0x7fbfd2c03270
+test_free: 23 in use after:: 0x7fbfd2c03270
 sggc_collect: putting 40 in unused
-sggc_collect: calling free for data for 200:: 0x7fe348402af0
-test_free: 22 in use after:: 0x7fe348402af0
+sggc_collect: calling free for data for 200:: 0x7fbfd2c03520
+test_free: 22 in use after:: 0x7fbfd2c03520
 sggc_collect: putting 200 in unused
-sggc_collect: calling free for data for 140:: 0x7fe348402a80
-test_free: 21 in use after:: 0x7fe348402a80
+sggc_collect: calling free for data for 140:: 0x7fbfd2c034b0
+test_free: 21 in use after:: 0x7fbfd2c034b0
 sggc_collect: putting 140 in unused
 sggc_collect: done
   unused: 4, old_gen1: 1, old_gen2: 6, old_to_new: 0, to_look_at: 0, const: 0
@@ -365,35 +355,35 @@ next_free_val [0]: ---  [1]: ---  [2]: ---
               00000000  00000000  00000000 
 sggc_alloc: type 2, length 10, kind 2
 sggc_alloc: found 140 in unused
-test_calloc: 22 in use after:: 0x7fe348402a80
-sggc_alloc: called alloc_zeroed for data (big 2, 3 chunks):: 0x7fe348402a80
+test_calloc: 22 in use after:: 0x7fbfd2c034b0
+sggc_alloc: called alloc_zeroed for data (big 2, 3 chunks):: 0x7fbfd2c034b0
 ALLOC RETURNING 140
 ALLOCATING c, setting its contents to a and b
 sggc_alloc: type 1, length 2, kind 1
 sggc_alloc: found 200 in unused
-test_calloc: 23 in use after:: 0x7fe348402af0
-sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fe348402af0
+test_calloc: 23 in use after:: 0x7fbfd2c03520
+sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fbfd2c03520
 ALLOC RETURNING 200
 ALLOCATING d, setting contents to 7777
 sggc_alloc: type 2, length 1, kind 2
 sggc_alloc: found 40 in unused
-test_calloc: 24 in use after:: 0x7fe348402840
-sggc_alloc: called alloc_zeroed for data (big 2, 1 chunks):: 0x7fe348402840
+test_calloc: 24 in use after:: 0x7fbfd2c03270
+sggc_alloc: called alloc_zeroed for data (big 2, 1 chunks):: 0x7fbfd2c03270
 ALLOC RETURNING 40
 ALLOCATING a AGAIN, leaving contents as nil
 sggc_alloc: type 1, length 2, kind 1
 sggc_alloc: found 1c0 in unused
-test_calloc: 25 in use after:: 0x7fe3484029e0
-sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fe3484029e0
+test_calloc: 25 in use after:: 0x7fbfd2c03410
+sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fbfd2c03410
 ALLOC RETURNING 1c0
 CHECKING CONTENTS
 
 ITERATION 5
 ALLOCATING a, leaving contents as nil
 sggc_alloc: type 1, length 2, kind 1
-test_calloc: 26 in use after:: 0x7fe348402be0
-sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fe348402be0
-test_free: 25 in use after:: 0x7fe348402be0
+test_calloc: 26 in use after:: 0x7fbfd2c03610
+sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fbfd2c03610
+test_free: 25 in use after:: 0x7fbfd2c03610
 ABOUT TO CALL sggc_collect IN ALLOC BECAUSE ALLOC FAILED
 sggc_collect: level 2
   unused: 0, old_gen1: 1, old_gen2: 6, old_to_new: 0, to_look_at: 0, const: 0
@@ -441,25 +431,21 @@ sggc_collect: 1c0 now old_gen1
 sggc_look_at: 0 0
 sggc_look_at: 0 0
 sggc_collect: looking at 0
-Free object of kind 1: 100
-Free object of kind 1: 280
-Free object of kind 2: 240
-Free object of kind 2: 80
 sggc_collect: 80 in old_gen2 now free
 sggc_collect: 280 in old_gen2 now free
 sggc_collect: 100 in old_gen2 now free
 sggc_collect: 240 in old_gen2 now free
-sggc_collect: calling free for data for 100:: 0x7fe348402990
-test_free: 24 in use after:: 0x7fe348402990
+sggc_collect: calling free for data for 100:: 0x7fbfd2c033c0
+test_free: 24 in use after:: 0x7fbfd2c033c0
 sggc_collect: putting 100 in unused
-sggc_collect: calling free for data for 280:: 0x7fe348402b90
-test_free: 23 in use after:: 0x7fe348402b90
+sggc_collect: calling free for data for 280:: 0x7fbfd2c035c0
+test_free: 23 in use after:: 0x7fbfd2c035c0
 sggc_collect: putting 280 in unused
-sggc_collect: calling free for data for 240:: 0x7fe348402b40
-test_free: 22 in use after:: 0x7fe348402b40
+sggc_collect: calling free for data for 240:: 0x7fbfd2c03570
+test_free: 22 in use after:: 0x7fbfd2c03570
 sggc_collect: putting 240 in unused
-sggc_collect: calling free for data for 80:: 0x7fe3484028e0
-test_free: 21 in use after:: 0x7fe3484028e0
+sggc_collect: calling free for data for 80:: 0x7fbfd2c03310
+test_free: 21 in use after:: 0x7fbfd2c03310
 sggc_collect: putting 80 in unused
 sggc_collect: done
   unused: 4, old_gen1: 4, old_gen2: 3, old_to_new: 0, to_look_at: 0, const: 0
@@ -469,14 +455,14 @@ next_free_val [0]: ---  [1]: ---  [2]: ---
               00000000  00000000  00000000 
 sggc_alloc: type 1, length 2, kind 1
 sggc_alloc: found 80 in unused
-test_calloc: 22 in use after:: 0x7fe348402b40
-sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fe348402b40
+test_calloc: 22 in use after:: 0x7fbfd2c03570
+sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fbfd2c03570
 ALLOC RETURNING 80
 ALLOCATING b, setting contents to 100*i .. 100*i+9
 sggc_alloc: type 2, length 10, kind 2
 sggc_alloc: found 240 in unused
-test_calloc: 23 in use after:: 0x7fe3484028e0
-sggc_alloc: called alloc_zeroed for data (big 2, 3 chunks):: 0x7fe3484028e0
+test_calloc: 23 in use after:: 0x7fbfd2c03310
+sggc_alloc: called alloc_zeroed for data (big 2, 3 chunks):: 0x7fbfd2c03310
 ALLOC RETURNING 240
 ALLOCATING c, setting its contents to a and b
 ABOUT TO CALL sggc_collect IN ALLOC DUE TO 24 ALLOCATIONS
@@ -515,10 +501,9 @@ sggc_collect: looking at 80
 sggc_collect: 80 now old_gen1
 sggc_look_at: 0 0
 sggc_look_at: 0 0
-Free object of kind 1: 1c0
 sggc_collect: 1c0 in old_gen1 now free
-sggc_collect: calling free for data for 1c0:: 0x7fe3484029e0
-test_free: 22 in use after:: 0x7fe3484029e0
+sggc_collect: calling free for data for 1c0:: 0x7fbfd2c03410
+test_free: 22 in use after:: 0x7fbfd2c03410
 sggc_collect: putting 1c0 in unused
 sggc_collect: done
   unused: 3, old_gen1: 2, old_gen2: 6, old_to_new: 0, to_look_at: 0, const: 0
@@ -528,29 +513,29 @@ next_free_val [0]: ---  [1]: ---  [2]: ---
               00000000  00000000  00000000 
 sggc_alloc: type 1, length 2, kind 1
 sggc_alloc: found 1c0 in unused
-test_calloc: 23 in use after:: 0x7fe3484029e0
-sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fe3484029e0
+test_calloc: 23 in use after:: 0x7fbfd2c03410
+sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fbfd2c03410
 ALLOC RETURNING 1c0
 ALLOCATING d, setting contents to 7777
 sggc_alloc: type 2, length 1, kind 2
 sggc_alloc: found 280 in unused
-test_calloc: 24 in use after:: 0x7fe348402b90
-sggc_alloc: called alloc_zeroed for data (big 2, 1 chunks):: 0x7fe348402b90
+test_calloc: 24 in use after:: 0x7fbfd2c035c0
+sggc_alloc: called alloc_zeroed for data (big 2, 1 chunks):: 0x7fbfd2c035c0
 ALLOC RETURNING 280
 ALLOCATING a AGAIN, leaving contents as nil
 sggc_alloc: type 1, length 2, kind 1
 sggc_alloc: found 100 in unused
-test_calloc: 25 in use after:: 0x7fe348402990
-sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fe348402990
+test_calloc: 25 in use after:: 0x7fbfd2c033c0
+sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fbfd2c033c0
 ALLOC RETURNING 100
 CHECKING CONTENTS
 
 ITERATION 6
 ALLOCATING a, leaving contents as nil
 sggc_alloc: type 1, length 2, kind 1
-test_calloc: 26 in use after:: 0x7fe348402be0
-sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fe348402be0
-test_free: 25 in use after:: 0x7fe348402be0
+test_calloc: 26 in use after:: 0x7fbfd2c03610
+sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fbfd2c03610
+test_free: 25 in use after:: 0x7fbfd2c03610
 ABOUT TO CALL sggc_collect IN ALLOC BECAUSE ALLOC FAILED
 sggc_collect: level 2
   unused: 0, old_gen1: 2, old_gen2: 6, old_to_new: 0, to_look_at: 0, const: 0
@@ -599,25 +584,21 @@ sggc_collect: 100 now old_gen1
 sggc_look_at: 0 0
 sggc_look_at: 0 0
 sggc_collect: looking at 0
-Free object of kind 1: c0
-Free object of kind 1: 200
-Free object of kind 2: 40
-Free object of kind 2: 140
 sggc_collect: 140 in old_gen2 now free
 sggc_collect: 200 in old_gen2 now free
 sggc_collect: 40 in old_gen2 now free
 sggc_collect: c0 in old_gen2 now free
-sggc_collect: calling free for data for c0:: 0x7fe348402850
-test_free: 24 in use after:: 0x7fe348402850
+sggc_collect: calling free for data for c0:: 0x7fbfd2c03280
+test_free: 24 in use after:: 0x7fbfd2c03280
 sggc_collect: putting c0 in unused
-sggc_collect: calling free for data for 200:: 0x7fe348402af0
-test_free: 23 in use after:: 0x7fe348402af0
+sggc_collect: calling free for data for 200:: 0x7fbfd2c03520
+test_free: 23 in use after:: 0x7fbfd2c03520
 sggc_collect: putting 200 in unused
-sggc_collect: calling free for data for 40:: 0x7fe348402840
-test_free: 22 in use after:: 0x7fe348402840
+sggc_collect: calling free for data for 40:: 0x7fbfd2c03270
+test_free: 22 in use after:: 0x7fbfd2c03270
 sggc_collect: putting 40 in unused
-sggc_collect: calling free for data for 140:: 0x7fe348402a80
-test_free: 21 in use after:: 0x7fe348402a80
+sggc_collect: calling free for data for 140:: 0x7fbfd2c034b0
+test_free: 21 in use after:: 0x7fbfd2c034b0
 sggc_collect: putting 140 in unused
 sggc_collect: done
   unused: 4, old_gen1: 3, old_gen2: 4, old_to_new: 0, to_look_at: 0, const: 0
@@ -627,33 +608,33 @@ next_free_val [0]: ---  [1]: ---  [2]: ---
               00000000  00000000  00000000 
 sggc_alloc: type 1, length 2, kind 1
 sggc_alloc: found 140 in unused
-test_calloc: 22 in use after:: 0x7fe348402af0
-sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fe348402af0
+test_calloc: 22 in use after:: 0x7fbfd2c03520
+sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fbfd2c03520
 ALLOC RETURNING 140
 ALLOCATING b, setting contents to 100*i .. 100*i+9
 sggc_alloc: type 2, length 10, kind 2
 sggc_alloc: found 40 in unused
-test_calloc: 23 in use after:: 0x7fe348402a80
-sggc_alloc: called alloc_zeroed for data (big 2, 3 chunks):: 0x7fe348402a80
+test_calloc: 23 in use after:: 0x7fbfd2c034b0
+sggc_alloc: called alloc_zeroed for data (big 2, 3 chunks):: 0x7fbfd2c034b0
 ALLOC RETURNING 40
 ALLOCATING c, setting its contents to a and b
 sggc_alloc: type 1, length 2, kind 1
 sggc_alloc: found 200 in unused
-test_calloc: 24 in use after:: 0x7fe348402840
-sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fe348402840
+test_calloc: 24 in use after:: 0x7fbfd2c03270
+sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fbfd2c03270
 ALLOC RETURNING 200
 ALLOCATING d, setting contents to 7777
 sggc_alloc: type 2, length 1, kind 2
 sggc_alloc: found c0 in unused
-test_calloc: 25 in use after:: 0x7fe348402850
-sggc_alloc: called alloc_zeroed for data (big 2, 1 chunks):: 0x7fe348402850
+test_calloc: 25 in use after:: 0x7fbfd2c03280
+sggc_alloc: called alloc_zeroed for data (big 2, 1 chunks):: 0x7fbfd2c03280
 ALLOC RETURNING c0
 ALLOCATING a AGAIN, leaving contents as nil
 BUT KEEPING REFERENCES TO OLD a IN e->x AND TO b IN e->y
 sggc_alloc: type 1, length 2, kind 1
-test_calloc: 26 in use after:: 0x7fe348402be0
-sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fe348402be0
-test_free: 25 in use after:: 0x7fe348402be0
+test_calloc: 26 in use after:: 0x7fbfd2c03610
+sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fbfd2c03610
+test_free: 25 in use after:: 0x7fbfd2c03610
 ABOUT TO CALL sggc_collect IN ALLOC BECAUSE ALLOC FAILED
 sggc_collect: level 2
   unused: 0, old_gen1: 3, old_gen2: 4, old_to_new: 1, to_look_at: 0, const: 0
@@ -700,30 +681,25 @@ sggc_collect: 140 now old_gen1
 sggc_look_at: 0 0
 sggc_look_at: 0 0
 sggc_collect: looking at 0
-Free object of kind 1: 1c0
-Free object of kind 1: 100
-Free object of kind 1: 80
-Free object of kind 2: 280
-Free object of kind 2: 240
 sggc_collect: 240 in old_gen2 now free
 sggc_collect: 80 in old_gen2 now free
 sggc_collect: 100 in old_gen1 now free
 sggc_collect: 1c0 in old_gen1 now free
 sggc_collect: 280 in old_gen1 now free
-sggc_collect: calling free for data for 1c0:: 0x7fe3484029e0
-test_free: 24 in use after:: 0x7fe3484029e0
+sggc_collect: calling free for data for 1c0:: 0x7fbfd2c03410
+test_free: 24 in use after:: 0x7fbfd2c03410
 sggc_collect: putting 1c0 in unused
-sggc_collect: calling free for data for 100:: 0x7fe348402990
-test_free: 23 in use after:: 0x7fe348402990
+sggc_collect: calling free for data for 100:: 0x7fbfd2c033c0
+test_free: 23 in use after:: 0x7fbfd2c033c0
 sggc_collect: putting 100 in unused
-sggc_collect: calling free for data for 80:: 0x7fe348402b40
-test_free: 22 in use after:: 0x7fe348402b40
+sggc_collect: calling free for data for 80:: 0x7fbfd2c03570
+test_free: 22 in use after:: 0x7fbfd2c03570
 sggc_collect: putting 80 in unused
-sggc_collect: calling free for data for 280:: 0x7fe348402b90
-test_free: 21 in use after:: 0x7fe348402b90
+sggc_collect: calling free for data for 280:: 0x7fbfd2c035c0
+test_free: 21 in use after:: 0x7fbfd2c035c0
 sggc_collect: putting 280 in unused
-sggc_collect: calling free for data for 240:: 0x7fe3484028e0
-test_free: 20 in use after:: 0x7fe3484028e0
+sggc_collect: calling free for data for 240:: 0x7fbfd2c03310
+test_free: 20 in use after:: 0x7fbfd2c03310
 sggc_collect: putting 240 in unused
 sggc_collect: done
   unused: 5, old_gen1: 4, old_gen2: 2, old_to_new: 1, to_look_at: 0, const: 0
@@ -733,8 +709,8 @@ next_free_val [0]: ---  [1]: ---  [2]: ---
               00000000  00000000  00000000 
 sggc_alloc: type 1, length 2, kind 1
 sggc_alloc: found 240 in unused
-test_calloc: 21 in use after:: 0x7fe348402b90
-sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fe348402b90
+test_calloc: 21 in use after:: 0x7fbfd2c035c0
+sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fbfd2c035c0
 ALLOC RETURNING 240
 CHECKING CONTENTS
 
@@ -770,32 +746,32 @@ next_free_val [0]: ---  [1]: ---  [2]: ---
               00000000  00000000  00000000 
 sggc_alloc: type 1, length 2, kind 1
 sggc_alloc: found 280 in unused
-test_calloc: 22 in use after:: 0x7fe348402b40
-sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fe348402b40
+test_calloc: 22 in use after:: 0x7fbfd2c03570
+sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fbfd2c03570
 ALLOC RETURNING 280
 ALLOCATING b, setting contents to 100*i .. 100*i+9
 sggc_alloc: type 2, length 10, kind 2
 sggc_alloc: found 80 in unused
-test_calloc: 23 in use after:: 0x7fe3484028e0
-sggc_alloc: called alloc_zeroed for data (big 2, 3 chunks):: 0x7fe3484028e0
+test_calloc: 23 in use after:: 0x7fbfd2c03310
+sggc_alloc: called alloc_zeroed for data (big 2, 3 chunks):: 0x7fbfd2c03310
 ALLOC RETURNING 80
 ALLOCATING c, setting its contents to a and b
 sggc_alloc: type 1, length 2, kind 1
 sggc_alloc: found 100 in unused
-test_calloc: 24 in use after:: 0x7fe348402990
-sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fe348402990
+test_calloc: 24 in use after:: 0x7fbfd2c033c0
+sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fbfd2c033c0
 ALLOC RETURNING 100
 ALLOCATING d, setting contents to 7777
 sggc_alloc: type 2, length 1, kind 2
 sggc_alloc: found 1c0 in unused
-test_calloc: 25 in use after:: 0x7fe3484029e0
-sggc_alloc: called alloc_zeroed for data (big 2, 1 chunks):: 0x7fe3484029e0
+test_calloc: 25 in use after:: 0x7fbfd2c03410
+sggc_alloc: called alloc_zeroed for data (big 2, 1 chunks):: 0x7fbfd2c03410
 ALLOC RETURNING 1c0
 ALLOCATING a AGAIN, leaving contents as nil
 sggc_alloc: type 1, length 2, kind 1
-test_calloc: 26 in use after:: 0x7fe348402be0
-sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fe348402be0
-test_free: 25 in use after:: 0x7fe348402be0
+test_calloc: 26 in use after:: 0x7fbfd2c03610
+sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fbfd2c03610
+test_free: 25 in use after:: 0x7fbfd2c03610
 ABOUT TO CALL sggc_collect IN ALLOC BECAUSE ALLOC FAILED
 sggc_collect: level 2
   unused: 0, old_gen1: 5, old_gen2: 2, old_to_new: 1, to_look_at: 0, const: 0
@@ -850,20 +826,17 @@ sggc_collect: 280 now old_gen1
 sggc_look_at: 0 0
 sggc_look_at: 0 0
 sggc_collect: looking at 0
-Free object of kind 1: 200
-Free object of kind 1: 240
-Free object of kind 2: c0
 sggc_collect: 240 in old_gen1 now free
 sggc_collect: 200 in old_gen1 now free
 sggc_collect: c0 in old_gen1 now free
-sggc_collect: calling free for data for 200:: 0x7fe348402840
-test_free: 24 in use after:: 0x7fe348402840
+sggc_collect: calling free for data for 200:: 0x7fbfd2c03270
+test_free: 24 in use after:: 0x7fbfd2c03270
 sggc_collect: putting 200 in unused
-sggc_collect: calling free for data for 240:: 0x7fe348402b90
-test_free: 23 in use after:: 0x7fe348402b90
+sggc_collect: calling free for data for 240:: 0x7fbfd2c035c0
+test_free: 23 in use after:: 0x7fbfd2c035c0
 sggc_collect: putting 240 in unused
-sggc_collect: calling free for data for c0:: 0x7fe348402850
-test_free: 22 in use after:: 0x7fe348402850
+sggc_collect: calling free for data for c0:: 0x7fbfd2c03280
+test_free: 22 in use after:: 0x7fbfd2c03280
 sggc_collect: putting c0 in unused
 sggc_collect: done
   unused: 3, old_gen1: 4, old_gen2: 4, old_to_new: 0, to_look_at: 0, const: 0
@@ -873,8 +846,8 @@ next_free_val [0]: ---  [1]: ---  [2]: ---
               00000000  00000000  00000000 
 sggc_alloc: type 1, length 2, kind 1
 sggc_alloc: found c0 in unused
-test_calloc: 23 in use after:: 0x7fe348402850
-sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fe348402850
+test_calloc: 23 in use after:: 0x7fbfd2c03280
+sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fbfd2c03280
 ALLOC RETURNING c0
 CHECKING CONTENTS
 
@@ -882,20 +855,20 @@ ITERATION 8
 ALLOCATING a, leaving contents as nil
 sggc_alloc: type 1, length 2, kind 1
 sggc_alloc: found 240 in unused
-test_calloc: 24 in use after:: 0x7fe348402b90
-sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fe348402b90
+test_calloc: 24 in use after:: 0x7fbfd2c035c0
+sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fbfd2c035c0
 ALLOC RETURNING 240
 ALLOCATING b, setting contents to 100*i .. 100*i+9
 sggc_alloc: type 2, length 10, kind 2
 sggc_alloc: found 200 in unused
-test_calloc: 25 in use after:: 0x7fe348402be0
-sggc_alloc: called alloc_zeroed for data (big 2, 3 chunks):: 0x7fe348402be0
+test_calloc: 25 in use after:: 0x7fbfd2c03610
+sggc_alloc: called alloc_zeroed for data (big 2, 3 chunks):: 0x7fbfd2c03610
 ALLOC RETURNING 200
 ALLOCATING c, setting its contents to a and b
 sggc_alloc: type 1, length 2, kind 1
-test_calloc: 26 in use after:: 0x7fe348402840
-sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fe348402840
-test_free: 25 in use after:: 0x7fe348402840
+test_calloc: 26 in use after:: 0x7fbfd2c03270
+sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fbfd2c03270
+test_free: 25 in use after:: 0x7fbfd2c03270
 ABOUT TO CALL sggc_collect IN ALLOC BECAUSE ALLOC FAILED
 sggc_collect: level 2
   unused: 0, old_gen1: 4, old_gen2: 4, old_to_new: 0, to_look_at: 0, const: 0
@@ -953,9 +926,8 @@ sggc_collect: 240 now old_gen1
 sggc_look_at: 0 0
 sggc_look_at: 0 0
 sggc_collect: looking at 0
-Free object of kind 1: c0
-sggc_collect: calling free for data for c0:: 0x7fe348402850
-test_free: 24 in use after:: 0x7fe348402850
+sggc_collect: calling free for data for c0:: 0x7fbfd2c03280
+test_free: 24 in use after:: 0x7fbfd2c03280
 sggc_collect: putting c0 in unused
 sggc_collect: done
   unused: 1, old_gen1: 2, old_gen2: 8, old_to_new: 0, to_look_at: 0, const: 0
@@ -965,8 +937,8 @@ next_free_val [0]: ---  [1]: ---  [2]: ---
               00000000  00000000  00000000 
 sggc_alloc: type 1, length 2, kind 1
 sggc_alloc: found c0 in unused
-test_calloc: 25 in use after:: 0x7fe348402850
-sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fe348402850
+test_calloc: 25 in use after:: 0x7fbfd2c03280
+sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fbfd2c03280
 ALLOC RETURNING c0
 ALLOCATING d, setting contents to 7777
 ABOUT TO CALL sggc_collect IN ALLOC DUE TO 40 ALLOCATIONS
@@ -994,9 +966,9 @@ next_free_val [0]: ---  [1]: ---  [2]: ---
               00000000  00000000  00000000 
               00000000  00000000  00000000 
 sggc_alloc: type 2, length 1, kind 2
-test_calloc: 26 in use after:: 0x7fe348402840
-sggc_alloc: called alloc_zeroed for data (big 2, 1 chunks):: 0x7fe348402840
-test_free: 25 in use after:: 0x7fe348402840
+test_calloc: 26 in use after:: 0x7fbfd2c03270
+sggc_alloc: called alloc_zeroed for data (big 2, 1 chunks):: 0x7fbfd2c03270
+test_free: 25 in use after:: 0x7fbfd2c03270
 ABOUT TO CALL sggc_collect IN ALLOC BECAUSE ALLOC FAILED
 sggc_collect: level 2
   unused: 0, old_gen1: 3, old_gen2: 8, old_to_new: 0, to_look_at: 0, const: 0
@@ -1048,20 +1020,17 @@ sggc_collect: 240 now old_gen2
 sggc_look_at: 0 0
 sggc_look_at: 0 0
 sggc_collect: looking at 0
-Free object of kind 1: 100
-Free object of kind 1: 280
-Free object of kind 2: 80
 sggc_collect: 280 in old_gen2 now free
 sggc_collect: 80 in old_gen2 now free
 sggc_collect: 100 in old_gen2 now free
-sggc_collect: calling free for data for 100:: 0x7fe348402990
-test_free: 24 in use after:: 0x7fe348402990
+sggc_collect: calling free for data for 100:: 0x7fbfd2c033c0
+test_free: 24 in use after:: 0x7fbfd2c033c0
 sggc_collect: putting 100 in unused
-sggc_collect: calling free for data for 280:: 0x7fe348402b40
-test_free: 23 in use after:: 0x7fe348402b40
+sggc_collect: calling free for data for 280:: 0x7fbfd2c03570
+test_free: 23 in use after:: 0x7fbfd2c03570
 sggc_collect: putting 280 in unused
-sggc_collect: calling free for data for 80:: 0x7fe3484028e0
-test_free: 22 in use after:: 0x7fe3484028e0
+sggc_collect: calling free for data for 80:: 0x7fbfd2c03310
+test_free: 22 in use after:: 0x7fbfd2c03310
 sggc_collect: putting 80 in unused
 sggc_collect: done
   unused: 3, old_gen1: 0, old_gen2: 8, old_to_new: 0, to_look_at: 0, const: 0
@@ -1071,14 +1040,14 @@ next_free_val [0]: ---  [1]: ---  [2]: ---
               00000000  00000000  00000000 
 sggc_alloc: type 2, length 1, kind 2
 sggc_alloc: found 80 in unused
-test_calloc: 23 in use after:: 0x7fe348402b40
-sggc_alloc: called alloc_zeroed for data (big 2, 1 chunks):: 0x7fe348402b40
+test_calloc: 23 in use after:: 0x7fbfd2c03570
+sggc_alloc: called alloc_zeroed for data (big 2, 1 chunks):: 0x7fbfd2c03570
 ALLOC RETURNING 80
 ALLOCATING a AGAIN, leaving contents as nil
 sggc_alloc: type 1, length 2, kind 1
 sggc_alloc: found 280 in unused
-test_calloc: 24 in use after:: 0x7fe348402990
-sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fe348402990
+test_calloc: 24 in use after:: 0x7fbfd2c033c0
+sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fbfd2c033c0
 ALLOC RETURNING 280
 AND KEEP REFERENCE TO NEW a IN e->x
 CHECKING CONTENTS
@@ -1087,14 +1056,14 @@ ITERATION 9
 ALLOCATING a, leaving contents as nil
 sggc_alloc: type 1, length 2, kind 1
 sggc_alloc: found 100 in unused
-test_calloc: 25 in use after:: 0x7fe348402840
-sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fe348402840
+test_calloc: 25 in use after:: 0x7fbfd2c03270
+sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fbfd2c03270
 ALLOC RETURNING 100
 ALLOCATING b, setting contents to 100*i .. 100*i+9
 sggc_alloc: type 2, length 10, kind 2
-test_calloc: 26 in use after:: 0x7fe3484028e0
-sggc_alloc: called alloc_zeroed for data (big 2, 3 chunks):: 0x7fe3484028e0
-test_free: 25 in use after:: 0x7fe3484028e0
+test_calloc: 26 in use after:: 0x7fbfd2c03310
+sggc_alloc: called alloc_zeroed for data (big 2, 3 chunks):: 0x7fbfd2c03310
+test_free: 25 in use after:: 0x7fbfd2c03310
 ABOUT TO CALL sggc_collect IN ALLOC BECAUSE ALLOC FAILED
 sggc_collect: level 2
   unused: 0, old_gen1: 0, old_gen2: 8, old_to_new: 1, to_look_at: 0, const: 0
@@ -1151,15 +1120,13 @@ sggc_collect: 100 now old_gen1
 sggc_look_at: 0 0
 sggc_look_at: 0 0
 sggc_collect: looking at 0
-Free object of kind 1: 140
-Free object of kind 2: 1c0
 sggc_collect: 1c0 in old_gen2 now free
 sggc_collect: 140 in old_gen2 now free
-sggc_collect: calling free for data for 140:: 0x7fe348402af0
-test_free: 24 in use after:: 0x7fe348402af0
+sggc_collect: calling free for data for 140:: 0x7fbfd2c03520
+test_free: 24 in use after:: 0x7fbfd2c03520
 sggc_collect: putting 140 in unused
-sggc_collect: calling free for data for 1c0:: 0x7fe3484029e0
-test_free: 23 in use after:: 0x7fe3484029e0
+sggc_collect: calling free for data for 1c0:: 0x7fbfd2c03410
+test_free: 23 in use after:: 0x7fbfd2c03410
 sggc_collect: putting 1c0 in unused
 sggc_collect: done
   unused: 2, old_gen1: 3, old_gen2: 6, old_to_new: 1, to_look_at: 0, const: 0
@@ -1169,20 +1136,20 @@ next_free_val [0]: ---  [1]: ---  [2]: ---
               00000000  00000000  00000000 
 sggc_alloc: type 2, length 10, kind 2
 sggc_alloc: found 1c0 in unused
-test_calloc: 24 in use after:: 0x7fe3484028e0
-sggc_alloc: called alloc_zeroed for data (big 2, 3 chunks):: 0x7fe3484028e0
+test_calloc: 24 in use after:: 0x7fbfd2c03310
+sggc_alloc: called alloc_zeroed for data (big 2, 3 chunks):: 0x7fbfd2c03310
 ALLOC RETURNING 1c0
 ALLOCATING c, setting its contents to a and b
 sggc_alloc: type 1, length 2, kind 1
 sggc_alloc: found 140 in unused
-test_calloc: 25 in use after:: 0x7fe3484029e0
-sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fe3484029e0
+test_calloc: 25 in use after:: 0x7fbfd2c03410
+sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fbfd2c03410
 ALLOC RETURNING 140
 ALLOCATING d, setting contents to 7777
 sggc_alloc: type 2, length 1, kind 2
-test_calloc: 26 in use after:: 0x7fe348402af0
-sggc_alloc: called alloc_zeroed for data (big 2, 1 chunks):: 0x7fe348402af0
-test_free: 25 in use after:: 0x7fe348402af0
+test_calloc: 26 in use after:: 0x7fbfd2c03520
+sggc_alloc: called alloc_zeroed for data (big 2, 1 chunks):: 0x7fbfd2c03520
+test_free: 25 in use after:: 0x7fbfd2c03520
 ABOUT TO CALL sggc_collect IN ALLOC BECAUSE ALLOC FAILED
 sggc_collect: level 2
   unused: 0, old_gen1: 3, old_gen2: 6, old_to_new: 1, to_look_at: 0, const: 0
@@ -1238,20 +1205,17 @@ sggc_collect: 100 now old_gen2
 sggc_look_at: 0 0
 sggc_look_at: 0 0
 sggc_collect: looking at 0
-Free object of kind 1: c0
-Free object of kind 1: 240
-Free object of kind 2: 200
 sggc_collect: 240 in old_gen2 now free
 sggc_collect: 200 in old_gen2 now free
 sggc_collect: c0 in old_gen2 now free
-sggc_collect: calling free for data for c0:: 0x7fe348402850
-test_free: 24 in use after:: 0x7fe348402850
+sggc_collect: calling free for data for c0:: 0x7fbfd2c03280
+test_free: 24 in use after:: 0x7fbfd2c03280
 sggc_collect: putting c0 in unused
-sggc_collect: calling free for data for 240:: 0x7fe348402b90
-test_free: 23 in use after:: 0x7fe348402b90
+sggc_collect: calling free for data for 240:: 0x7fbfd2c035c0
+test_free: 23 in use after:: 0x7fbfd2c035c0
 sggc_collect: putting 240 in unused
-sggc_collect: calling free for data for 200:: 0x7fe348402be0
-test_free: 22 in use after:: 0x7fe348402be0
+sggc_collect: calling free for data for 200:: 0x7fbfd2c03610
+test_free: 22 in use after:: 0x7fbfd2c03610
 sggc_collect: putting 200 in unused
 sggc_collect: done
   unused: 3, old_gen1: 2, old_gen2: 6, old_to_new: 0, to_look_at: 0, const: 0
@@ -1261,14 +1225,14 @@ next_free_val [0]: ---  [1]: ---  [2]: ---
               00000000  00000000  00000000 
 sggc_alloc: type 2, length 1, kind 2
 sggc_alloc: found 200 in unused
-test_calloc: 23 in use after:: 0x7fe348402b90
-sggc_alloc: called alloc_zeroed for data (big 2, 1 chunks):: 0x7fe348402b90
+test_calloc: 23 in use after:: 0x7fbfd2c035c0
+sggc_alloc: called alloc_zeroed for data (big 2, 1 chunks):: 0x7fbfd2c035c0
 ALLOC RETURNING 200
 ALLOCATING a AGAIN, leaving contents as nil
 sggc_alloc: type 1, length 2, kind 1
 sggc_alloc: found 240 in unused
-test_calloc: 24 in use after:: 0x7fe348402850
-sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fe348402850
+test_calloc: 24 in use after:: 0x7fbfd2c03280
+sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fbfd2c03280
 ALLOC RETURNING 240
 CHECKING CONTENTS
 
@@ -1276,8 +1240,8 @@ ITERATION 10
 ALLOCATING a, leaving contents as nil
 sggc_alloc: type 1, length 2, kind 1
 sggc_alloc: found c0 in unused
-test_calloc: 25 in use after:: 0x7fe348402af0
-sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fe348402af0
+test_calloc: 25 in use after:: 0x7fbfd2c03520
+sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fbfd2c03520
 ALLOC RETURNING c0
 ALLOCATING b, setting contents to 100*i .. 100*i+9
 ABOUT TO CALL sggc_collect IN ALLOC DUE TO 48 ALLOCATIONS
@@ -1333,14 +1297,12 @@ sggc_collect: c0 now old_gen1
 sggc_look_at: 0 0
 sggc_look_at: 0 0
 sggc_collect: looking at 0
-Free object of kind 1: 240
-Free object of kind 2: 80
 sggc_collect: 80 in old_gen2 now free
-sggc_collect: calling free for data for 240:: 0x7fe348402850
-test_free: 24 in use after:: 0x7fe348402850
+sggc_collect: calling free for data for 240:: 0x7fbfd2c03280
+test_free: 24 in use after:: 0x7fbfd2c03280
 sggc_collect: putting 240 in unused
-sggc_collect: calling free for data for 80:: 0x7fe348402b40
-test_free: 23 in use after:: 0x7fe348402b40
+sggc_collect: calling free for data for 80:: 0x7fbfd2c03570
+test_free: 23 in use after:: 0x7fbfd2c03570
 sggc_collect: putting 80 in unused
 sggc_collect: done
   unused: 2, old_gen1: 2, old_gen2: 7, old_to_new: 0, to_look_at: 0, const: 0
@@ -1350,20 +1312,20 @@ next_free_val [0]: ---  [1]: ---  [2]: ---
               00000000  00000000  00000000 
 sggc_alloc: type 2, length 10, kind 2
 sggc_alloc: found 80 in unused
-test_calloc: 24 in use after:: 0x7fe348402be0
-sggc_alloc: called alloc_zeroed for data (big 2, 3 chunks):: 0x7fe348402be0
+test_calloc: 24 in use after:: 0x7fbfd2c03610
+sggc_alloc: called alloc_zeroed for data (big 2, 3 chunks):: 0x7fbfd2c03610
 ALLOC RETURNING 80
 ALLOCATING c, setting its contents to a and b
 sggc_alloc: type 1, length 2, kind 1
 sggc_alloc: found 240 in unused
-test_calloc: 25 in use after:: 0x7fe348402b40
-sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fe348402b40
+test_calloc: 25 in use after:: 0x7fbfd2c03570
+sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fbfd2c03570
 ALLOC RETURNING 240
 ALLOCATING d, setting contents to 7777
 sggc_alloc: type 2, length 1, kind 2
-test_calloc: 26 in use after:: 0x7fe348402850
-sggc_alloc: called alloc_zeroed for data (big 2, 1 chunks):: 0x7fe348402850
-test_free: 25 in use after:: 0x7fe348402850
+test_calloc: 26 in use after:: 0x7fbfd2c03280
+sggc_alloc: called alloc_zeroed for data (big 2, 1 chunks):: 0x7fbfd2c03280
+test_free: 25 in use after:: 0x7fbfd2c03280
 ABOUT TO CALL sggc_collect IN ALLOC BECAUSE ALLOC FAILED
 sggc_collect: level 2
   unused: 0, old_gen1: 2, old_gen2: 7, old_to_new: 0, to_look_at: 0, const: 0
@@ -1414,20 +1376,17 @@ sggc_collect: c0 now old_gen2
 sggc_look_at: 0 0
 sggc_look_at: 0 0
 sggc_collect: looking at 0
-Free object of kind 1: 100
-Free object of kind 1: 140
-Free object of kind 2: 1c0
 sggc_collect: 1c0 in old_gen2 now free
 sggc_collect: 140 in old_gen2 now free
 sggc_collect: 100 in old_gen2 now free
-sggc_collect: calling free for data for 100:: 0x7fe348402840
-test_free: 24 in use after:: 0x7fe348402840
+sggc_collect: calling free for data for 100:: 0x7fbfd2c03270
+test_free: 24 in use after:: 0x7fbfd2c03270
 sggc_collect: putting 100 in unused
-sggc_collect: calling free for data for 140:: 0x7fe3484029e0
-test_free: 23 in use after:: 0x7fe3484029e0
+sggc_collect: calling free for data for 140:: 0x7fbfd2c03410
+test_free: 23 in use after:: 0x7fbfd2c03410
 sggc_collect: putting 140 in unused
-sggc_collect: calling free for data for 1c0:: 0x7fe3484028e0
-test_free: 22 in use after:: 0x7fe3484028e0
+sggc_collect: calling free for data for 1c0:: 0x7fbfd2c03310
+test_free: 22 in use after:: 0x7fbfd2c03310
 sggc_collect: putting 1c0 in unused
 sggc_collect: done
   unused: 3, old_gen1: 2, old_gen2: 6, old_to_new: 0, to_look_at: 0, const: 0
@@ -1437,14 +1396,14 @@ next_free_val [0]: ---  [1]: ---  [2]: ---
               00000000  00000000  00000000 
 sggc_alloc: type 2, length 1, kind 2
 sggc_alloc: found 1c0 in unused
-test_calloc: 23 in use after:: 0x7fe3484029e0
-sggc_alloc: called alloc_zeroed for data (big 2, 1 chunks):: 0x7fe3484029e0
+test_calloc: 23 in use after:: 0x7fbfd2c03410
+sggc_alloc: called alloc_zeroed for data (big 2, 1 chunks):: 0x7fbfd2c03410
 ALLOC RETURNING 1c0
 ALLOCATING a AGAIN, leaving contents as nil
 sggc_alloc: type 1, length 2, kind 1
 sggc_alloc: found 140 in unused
-test_calloc: 24 in use after:: 0x7fe348402840
-sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fe348402840
+test_calloc: 24 in use after:: 0x7fbfd2c03270
+sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fbfd2c03270
 ALLOC RETURNING 140
 CHECKING CONTENTS
 
@@ -1452,14 +1411,14 @@ ITERATION 11
 ALLOCATING a, leaving contents as nil
 sggc_alloc: type 1, length 2, kind 1
 sggc_alloc: found 100 in unused
-test_calloc: 25 in use after:: 0x7fe348402850
-sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fe348402850
+test_calloc: 25 in use after:: 0x7fbfd2c03280
+sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fbfd2c03280
 ALLOC RETURNING 100
 ALLOCATING b, setting contents to 100*i .. 100*i+9
 sggc_alloc: type 2, length 10, kind 2
-test_calloc: 26 in use after:: 0x7fe3484028e0
-sggc_alloc: called alloc_zeroed for data (big 2, 3 chunks):: 0x7fe3484028e0
-test_free: 25 in use after:: 0x7fe3484028e0
+test_calloc: 26 in use after:: 0x7fbfd2c03310
+sggc_alloc: called alloc_zeroed for data (big 2, 3 chunks):: 0x7fbfd2c03310
+test_free: 25 in use after:: 0x7fbfd2c03310
 ABOUT TO CALL sggc_collect IN ALLOC BECAUSE ALLOC FAILED
 sggc_collect: level 2
   unused: 0, old_gen1: 2, old_gen2: 6, old_to_new: 0, to_look_at: 0, const: 0
@@ -1513,14 +1472,12 @@ sggc_collect: 100 now old_gen1
 sggc_look_at: 0 0
 sggc_look_at: 0 0
 sggc_collect: looking at 0
-Free object of kind 1: 140
-Free object of kind 2: 200
 sggc_collect: 200 in old_gen2 now free
-sggc_collect: calling free for data for 140:: 0x7fe348402840
-test_free: 24 in use after:: 0x7fe348402840
+sggc_collect: calling free for data for 140:: 0x7fbfd2c03270
+test_free: 24 in use after:: 0x7fbfd2c03270
 sggc_collect: putting 140 in unused
-sggc_collect: calling free for data for 200:: 0x7fe348402b90
-test_free: 23 in use after:: 0x7fe348402b90
+sggc_collect: calling free for data for 200:: 0x7fbfd2c035c0
+test_free: 23 in use after:: 0x7fbfd2c035c0
 sggc_collect: putting 200 in unused
 sggc_collect: done
   unused: 2, old_gen1: 2, old_gen2: 7, old_to_new: 0, to_look_at: 0, const: 0
@@ -1530,20 +1487,20 @@ next_free_val [0]: ---  [1]: ---  [2]: ---
               00000000  00000000  00000000 
 sggc_alloc: type 2, length 10, kind 2
 sggc_alloc: found 200 in unused
-test_calloc: 24 in use after:: 0x7fe3484028e0
-sggc_alloc: called alloc_zeroed for data (big 2, 3 chunks):: 0x7fe3484028e0
+test_calloc: 24 in use after:: 0x7fbfd2c03310
+sggc_alloc: called alloc_zeroed for data (big 2, 3 chunks):: 0x7fbfd2c03310
 ALLOC RETURNING 200
 ALLOCATING c, setting its contents to a and b
 sggc_alloc: type 1, length 2, kind 1
 sggc_alloc: found 140 in unused
-test_calloc: 25 in use after:: 0x7fe348402b90
-sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fe348402b90
+test_calloc: 25 in use after:: 0x7fbfd2c035c0
+sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fbfd2c035c0
 ALLOC RETURNING 140
 ALLOCATING d, setting contents to 7777
 sggc_alloc: type 2, length 1, kind 2
-test_calloc: 26 in use after:: 0x7fe348402840
-sggc_alloc: called alloc_zeroed for data (big 2, 1 chunks):: 0x7fe348402840
-test_free: 25 in use after:: 0x7fe348402840
+test_calloc: 26 in use after:: 0x7fbfd2c03270
+sggc_alloc: called alloc_zeroed for data (big 2, 1 chunks):: 0x7fbfd2c03270
+test_free: 25 in use after:: 0x7fbfd2c03270
 ABOUT TO CALL sggc_collect IN ALLOC BECAUSE ALLOC FAILED
 sggc_collect: level 2
   unused: 0, old_gen1: 2, old_gen2: 7, old_to_new: 0, to_look_at: 0, const: 0
@@ -1594,20 +1551,17 @@ sggc_collect: 100 now old_gen2
 sggc_look_at: 0 0
 sggc_look_at: 0 0
 sggc_collect: looking at 0
-Free object of kind 1: c0
-Free object of kind 1: 240
-Free object of kind 2: 80
 sggc_collect: 80 in old_gen2 now free
 sggc_collect: 240 in old_gen2 now free
 sggc_collect: c0 in old_gen2 now free
-sggc_collect: calling free for data for c0:: 0x7fe348402af0
-test_free: 24 in use after:: 0x7fe348402af0
+sggc_collect: calling free for data for c0:: 0x7fbfd2c03520
+test_free: 24 in use after:: 0x7fbfd2c03520
 sggc_collect: putting c0 in unused
-sggc_collect: calling free for data for 240:: 0x7fe348402b40
-test_free: 23 in use after:: 0x7fe348402b40
+sggc_collect: calling free for data for 240:: 0x7fbfd2c03570
+test_free: 23 in use after:: 0x7fbfd2c03570
 sggc_collect: putting 240 in unused
-sggc_collect: calling free for data for 80:: 0x7fe348402be0
-test_free: 22 in use after:: 0x7fe348402be0
+sggc_collect: calling free for data for 80:: 0x7fbfd2c03610
+test_free: 22 in use after:: 0x7fbfd2c03610
 sggc_collect: putting 80 in unused
 sggc_collect: done
   unused: 3, old_gen1: 2, old_gen2: 6, old_to_new: 0, to_look_at: 0, const: 0
@@ -1617,8 +1571,8 @@ next_free_val [0]: ---  [1]: ---  [2]: ---
               00000000  00000000  00000000 
 sggc_alloc: type 2, length 1, kind 2
 sggc_alloc: found 80 in unused
-test_calloc: 23 in use after:: 0x7fe348402b40
-sggc_alloc: called alloc_zeroed for data (big 2, 1 chunks):: 0x7fe348402b40
+test_calloc: 23 in use after:: 0x7fbfd2c03570
+sggc_alloc: called alloc_zeroed for data (big 2, 1 chunks):: 0x7fbfd2c03570
 ALLOC RETURNING 80
 ALLOCATING a AGAIN, leaving contents as nil
 ABOUT TO CALL sggc_collect IN ALLOC DUE TO 56 ALLOCATIONS
@@ -1645,8 +1599,8 @@ next_free_val [0]: ---  [1]: ---  [2]: ---
               00000000  00000000  00000000 
 sggc_alloc: type 1, length 2, kind 1
 sggc_alloc: found 240 in unused
-test_calloc: 24 in use after:: 0x7fe348402af0
-sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fe348402af0
+test_calloc: 24 in use after:: 0x7fbfd2c03520
+sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fbfd2c03520
 ALLOC RETURNING 240
 CHECKING CONTENTS
 
@@ -1654,14 +1608,14 @@ ITERATION 12
 ALLOCATING a, leaving contents as nil
 sggc_alloc: type 1, length 2, kind 1
 sggc_alloc: found c0 in unused
-test_calloc: 25 in use after:: 0x7fe348402840
-sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fe348402840
+test_calloc: 25 in use after:: 0x7fbfd2c03270
+sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fbfd2c03270
 ALLOC RETURNING c0
 ALLOCATING b, setting contents to 100*i .. 100*i+9
 sggc_alloc: type 2, length 10, kind 2
-test_calloc: 26 in use after:: 0x7fe348402be0
-sggc_alloc: called alloc_zeroed for data (big 2, 3 chunks):: 0x7fe348402be0
-test_free: 25 in use after:: 0x7fe348402be0
+test_calloc: 26 in use after:: 0x7fbfd2c03610
+sggc_alloc: called alloc_zeroed for data (big 2, 3 chunks):: 0x7fbfd2c03610
+test_free: 25 in use after:: 0x7fbfd2c03610
 ABOUT TO CALL sggc_collect IN ALLOC BECAUSE ALLOC FAILED
 sggc_collect: level 2
   unused: 0, old_gen1: 3, old_gen2: 6, old_to_new: 0, to_look_at: 0, const: 0
@@ -1716,14 +1670,12 @@ sggc_collect: c0 now old_gen1
 sggc_look_at: 0 0
 sggc_look_at: 0 0
 sggc_collect: looking at 0
-Free object of kind 1: 240
-Free object of kind 2: 1c0
 sggc_collect: 1c0 in old_gen2 now free
-sggc_collect: calling free for data for 240:: 0x7fe348402af0
-test_free: 24 in use after:: 0x7fe348402af0
+sggc_collect: calling free for data for 240:: 0x7fbfd2c03520
+test_free: 24 in use after:: 0x7fbfd2c03520
 sggc_collect: putting 240 in unused
-sggc_collect: calling free for data for 1c0:: 0x7fe3484029e0
-test_free: 23 in use after:: 0x7fe3484029e0
+sggc_collect: calling free for data for 1c0:: 0x7fbfd2c03410
+test_free: 23 in use after:: 0x7fbfd2c03410
 sggc_collect: putting 1c0 in unused
 sggc_collect: done
   unused: 2, old_gen1: 1, old_gen2: 8, old_to_new: 0, to_look_at: 0, const: 0
@@ -1733,20 +1685,20 @@ next_free_val [0]: ---  [1]: ---  [2]: ---
               00000000  00000000  00000000 
 sggc_alloc: type 2, length 10, kind 2
 sggc_alloc: found 1c0 in unused
-test_calloc: 24 in use after:: 0x7fe348402be0
-sggc_alloc: called alloc_zeroed for data (big 2, 3 chunks):: 0x7fe348402be0
+test_calloc: 24 in use after:: 0x7fbfd2c03610
+sggc_alloc: called alloc_zeroed for data (big 2, 3 chunks):: 0x7fbfd2c03610
 ALLOC RETURNING 1c0
 ALLOCATING c, setting its contents to a and b
 sggc_alloc: type 1, length 2, kind 1
 sggc_alloc: found 240 in unused
-test_calloc: 25 in use after:: 0x7fe3484029e0
-sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fe3484029e0
+test_calloc: 25 in use after:: 0x7fbfd2c03410
+sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fbfd2c03410
 ALLOC RETURNING 240
 ALLOCATING d, setting contents to 7777
 sggc_alloc: type 2, length 1, kind 2
-test_calloc: 26 in use after:: 0x7fe348402af0
-sggc_alloc: called alloc_zeroed for data (big 2, 1 chunks):: 0x7fe348402af0
-test_free: 25 in use after:: 0x7fe348402af0
+test_calloc: 26 in use after:: 0x7fbfd2c03520
+sggc_alloc: called alloc_zeroed for data (big 2, 1 chunks):: 0x7fbfd2c03520
+test_free: 25 in use after:: 0x7fbfd2c03520
 ABOUT TO CALL sggc_collect IN ALLOC BECAUSE ALLOC FAILED
 sggc_collect: level 2
   unused: 0, old_gen1: 1, old_gen2: 8, old_to_new: 0, to_look_at: 0, const: 0
@@ -1796,20 +1748,17 @@ sggc_collect: c0 now old_gen2
 sggc_look_at: 0 0
 sggc_look_at: 0 0
 sggc_collect: looking at 0
-Free object of kind 1: 100
-Free object of kind 1: 140
-Free object of kind 2: 200
 sggc_collect: 200 in old_gen2 now free
 sggc_collect: 140 in old_gen2 now free
 sggc_collect: 100 in old_gen2 now free
-sggc_collect: calling free for data for 100:: 0x7fe348402850
-test_free: 24 in use after:: 0x7fe348402850
+sggc_collect: calling free for data for 100:: 0x7fbfd2c03280
+test_free: 24 in use after:: 0x7fbfd2c03280
 sggc_collect: putting 100 in unused
-sggc_collect: calling free for data for 140:: 0x7fe348402b90
-test_free: 23 in use after:: 0x7fe348402b90
+sggc_collect: calling free for data for 140:: 0x7fbfd2c035c0
+test_free: 23 in use after:: 0x7fbfd2c035c0
 sggc_collect: putting 140 in unused
-sggc_collect: calling free for data for 200:: 0x7fe3484028e0
-test_free: 22 in use after:: 0x7fe3484028e0
+sggc_collect: calling free for data for 200:: 0x7fbfd2c03310
+test_free: 22 in use after:: 0x7fbfd2c03310
 sggc_collect: putting 200 in unused
 sggc_collect: done
   unused: 3, old_gen1: 2, old_gen2: 6, old_to_new: 0, to_look_at: 0, const: 0
@@ -1819,14 +1768,14 @@ next_free_val [0]: ---  [1]: ---  [2]: ---
               00000000  00000000  00000000 
 sggc_alloc: type 2, length 1, kind 2
 sggc_alloc: found 200 in unused
-test_calloc: 23 in use after:: 0x7fe348402b90
-sggc_alloc: called alloc_zeroed for data (big 2, 1 chunks):: 0x7fe348402b90
+test_calloc: 23 in use after:: 0x7fbfd2c035c0
+sggc_alloc: called alloc_zeroed for data (big 2, 1 chunks):: 0x7fbfd2c035c0
 ALLOC RETURNING 200
 ALLOCATING a AGAIN, leaving contents as nil
 sggc_alloc: type 1, length 2, kind 1
 sggc_alloc: found 140 in unused
-test_calloc: 24 in use after:: 0x7fe348402850
-sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fe348402850
+test_calloc: 24 in use after:: 0x7fbfd2c03280
+sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fbfd2c03280
 ALLOC RETURNING 140
 CHECKING CONTENTS
 
@@ -1834,14 +1783,14 @@ ITERATION 13
 ALLOCATING a, leaving contents as nil
 sggc_alloc: type 1, length 2, kind 1
 sggc_alloc: found 100 in unused
-test_calloc: 25 in use after:: 0x7fe348402af0
-sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fe348402af0
+test_calloc: 25 in use after:: 0x7fbfd2c03520
+sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fbfd2c03520
 ALLOC RETURNING 100
 ALLOCATING b, setting contents to 100*i .. 100*i+9
 sggc_alloc: type 2, length 10, kind 2
-test_calloc: 26 in use after:: 0x7fe3484028e0
-sggc_alloc: called alloc_zeroed for data (big 2, 3 chunks):: 0x7fe3484028e0
-test_free: 25 in use after:: 0x7fe3484028e0
+test_calloc: 26 in use after:: 0x7fbfd2c03310
+sggc_alloc: called alloc_zeroed for data (big 2, 3 chunks):: 0x7fbfd2c03310
+test_free: 25 in use after:: 0x7fbfd2c03310
 ABOUT TO CALL sggc_collect IN ALLOC BECAUSE ALLOC FAILED
 sggc_collect: level 2
   unused: 0, old_gen1: 2, old_gen2: 6, old_to_new: 0, to_look_at: 0, const: 0
@@ -1895,14 +1844,12 @@ sggc_collect: 100 now old_gen1
 sggc_look_at: 0 0
 sggc_look_at: 0 0
 sggc_collect: looking at 0
-Free object of kind 1: 140
-Free object of kind 2: 80
 sggc_collect: 80 in old_gen2 now free
-sggc_collect: calling free for data for 140:: 0x7fe348402850
-test_free: 24 in use after:: 0x7fe348402850
+sggc_collect: calling free for data for 140:: 0x7fbfd2c03280
+test_free: 24 in use after:: 0x7fbfd2c03280
 sggc_collect: putting 140 in unused
-sggc_collect: calling free for data for 80:: 0x7fe348402b40
-test_free: 23 in use after:: 0x7fe348402b40
+sggc_collect: calling free for data for 80:: 0x7fbfd2c03570
+test_free: 23 in use after:: 0x7fbfd2c03570
 sggc_collect: putting 80 in unused
 sggc_collect: done
   unused: 2, old_gen1: 2, old_gen2: 7, old_to_new: 0, to_look_at: 0, const: 0
@@ -1912,8 +1859,8 @@ next_free_val [0]: ---  [1]: ---  [2]: ---
               00000000  00000000  00000000 
 sggc_alloc: type 2, length 10, kind 2
 sggc_alloc: found 80 in unused
-test_calloc: 24 in use after:: 0x7fe3484028e0
-sggc_alloc: called alloc_zeroed for data (big 2, 3 chunks):: 0x7fe3484028e0
+test_calloc: 24 in use after:: 0x7fbfd2c03310
+sggc_alloc: called alloc_zeroed for data (big 2, 3 chunks):: 0x7fbfd2c03310
 ALLOC RETURNING 80
 ALLOCATING c, setting its contents to a and b
 ABOUT TO CALL sggc_collect IN ALLOC DUE TO 64 ALLOCATIONS
@@ -1940,14 +1887,14 @@ next_free_val [0]: ---  [1]: ---  [2]: ---
               00000000  00000000  00000000 
 sggc_alloc: type 1, length 2, kind 1
 sggc_alloc: found 140 in unused
-test_calloc: 25 in use after:: 0x7fe348402b40
-sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fe348402b40
+test_calloc: 25 in use after:: 0x7fbfd2c03570
+sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fbfd2c03570
 ALLOC RETURNING 140
 ALLOCATING d, setting contents to 7777
 sggc_alloc: type 2, length 1, kind 2
-test_calloc: 26 in use after:: 0x7fe348402850
-sggc_alloc: called alloc_zeroed for data (big 2, 1 chunks):: 0x7fe348402850
-test_free: 25 in use after:: 0x7fe348402850
+test_calloc: 26 in use after:: 0x7fbfd2c03280
+sggc_alloc: called alloc_zeroed for data (big 2, 1 chunks):: 0x7fbfd2c03280
+test_free: 25 in use after:: 0x7fbfd2c03280
 ABOUT TO CALL sggc_collect IN ALLOC BECAUSE ALLOC FAILED
 sggc_collect: level 2
   unused: 0, old_gen1: 3, old_gen2: 7, old_to_new: 0, to_look_at: 0, const: 0
@@ -1999,20 +1946,17 @@ sggc_collect: 100 now old_gen2
 sggc_look_at: 0 0
 sggc_look_at: 0 0
 sggc_collect: looking at 0
-Free object of kind 1: c0
-Free object of kind 1: 240
-Free object of kind 2: 1c0
 sggc_collect: 1c0 in old_gen2 now free
 sggc_collect: 240 in old_gen2 now free
 sggc_collect: c0 in old_gen2 now free
-sggc_collect: calling free for data for c0:: 0x7fe348402840
-test_free: 24 in use after:: 0x7fe348402840
+sggc_collect: calling free for data for c0:: 0x7fbfd2c03270
+test_free: 24 in use after:: 0x7fbfd2c03270
 sggc_collect: putting c0 in unused
-sggc_collect: calling free for data for 240:: 0x7fe3484029e0
-test_free: 23 in use after:: 0x7fe3484029e0
+sggc_collect: calling free for data for 240:: 0x7fbfd2c03410
+test_free: 23 in use after:: 0x7fbfd2c03410
 sggc_collect: putting 240 in unused
-sggc_collect: calling free for data for 1c0:: 0x7fe348402be0
-test_free: 22 in use after:: 0x7fe348402be0
+sggc_collect: calling free for data for 1c0:: 0x7fbfd2c03610
+test_free: 22 in use after:: 0x7fbfd2c03610
 sggc_collect: putting 1c0 in unused
 sggc_collect: done
   unused: 3, old_gen1: 1, old_gen2: 7, old_to_new: 0, to_look_at: 0, const: 0
@@ -2022,14 +1966,14 @@ next_free_val [0]: ---  [1]: ---  [2]: ---
               00000000  00000000  00000000 
 sggc_alloc: type 2, length 1, kind 2
 sggc_alloc: found 1c0 in unused
-test_calloc: 23 in use after:: 0x7fe3484029e0
-sggc_alloc: called alloc_zeroed for data (big 2, 1 chunks):: 0x7fe3484029e0
+test_calloc: 23 in use after:: 0x7fbfd2c03410
+sggc_alloc: called alloc_zeroed for data (big 2, 1 chunks):: 0x7fbfd2c03410
 ALLOC RETURNING 1c0
 ALLOCATING a AGAIN, leaving contents as nil
 sggc_alloc: type 1, length 2, kind 1
 sggc_alloc: found 240 in unused
-test_calloc: 24 in use after:: 0x7fe348402840
-sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fe348402840
+test_calloc: 24 in use after:: 0x7fbfd2c03270
+sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fbfd2c03270
 ALLOC RETURNING 240
 CHECKING CONTENTS
 
@@ -2037,14 +1981,14 @@ ITERATION 14
 ALLOCATING a, leaving contents as nil
 sggc_alloc: type 1, length 2, kind 1
 sggc_alloc: found c0 in unused
-test_calloc: 25 in use after:: 0x7fe348402850
-sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fe348402850
+test_calloc: 25 in use after:: 0x7fbfd2c03280
+sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fbfd2c03280
 ALLOC RETURNING c0
 ALLOCATING b, setting contents to 100*i .. 100*i+9
 sggc_alloc: type 2, length 10, kind 2
-test_calloc: 26 in use after:: 0x7fe348402be0
-sggc_alloc: called alloc_zeroed for data (big 2, 3 chunks):: 0x7fe348402be0
-test_free: 25 in use after:: 0x7fe348402be0
+test_calloc: 26 in use after:: 0x7fbfd2c03610
+sggc_alloc: called alloc_zeroed for data (big 2, 3 chunks):: 0x7fbfd2c03610
+test_free: 25 in use after:: 0x7fbfd2c03610
 ABOUT TO CALL sggc_collect IN ALLOC BECAUSE ALLOC FAILED
 sggc_collect: level 2
   unused: 0, old_gen1: 1, old_gen2: 7, old_to_new: 0, to_look_at: 0, const: 0
@@ -2097,14 +2041,12 @@ sggc_collect: c0 now old_gen1
 sggc_look_at: 0 0
 sggc_look_at: 0 0
 sggc_collect: looking at 0
-Free object of kind 1: 240
-Free object of kind 2: 200
 sggc_collect: 200 in old_gen2 now free
-sggc_collect: calling free for data for 240:: 0x7fe348402840
-test_free: 24 in use after:: 0x7fe348402840
+sggc_collect: calling free for data for 240:: 0x7fbfd2c03270
+test_free: 24 in use after:: 0x7fbfd2c03270
 sggc_collect: putting 240 in unused
-sggc_collect: calling free for data for 200:: 0x7fe348402b90
-test_free: 23 in use after:: 0x7fe348402b90
+sggc_collect: calling free for data for 200:: 0x7fbfd2c035c0
+test_free: 23 in use after:: 0x7fbfd2c035c0
 sggc_collect: putting 200 in unused
 sggc_collect: done
   unused: 2, old_gen1: 2, old_gen2: 7, old_to_new: 0, to_look_at: 0, const: 0
@@ -2114,20 +2056,20 @@ next_free_val [0]: ---  [1]: ---  [2]: ---
               00000000  00000000  00000000 
 sggc_alloc: type 2, length 10, kind 2
 sggc_alloc: found 200 in unused
-test_calloc: 24 in use after:: 0x7fe348402be0
-sggc_alloc: called alloc_zeroed for data (big 2, 3 chunks):: 0x7fe348402be0
+test_calloc: 24 in use after:: 0x7fbfd2c03610
+sggc_alloc: called alloc_zeroed for data (big 2, 3 chunks):: 0x7fbfd2c03610
 ALLOC RETURNING 200
 ALLOCATING c, setting its contents to a and b
 sggc_alloc: type 1, length 2, kind 1
 sggc_alloc: found 240 in unused
-test_calloc: 25 in use after:: 0x7fe348402b90
-sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fe348402b90
+test_calloc: 25 in use after:: 0x7fbfd2c035c0
+sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fbfd2c035c0
 ALLOC RETURNING 240
 ALLOCATING d, setting contents to 7777
 sggc_alloc: type 2, length 1, kind 2
-test_calloc: 26 in use after:: 0x7fe348402840
-sggc_alloc: called alloc_zeroed for data (big 2, 1 chunks):: 0x7fe348402840
-test_free: 25 in use after:: 0x7fe348402840
+test_calloc: 26 in use after:: 0x7fbfd2c03270
+sggc_alloc: called alloc_zeroed for data (big 2, 1 chunks):: 0x7fbfd2c03270
+test_free: 25 in use after:: 0x7fbfd2c03270
 ABOUT TO CALL sggc_collect IN ALLOC BECAUSE ALLOC FAILED
 sggc_collect: level 2
   unused: 0, old_gen1: 2, old_gen2: 7, old_to_new: 0, to_look_at: 0, const: 0
@@ -2178,20 +2120,17 @@ sggc_collect: c0 now old_gen2
 sggc_look_at: 0 0
 sggc_look_at: 0 0
 sggc_collect: looking at 0
-Free object of kind 1: 100
-Free object of kind 1: 140
-Free object of kind 2: 80
 sggc_collect: 140 in old_gen2 now free
 sggc_collect: 100 in old_gen2 now free
 sggc_collect: 80 in old_gen2 now free
-sggc_collect: calling free for data for 100:: 0x7fe348402af0
-test_free: 24 in use after:: 0x7fe348402af0
+sggc_collect: calling free for data for 100:: 0x7fbfd2c03520
+test_free: 24 in use after:: 0x7fbfd2c03520
 sggc_collect: putting 100 in unused
-sggc_collect: calling free for data for 140:: 0x7fe348402b40
-test_free: 23 in use after:: 0x7fe348402b40
+sggc_collect: calling free for data for 140:: 0x7fbfd2c03570
+test_free: 23 in use after:: 0x7fbfd2c03570
 sggc_collect: putting 140 in unused
-sggc_collect: calling free for data for 80:: 0x7fe3484028e0
-test_free: 22 in use after:: 0x7fe3484028e0
+sggc_collect: calling free for data for 80:: 0x7fbfd2c03310
+test_free: 22 in use after:: 0x7fbfd2c03310
 sggc_collect: putting 80 in unused
 sggc_collect: done
   unused: 3, old_gen1: 2, old_gen2: 6, old_to_new: 0, to_look_at: 0, const: 0
@@ -2201,14 +2140,14 @@ next_free_val [0]: ---  [1]: ---  [2]: ---
               00000000  00000000  00000000 
 sggc_alloc: type 2, length 1, kind 2
 sggc_alloc: found 80 in unused
-test_calloc: 23 in use after:: 0x7fe348402b40
-sggc_alloc: called alloc_zeroed for data (big 2, 1 chunks):: 0x7fe348402b40
+test_calloc: 23 in use after:: 0x7fbfd2c03570
+sggc_alloc: called alloc_zeroed for data (big 2, 1 chunks):: 0x7fbfd2c03570
 ALLOC RETURNING 80
 ALLOCATING a AGAIN, leaving contents as nil
 sggc_alloc: type 1, length 2, kind 1
 sggc_alloc: found 140 in unused
-test_calloc: 24 in use after:: 0x7fe348402af0
-sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fe348402af0
+test_calloc: 24 in use after:: 0x7fbfd2c03520
+sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fbfd2c03520
 ALLOC RETURNING 140
 CHECKING CONTENTS
 
@@ -2253,14 +2192,14 @@ next_free_val [0]: ---  [1]: ---  [2]: ---
               00000000  00000000  00000000 
 sggc_alloc: type 1, length 2, kind 1
 sggc_alloc: found 100 in unused
-test_calloc: 25 in use after:: 0x7fe348402840
-sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fe348402840
+test_calloc: 25 in use after:: 0x7fbfd2c03270
+sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fbfd2c03270
 ALLOC RETURNING 100
 ALLOCATING b, setting contents to 100*i .. 100*i+9
 sggc_alloc: type 2, length 10, kind 2
-test_calloc: 26 in use after:: 0x7fe3484028e0
-sggc_alloc: called alloc_zeroed for data (big 2, 3 chunks):: 0x7fe3484028e0
-test_free: 25 in use after:: 0x7fe3484028e0
+test_calloc: 26 in use after:: 0x7fbfd2c03310
+sggc_alloc: called alloc_zeroed for data (big 2, 3 chunks):: 0x7fbfd2c03310
+test_free: 25 in use after:: 0x7fbfd2c03310
 ABOUT TO CALL sggc_collect IN ALLOC BECAUSE ALLOC FAILED
 sggc_collect: level 2
   unused: 0, old_gen1: 2, old_gen2: 8, old_to_new: 0, to_look_at: 0, const: 0
@@ -2314,15 +2253,13 @@ sggc_collect: 100 now old_gen1
 sggc_look_at: 0 0
 sggc_look_at: 0 0
 sggc_collect: looking at 0
-Free object of kind 1: 140
-Free object of kind 2: 1c0
 sggc_collect: 1c0 in old_gen2 now free
 sggc_collect: 140 in old_gen1 now free
-sggc_collect: calling free for data for 140:: 0x7fe348402af0
-test_free: 24 in use after:: 0x7fe348402af0
+sggc_collect: calling free for data for 140:: 0x7fbfd2c03520
+test_free: 24 in use after:: 0x7fbfd2c03520
 sggc_collect: putting 140 in unused
-sggc_collect: calling free for data for 1c0:: 0x7fe3484029e0
-test_free: 23 in use after:: 0x7fe3484029e0
+sggc_collect: calling free for data for 1c0:: 0x7fbfd2c03410
+test_free: 23 in use after:: 0x7fbfd2c03410
 sggc_collect: putting 1c0 in unused
 sggc_collect: done
   unused: 2, old_gen1: 1, old_gen2: 8, old_to_new: 0, to_look_at: 0, const: 0
@@ -2332,20 +2269,20 @@ next_free_val [0]: ---  [1]: ---  [2]: ---
               00000000  00000000  00000000 
 sggc_alloc: type 2, length 10, kind 2
 sggc_alloc: found 1c0 in unused
-test_calloc: 24 in use after:: 0x7fe3484028e0
-sggc_alloc: called alloc_zeroed for data (big 2, 3 chunks):: 0x7fe3484028e0
+test_calloc: 24 in use after:: 0x7fbfd2c03310
+sggc_alloc: called alloc_zeroed for data (big 2, 3 chunks):: 0x7fbfd2c03310
 ALLOC RETURNING 1c0
 ALLOCATING c, setting its contents to a and b
 sggc_alloc: type 1, length 2, kind 1
 sggc_alloc: found 140 in unused
-test_calloc: 25 in use after:: 0x7fe3484029e0
-sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fe3484029e0
+test_calloc: 25 in use after:: 0x7fbfd2c03410
+sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fbfd2c03410
 ALLOC RETURNING 140
 ALLOCATING d, setting contents to 7777
 sggc_alloc: type 2, length 1, kind 2
-test_calloc: 26 in use after:: 0x7fe348402af0
-sggc_alloc: called alloc_zeroed for data (big 2, 1 chunks):: 0x7fe348402af0
-test_free: 25 in use after:: 0x7fe348402af0
+test_calloc: 26 in use after:: 0x7fbfd2c03520
+sggc_alloc: called alloc_zeroed for data (big 2, 1 chunks):: 0x7fbfd2c03520
+test_free: 25 in use after:: 0x7fbfd2c03520
 ABOUT TO CALL sggc_collect IN ALLOC BECAUSE ALLOC FAILED
 sggc_collect: level 2
   unused: 0, old_gen1: 1, old_gen2: 8, old_to_new: 0, to_look_at: 0, const: 0
@@ -2395,20 +2332,17 @@ sggc_collect: 100 now old_gen2
 sggc_look_at: 0 0
 sggc_look_at: 0 0
 sggc_collect: looking at 0
-Free object of kind 1: c0
-Free object of kind 1: 240
-Free object of kind 2: 200
 sggc_collect: 200 in old_gen2 now free
 sggc_collect: 240 in old_gen2 now free
 sggc_collect: c0 in old_gen2 now free
-sggc_collect: calling free for data for c0:: 0x7fe348402850
-test_free: 24 in use after:: 0x7fe348402850
+sggc_collect: calling free for data for c0:: 0x7fbfd2c03280
+test_free: 24 in use after:: 0x7fbfd2c03280
 sggc_collect: putting c0 in unused
-sggc_collect: calling free for data for 240:: 0x7fe348402b90
-test_free: 23 in use after:: 0x7fe348402b90
+sggc_collect: calling free for data for 240:: 0x7fbfd2c035c0
+test_free: 23 in use after:: 0x7fbfd2c035c0
 sggc_collect: putting 240 in unused
-sggc_collect: calling free for data for 200:: 0x7fe348402be0
-test_free: 22 in use after:: 0x7fe348402be0
+sggc_collect: calling free for data for 200:: 0x7fbfd2c03610
+test_free: 22 in use after:: 0x7fbfd2c03610
 sggc_collect: putting 200 in unused
 sggc_collect: done
   unused: 3, old_gen1: 2, old_gen2: 6, old_to_new: 0, to_look_at: 0, const: 0
@@ -2418,14 +2352,14 @@ next_free_val [0]: ---  [1]: ---  [2]: ---
               00000000  00000000  00000000 
 sggc_alloc: type 2, length 1, kind 2
 sggc_alloc: found 200 in unused
-test_calloc: 23 in use after:: 0x7fe348402b90
-sggc_alloc: called alloc_zeroed for data (big 2, 1 chunks):: 0x7fe348402b90
+test_calloc: 23 in use after:: 0x7fbfd2c035c0
+sggc_alloc: called alloc_zeroed for data (big 2, 1 chunks):: 0x7fbfd2c035c0
 ALLOC RETURNING 200
 ALLOCATING a AGAIN, leaving contents as nil
 sggc_alloc: type 1, length 2, kind 1
 sggc_alloc: found 240 in unused
-test_calloc: 24 in use after:: 0x7fe348402850
-sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fe348402850
+test_calloc: 24 in use after:: 0x7fbfd2c03280
+sggc_alloc: called alloc_zeroed for data (big 1, 1 chunks):: 0x7fbfd2c03280
 ALLOC RETURNING 240
 CHECKING CONTENTS
 DONE MAIN PART OF TEST
@@ -2458,15 +2392,6 @@ sggc_look_at: 0 0
 sggc_look_at: 0 0
 sggc_look_at: 0 0
 sggc_collect: looking at 0
-Free object of kind 1: 140
-Free object of kind 1: 180
-Free object of kind 1: 280
-Free object of kind 1: 100
-Free object of kind 1: 240
-Free object of kind 2: 1c0
-Free object of kind 2: 40
-Free object of kind 2: 80
-Free object of kind 2: 200
 sggc_collect: 100 in old_gen2 now free
 sggc_collect: 80 in old_gen2 now free
 sggc_collect: 280 in old_gen2 now free
@@ -2474,32 +2399,32 @@ sggc_collect: 40 in old_gen2 now free
 sggc_collect: 180 in old_gen2 now free
 sggc_collect: 1c0 in old_gen1 now free
 sggc_collect: 140 in old_gen1 now free
-sggc_collect: calling free for data for 140:: 0x7fe3484029e0
-test_free: 23 in use after:: 0x7fe3484029e0
+sggc_collect: calling free for data for 140:: 0x7fbfd2c03410
+test_free: 23 in use after:: 0x7fbfd2c03410
 sggc_collect: putting 140 in unused
-sggc_collect: calling free for data for 180:: 0x7fe348402a30
-test_free: 22 in use after:: 0x7fe348402a30
+sggc_collect: calling free for data for 180:: 0x7fbfd2c03460
+test_free: 22 in use after:: 0x7fbfd2c03460
 sggc_collect: putting 180 in unused
-sggc_collect: calling free for data for 280:: 0x7fe348402990
-test_free: 21 in use after:: 0x7fe348402990
+sggc_collect: calling free for data for 280:: 0x7fbfd2c033c0
+test_free: 21 in use after:: 0x7fbfd2c033c0
 sggc_collect: putting 280 in unused
-sggc_collect: calling free for data for 100:: 0x7fe348402840
-test_free: 20 in use after:: 0x7fe348402840
+sggc_collect: calling free for data for 100:: 0x7fbfd2c03270
+test_free: 20 in use after:: 0x7fbfd2c03270
 sggc_collect: putting 100 in unused
-sggc_collect: calling free for data for 240:: 0x7fe348402850
-test_free: 19 in use after:: 0x7fe348402850
+sggc_collect: calling free for data for 240:: 0x7fbfd2c03280
+test_free: 19 in use after:: 0x7fbfd2c03280
 sggc_collect: putting 240 in unused
-sggc_collect: calling free for data for 1c0:: 0x7fe3484028e0
-test_free: 18 in use after:: 0x7fe3484028e0
+sggc_collect: calling free for data for 1c0:: 0x7fbfd2c03310
+test_free: 18 in use after:: 0x7fbfd2c03310
 sggc_collect: putting 1c0 in unused
-sggc_collect: calling free for data for 40:: 0x7fe348402a80
-test_free: 17 in use after:: 0x7fe348402a80
+sggc_collect: calling free for data for 40:: 0x7fbfd2c034b0
+test_free: 17 in use after:: 0x7fbfd2c034b0
 sggc_collect: putting 40 in unused
-sggc_collect: calling free for data for 80:: 0x7fe348402b40
-test_free: 16 in use after:: 0x7fe348402b40
+sggc_collect: calling free for data for 80:: 0x7fbfd2c03570
+test_free: 16 in use after:: 0x7fbfd2c03570
 sggc_collect: putting 80 in unused
-sggc_collect: calling free for data for 200:: 0x7fe348402b90
-test_free: 15 in use after:: 0x7fe348402b90
+sggc_collect: calling free for data for 200:: 0x7fbfd2c035c0
+test_free: 15 in use after:: 0x7fbfd2c035c0
 sggc_collect: putting 200 in unused
 sggc_collect: done
   unused: 10, old_gen1: 0, old_gen2: 1, old_to_new: 0, to_look_at: 0, const: 0
