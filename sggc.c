@@ -935,10 +935,43 @@ static void collect_debug (void)
 }
 
 
+/* "MARK" AN OBJECT AS IN USE, BY REMOVING IT FROM FREE SET, ADDING TO OLD. */
+
+static void mark_object (sggc_cptr_t v)
+{
+  if (collect_level == 0)
+  { /* must be in generation 0 */
+    set_add (&old_gen1, v);
+    if (SGGC_DEBUG) printf("sggc_collect: %x now old_gen1\n",(unsigned)v);
+  }
+  else if (collect_level == 1)
+  { if (set_remove (&old_gen1, v))
+    { set_add (&old_gen2, v);
+      if (SGGC_DEBUG) printf("sggc_collect: %x now old_gen2\n",(unsigned)v);
+    }
+    else /* must be in generation 0 */
+    { set_add (&old_gen1, v);
+      if (SGGC_DEBUG) printf("sggc_collect: %x now old_gen1\n",(unsigned)v);
+    }
+  }
+  else /* collect_level == 2 */
+  { if (set_remove (&old_gen1, v))
+    { set_add (&old_gen2, v);
+      if (SGGC_DEBUG) printf("sggc_collect: %x now old_gen2\n",(unsigned)v);
+    }
+    else if (!set_chain_contains (SET_OLD_GEN2_CONST, v))
+                /* must be in generation 0 */
+    { set_add (&old_gen1, v);
+      if (SGGC_DEBUG) printf("sggc_collect: %x now old_gen1\n",(unsigned)v);
+    }
+  }  
+}
+
+
 /* DO A GARBAGE COLLECTION AT THE SPECIFIED LEVEL. 
 
    This is done using several sub-procedures, primarily so that profiling
-   will show how much time is spent in each.  (Accordingly, they have
+   will show how much time is spent in each.  (Accordingly, most they
    external scope even though only used here, to discourage inlining.) 
  */
 
@@ -948,13 +981,13 @@ static void collect_debug (void)
      Two versions are maintained, an old one doing it one object at a
      time, and a new one that does it a segment at a time. */
 
-void sggc_collect_put_in_free_or_new (int level)
+void sggc_collect_put_in_free_or_new (void)
 {
   sggc_cptr_t v;
 
   if (!SGGC_SEGMENT_AT_A_TIME) /* do it the old way, one object at a time */
   {
-    if (level == 2)
+    if (collect_level == 2)
     { for (v = set_first(&old_gen2, 0);
            v != SET_NO_VALUE;
            v = set_next(&old_gen2,v,0))
@@ -965,7 +998,7 @@ void sggc_collect_put_in_free_or_new (int level)
       }
     }
 
-    if (level >= 1)
+    if (collect_level >= 1)
     { for (v = set_first(&old_gen1, 0);
            v != SET_NO_VALUE;
            v = set_next(&old_gen1,v,0))
@@ -978,7 +1011,7 @@ void sggc_collect_put_in_free_or_new (int level)
   }
   else /* do it a segment at a time */
   {
-    if (level == 2)
+    if (collect_level == 2)
     { for (v = set_first(&old_gen2, 0); 
            v != SET_NO_VALUE; 
            v = set_chain_next_segment(SET_OLD_GEN2_CONST,v))
@@ -990,7 +1023,7 @@ void sggc_collect_put_in_free_or_new (int level)
       }
     }
 
-    if (level >= 1)
+    if (collect_level >= 1)
     { for (v = set_first(&old_gen1, 0); 
            v != SET_NO_VALUE; 
            v = set_chain_next_segment(SET_OLD_GEN1,v))
@@ -1012,7 +1045,7 @@ void sggc_collect_put_in_free_or_new (int level)
      unnecessary.  (That may also mean that the old-to-new entry is 
      still needed). */
 
-void sggc_collect_old_to_new (int level)
+void sggc_collect_old_to_new (void)
 {
   sggc_cptr_t v;
 
@@ -1028,7 +1061,7 @@ void sggc_collect_old_to_new (int level)
     { old_to_new_check = 2;
     }
     else /* v is in old generation 1 */
-    { if (level == 0)
+    { if (collect_level == 0)
       { old_to_new_check = 0;
         remove = 1;
       }
@@ -1057,7 +1090,7 @@ void sggc_collect_old_to_new (int level)
      any pointers they contain (which may add to the to_look_at set),
      until there are no more in the set. */
 
-void sggc_collect_look_at (int level)
+void sggc_collect_look_at (void)
 {
   sggc_cptr_t v;
 
@@ -1071,38 +1104,13 @@ void sggc_collect_look_at (int level)
     {
       if (SGGC_DEBUG) printf("sggc_collect: looking at %x\n",(unsigned)v);
 
-      if (level == 0)
-      { /* must be in generation 0 */
-        set_add (&old_gen1, v);
-        if (SGGC_DEBUG) printf("sggc_collect: %x now old_gen1\n",(unsigned)v);
-      }
-      else if (level == 1)
-      { if (set_remove (&old_gen1, v))
-        { set_add (&old_gen2, v);
-          if (SGGC_DEBUG) printf("sggc_collect: %x now old_gen2\n",(unsigned)v);
-        }
-        else /* must be in generation 0 */
-        { set_add (&old_gen1, v);
-          if (SGGC_DEBUG) printf("sggc_collect: %x now old_gen1\n",(unsigned)v);
-        }
-      }
-      else /* level == 2 */
-      { if (set_remove (&old_gen1, v))
-        { set_add (&old_gen2, v);
-          if (SGGC_DEBUG) printf("sggc_collect: %x now old_gen2\n",(unsigned)v);
-        }
-        else if (!set_chain_contains (SET_OLD_GEN2_CONST, v))
-                    /* must be in generation 0 */
-        { set_add (&old_gen1, v);
-          if (SGGC_DEBUG) printf("sggc_collect: %x now old_gen1\n",(unsigned)v);
-        }
-      }  
+      mark_object (v);
   
       sggc_find_object_ptrs (v);
     }
 
 #   ifdef SGGC_AFTER_MARKING
-    sggc_after_marking (level, rep++);
+    sggc_after_marking (collect_level, rep++);
 #   endif
 
   } while (set_first (&to_look_at, 0) != SGGC_NO_OBJECT);
@@ -1118,13 +1126,13 @@ void sggc_collect_look_at (int level)
      Two versions are maintained, an old one doing it one object at a
      time, and a new one that does it a segment at a time. */
 
-void sggc_collect_remove_free (int level)
+void sggc_collect_remove_free (void)
 {
   sggc_cptr_t v;
 
   if (!SGGC_SEGMENT_AT_A_TIME) /* do it the old way, one object at a time */
   { 
-    if (level == 2)
+    if (collect_level == 2)
     { v = set_first (&old_gen2, 0); 
       while (v != SET_NO_VALUE)
       { int remove = set_chain_contains (SET_UNUSED_FREE_NEW, v);
@@ -1138,7 +1146,7 @@ void sggc_collect_remove_free (int level)
       }
     }
 
-    if (level >= 1)
+    if (collect_level >= 1)
     { v = set_first (&old_gen1, 0); 
       while (v != SET_NO_VALUE)
       { int remove = set_chain_contains (SET_UNUSED_FREE_NEW, v);
@@ -1154,7 +1162,7 @@ void sggc_collect_remove_free (int level)
   }
   else /* do it a segment at a time */
   { 
-    if (level == 2)
+    if (collect_level == 2)
     { v = set_first(&old_gen2, 0); 
       while (v != SET_NO_VALUE)
       { if (SGGC_DEBUG)
@@ -1171,7 +1179,7 @@ void sggc_collect_remove_free (int level)
       }
     }
 
-    if (level >= 1)
+    if (collect_level >= 1)
     { v = set_first(&old_gen1, 0); 
       while (v != SET_NO_VALUE)
       { if (SGGC_DEBUG)
@@ -1194,7 +1202,7 @@ void sggc_collect_remove_free (int level)
      storage.  Auxiliary information is not freed (and should not be
      read-only). */
 
-void sggc_collect_move_to_unused (int level)
+void sggc_collect_move_to_unused (void)
 {
   sggc_cptr_t v;
   int k;
@@ -1230,8 +1238,8 @@ void sggc_collect (int level)
 
   if (set_first(&to_look_at, 0) != SET_NO_VALUE) abort();
 
-  sggc_collect_put_in_free_or_new (level);
-  sggc_collect_old_to_new (level);
+  sggc_collect_put_in_free_or_new();
+  sggc_collect_old_to_new();
 
   /* Get the application to take root pointers out of the free_or_new set,
      and put them in the to_look_at set. */
@@ -1239,9 +1247,9 @@ void sggc_collect (int level)
   old_to_new_check = 0;  /* no special old-to-new processing in sggc_look_at */
   sggc_find_root_ptrs();
 
-  sggc_collect_look_at (level);
-  sggc_collect_remove_free (level);
-  sggc_collect_move_to_unused (level);
+  sggc_collect_look_at();
+  sggc_collect_remove_free();
+  sggc_collect_move_to_unused();
 
   /* For each kind, set up sggc_next_free_val, and sggc_next_free_bits to 
      use all of free_or_new. */
@@ -1350,8 +1358,11 @@ void sggc_look_at (sggc_cptr_t cptr)
 
 void sggc_mark (sggc_cptr_t cptr)
 {
-  set_remove (&free_or_new[SGGC_KIND(cptr)], cptr);
   if (SGGC_DEBUG) printf("sggc_mark: %x\n",(unsigned)cptr);
+
+  if (set_remove (&free_or_new[SGGC_KIND(cptr)], cptr))
+  { mark_object (cptr);
+  }
 }
 
 
