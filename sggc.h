@@ -382,14 +382,30 @@ static inline void sggc_old_to_new_check (sggc_cptr_t from_ptr,
 
   if (set_chain_contains (SET_OLD_GEN2_CONST, from_ptr))
   { 
-    /* If from_ptr is in old generation 2, only others in old generation 2
-       and constants can be referenced without using old-to-new. */
+    /* If from_ptr is in old generation 2, only others in old generation 2,
+       constants, and uncollected objects can be referenced without using 
+       old-to-new. */
 
-    if (set_chain_contains (SET_OLD_GEN2_CONST, to_ptr))
+    if (set_chain_contains (SET_OLD_GEN2_CONST, to_ptr) 
+         || set_chain_contains (SET_LOOK_AT_UNCOLLECTED, to_ptr))
     { return;
     }
   }
-  else
+
+#ifdef SGGC_KIND_UNCOLLECTED
+  else if (set_chain_contains (SET_LOOK_AT_UNCOLLECTED, from_ptr))
+  {
+    /* If from_ptr is uncollected, only constants and other uncollected
+       objects can be referenced without using old-to-new. */
+
+    if (sggc_is_constant (to_ptr) 
+         || set_chain_contains (SET_LOOK_AT_UNCOLLECTED, to_ptr))
+    { return;
+    }
+  }
+#endif
+
+  else /* must be in old generation 1 */
   { 
     /* If from_ptr is in old generation 1, only references to newly 
        allocated objects require using old-to-new. */

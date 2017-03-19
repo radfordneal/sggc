@@ -2,7 +2,8 @@ all:	interp interp-db interp-pg interp-no-offset interp-no-set-static \
 	interp-no-max-segments interp-no-segment-at-a-time interp-no-builtins \
 	interp-alloc-kind interp-alloc-small-kind \
 	interp-alloc-small-kind-quickly \
-	interp-memset-quickly interp-seg-direct interp-seg-direct-no-max
+	interp-memset-quickly interp-seg-direct interp-seg-direct-no-max \
+	interp-uncollected-nil
 
 CC=gcc
 
@@ -83,3 +84,9 @@ interp-seg-direct-no-max:	interp.c sggc.c set.c sggc-app.h sggc.h set-app.h set.
 	 -DSET_STATIC=1 -DSGGC_USE_OFFSET_POINTERS=1 \
 	 -DSGGC_SEG_DIRECT \
 	 interp.c sggc.c -o interp-seg-direct-no-max
+
+interp-uncollected-nil:	interp.c sggc.c set.c sggc-app.h sggc.h set-app.h set.h
+	$(CC) -g -O3 -march=native -mtune=native \
+	 -DSGGC_MAX_SEGMENTS=10000 -DSET_STATIC=1 -DSGGC_USE_OFFSET_POINTERS=1 \
+	 -DUNCOLLECTED_NIL \
+	 interp.c sggc.c -o interp-uncollected-nil

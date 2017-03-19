@@ -30,6 +30,10 @@ typedef unsigned sggc_nchunks_t;/* Type for how many chunks are in a segment */
 #define SGGC_KIND_CHUNKS { 0, 1, 1, 1 }
 #define SGGC_KIND_TYPES { 0, 1, 2, 3 }
 
+#ifdef UNCOLLECTED_NIL
+#define SGGC_KIND_UNCOLLECTED { 1, 0, 0, 0 } /* Make () an uncollected object */
+#endif
+
 #define SGGC_AUX1_SIZE 1        /* Size of auxiliary information 1 */
 #define SGGC_AUX1_BLOCK_SIZE 4  /* Number of blocks in aux1 allocations */
 #define SGGC_AUX1_READ_ONLY     /* Some auxiliary information 1 is read-only */

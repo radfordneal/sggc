@@ -100,7 +100,8 @@ sggc_alloc_small_kind function is used (see below):
                         kind of object.
 
 The following constant must be defined if some kinds of objects are
-never collected as garbage (see below):
+never collected as garbage (see below), and should be left undefined
+if uncollected objects are not used by the application:
 
   SGGC_KIND_UNCOLLECTED An initializer for an array of 0 / 1 values 
                         specifying which kinds of objects are never
