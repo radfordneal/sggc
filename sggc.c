@@ -159,10 +159,10 @@ static struct set constants;                  /* Prealloc'd constant segments */
 /* RECORDS OF NEXT FREE OBJECTS FOR EACH KIND.  These are used only
    for small kinds.  (Big kinds use 'unused'.)
 
-   The sggc_next_free_val[k] value (unless it is SGGC_NO_OBJECT) is a
-   free objects of kind k, with all objects in the SET_UNUSED_FREE_NEW
-   chain following it also being free, unless sggc_next_segment_not_free[k]
-   is 1.
+   The sggc_next_free_val[k] value (unless it is SGGC_NO_OBJECT)
+   points to free objects of kind k, with all objects in the
+   SET_UNUSED_FREE_NEW chain following it also being free, unless
+   sggc_next_segment_not_free[k] is 1.
 
    sggc_next_free_bit[k] records the free objects in the segment of
    sggc_next_free_val[k], with bits shifted right so that there is a 1
