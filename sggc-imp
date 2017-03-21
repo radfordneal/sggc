@@ -426,6 +426,10 @@ reference to a generation 1 object.  Once such a reference is found,
 no further references need be examined, so sggc_look_at for further
 calls for the object quickly returns (after checking a flag value).
 
+At all collection levels, an uncollected object in 'old_to_new' must
+remain there unless it contains only references to constants and to
+other uncollected objects.
+
 The actions to do for old-to-new references when collecting at each
 level are summarized below:
 
@@ -581,6 +585,16 @@ include the following:
     searching), by adding a flag in small segments that is set if any
     object in the segment is in the free portion of a free_or_new set.
 
+  o Uncollected objects with old-to-new references could be kept in a
+    separate set that uses the SET_OLD_TO_NEW chain (since they are
+    in separate kinds, hence don't share segments with collected
+    objects).  A record could then be kept of the youngest generation
+    of any reference from an uncollected object, allowing scanning of
+    the uncollected old-to-new set to be omitted at collection levels
+    less than this.  This could also be done for collected objects,
+    but one might expect that there would be little benefit for them,
+    since they would almost always have a reference to the youngest
+    generation.
+
   o More information could be maintained in sggc_info to help the
     application decide when to call sggc_collect.
-
