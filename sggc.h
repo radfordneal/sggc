@@ -425,7 +425,7 @@ static inline void sggc_old_to_new_check (sggc_cptr_t from_ptr,
 
 /* FIND THE NEXT UNCOLLECTED OBJECT OF THE SAME KIND. */
 
-static inline sggc_cptr_t sggc_next_free_of_kind (sggc_cptr_t obj)
+static inline sggc_cptr_t sggc_next_uncollected_of_kind (sggc_cptr_t obj)
 {
   return set_chain_next (SET_LOOK_AT_UNCOLLECTED, obj);
 }

@@ -147,13 +147,23 @@ static set_bits_t kind_full[SGGC_N_KINDS];
 #define old_to_new sggc_old_to_new_set  /* External for inline use in sggc.h */
 
 static struct set free_or_new[SGGC_N_KINDS];  /* Free or newly allocated */
-static struct set uncollected[SGGC_N_KINDS];  /* Objects never collected */
 static struct set unused;                     /* Big segments not being used */
 static struct set old_gen1;                   /* Survived collection once */
 static struct set old_gen2;                   /* Survived collection >1 time */
 struct set old_to_new;                        /* May have old->new references */
 static struct set to_look_at;                 /* Not yet looked at in sweep */
 static struct set constants;                  /* Prealloc'd constant segments */
+
+#ifdef SGGC_KIND_UNCOLLECTED
+static struct set uncollected[SGGC_N_KINDS];  /* Objects never collected */
+#endif
+
+
+/* INDICATORS OF WHICH KINDS ARE FOR UNCOLLECTED OBJECTS. */
+
+#ifdef SGGC_KIND_UNCOLLECTED
+static const int kind_uncollected[SGGC_N_KINDS] = SGGC_KIND_UNCOLLECTED;
+#endif
 
 
 /* RECORDS OF NEXT FREE OBJECTS FOR EACH KIND.  These are used only
@@ -164,7 +174,7 @@ static struct set constants;                  /* Prealloc'd constant segments */
    SET_UNUSED_FREE_NEW chain following it also being free, unless
    sggc_next_segment_not_free[k] is 1.
 
-   sggc_next_free_bit[k] records the free objects in the segment of
+   sggc_next_free_bits[k] records the free objects in the segment of
    sggc_next_free_val[k], with bits shifted right so that there is a 1
    bit in the bottom corresponding to sggc_next_free_val[k].
 
@@ -185,7 +195,7 @@ static set_offset_t next_segment;             /* Number of segments in use */
 /* GLOBAL VARIABLES USED FOR LOOKING AT OLD-NEW REFERENCES. */
 
 static int collect_level = -1; /* Level of current garbage collection */
-static int old_to_new_check;   /* 1 if should look for old-to-new reference */
+static int old_to_new_check;   /* Controls whether old-to-new processing done */
 
 
 /* MACRO TO DO SOMETHING FOR ELEMENT AND THOSE FOLLOWING IN THE SAME SEGMENT. 
@@ -369,7 +379,9 @@ int sggc_init (int max_segments)
   set_init(&unused,SET_UNUSED_FREE_NEW);
   for (k = 0; k < SGGC_N_KINDS; k++) 
   { set_init(&free_or_new[k],SET_UNUSED_FREE_NEW);
-    set_init(&uncollected[k],SET_UNUSED_FREE_NEW);
+#ifdef SGGC_KIND_UNCOLLECTED
+    set_init(&uncollected[k],SET_LOOK_AT_UNCOLLECTED);
+#endif
   }
   set_init(&old_gen1,SET_OLD_GEN1);
   set_init(&old_gen2,SET_OLD_GEN2_CONST);
@@ -494,7 +506,14 @@ static sggc_cptr_t sggc_alloc_kind_type_length (sggc_kind_t kind,
     v = set_first (&unused, 1);
     if (v != SGGC_NO_OBJECT)
     { if (SGGC_DEBUG) printf("sggc_alloc: found %x in unused\n",(unsigned)v);
-      set_add (&free_or_new[kind], v);
+#ifdef SGGC_KIND_UNCOLLECTED
+      if (kind_uncollected[kind])
+      { set_add (&uncollected[kind], v);
+      }
+      else
+#endif
+      { set_add (&free_or_new[kind], v);
+      }
       index = SET_VAL_INDEX(v);
       seg = SET_SEGMENT(index);
       sggc_type[index] = type;  /* may reuse big segments of other types */
@@ -635,7 +654,14 @@ static sggc_cptr_t sggc_alloc_kind_type_length (sggc_kind_t kind,
     seg->x.big.kind = kind;  /* small.kind and big.kind are the same place */
 
     v = SGGC_CPTR_VAL(index,0);
-    set_add (&free_or_new[kind], v);
+#ifdef SGGC_KIND_UNCOLLECTED
+    if (kind_uncollected[kind])
+    { set_add (&uncollected[kind], v);
+    }
+    else
+#endif
+    { set_add (&free_or_new[kind], v);
+    }
     if (SGGC_DEBUG) 
     { printf("sggc_alloc: created %x in new segment\n", (unsigned)v);
     }
@@ -645,7 +671,11 @@ static sggc_cptr_t sggc_alloc_kind_type_length (sggc_kind_t kind,
     }
     else  /* small segment */
     { 
-      set_assign_segment_bits (&free_or_new[kind], v, kind_full[kind]);
+#ifdef SGGC_KIND_UNCOLLECTED
+      if (!kind_uncollected[kind])
+#endif
+      { set_assign_segment_bits (&free_or_new[kind], v, kind_full[kind]);
+      }
 
       if (SGGC_DEBUG)
       { printf(
@@ -1252,20 +1282,26 @@ void sggc_collect (int level)
   sggc_collect_move_to_unused();
 
   /* For each kind, set up sggc_next_free_val, and sggc_next_free_bits to 
-     use all of free_or_new. */
+     use all of free_or_new.  For uncollected kinds, we just leave these as
+     they were, since nothing was freed in the collection. */
 
   for (k = 0; k < SGGC_N_KINDS; k++)
   { if (sggc_kind_chunks[k] != 0)  /* kind uses small segments */
-    { set_value_t n = set_first (&free_or_new[k], 0);
-      sggc_next_free_val[k] = n;
-      if (n == SGGC_NO_OBJECT)
-      { sggc_next_free_bits[k] = 0;
+    {
+#ifdef SGGC_KIND_UNCOLLECTED
+      if (!kind_uncollected[k])
+#endif
+      { set_value_t n = set_first (&free_or_new[k], 0);
+        sggc_next_free_val[k] = n;
+        if (n == SGGC_NO_OBJECT)
+        { sggc_next_free_bits[k] = 0;
+        }
+        else 
+        { sggc_next_free_bits[k] = set_chain_segment_bits(SET_UNUSED_FREE_NEW,n)
+                                     >> SET_VAL_OFFSET(n);
+        }
+        sggc_next_segment_not_free[k] = 0;
       }
-      else 
-      { sggc_next_free_bits[k] = set_chain_segment_bits (SET_UNUSED_FREE_NEW, n)
-                                   >> SET_VAL_OFFSET(n);
-      }
-      sggc_next_segment_not_free[k] = 0;
     }
   }
 
@@ -1368,7 +1404,11 @@ void sggc_mark (sggc_cptr_t cptr)
 
 /* FIND THE FIRST UNCOLLECTED OBJECT OF A GIVEN KIND. */
 
-sggc_cptr_t sggc_first_free_of_kind (sggc_kind_t kind)
+sggc_cptr_t sggc_first_uncollected_of_kind (sggc_kind_t kind)
 {
+#ifdef SGGC_UNCOLLECTED_KIND
   return set_first (&uncollected[kind], 0);
+#else
+  return SGGC_NO_OBJECT;
+#endif
 }
