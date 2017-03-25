@@ -283,12 +283,12 @@ as follows:
                         objects, by kind, called 'uncollected[k]'.
 
 Separating 'old_gen1' and 'old_gen2' into different sets for each kind
-is necessary only for identification of newly-freed objects, in order
-to support the sggc_call_for_newly_freed_object facility.  There is
-little overhead to this separation, however, and it may even produce a
-slight efficiency advantage.  The 'uncollect[k]' sets are needed only
-to allow implementation of the sggc_first_uncollected_of_kind and
-sggc_next_uncollected_of_kind functions.
+is necessary only for identification of newly-freed objects of a given
+kind, in order to implement sggc_call_for_newly_freed_object.  There
+is little overhead to this separation, however, and it may even
+produce a slight efficiency advantage.  The 'uncollected[k]' sets are
+needed only to allow implementation of sggc_first_uncollected_of_kind
+and sggc_next_uncollected_of_kind.
 
 Note that with five chains, plus four bytes of extra information used
 by SGGC, the size of a set_segment structure is 64 bytes, which may be
@@ -297,12 +297,17 @@ efficient indexing in an array of segments, which is used with one
 implementation option (the alternative being to use an array of
 pointers to segments).
 
-Between calls of sggc_collect, for kinds, k, that use small segments,
-the set 'free_or_new[[k]' contains objects in segments that have data
-and auxiliary information allocated.  Some of these objects are
-newly-allocated (since the last call of sggc_collect), and may still
-be in use, and others are free.  The objects known to be free start at
-'sggc_next_free_val[k]'.
+Between calls of sggc_collect, for collected kinds, k, that use small
+segments, the set 'free_or_new[[k]' contains objects in segments that
+have data and auxiliary information allocated.  Some of these objects
+are newly-allocated (since the last call of sggc_collect), and may
+still be in use, and others are free.  The objects known to be free
+start at 'sggc_next_free_val[k]', and continue to the end of the set,
+except that if 'sggc_next_segment_not_free[k]' is 1, only the objects
+in the same segment as 'sggc_next_free_val[k]' are still free (this
+happens when the free objects in 'free_or_new[k]' have all been used,
+and new segments of free objects are being allocated, and put at the
+front of 'free_or_new[k]').
 
 If k uses big segments, 'free_or_new[[k]' contains only newly
 allocated objects between calls of sggc_collect.  Allocation for
@@ -315,12 +320,29 @@ using sggc_alloc_zeroed when the segment becomes used.  If 'unused' is
 empty, sggc_alloc_zeroed is used to allocate a new segment, data, and
 auxiliary information (if a partial block is not already allocated).
 
-Objects of an uncollected kind are allocated in the same way (except
+Objects of an uncollected kind are allocated in the same way, except
 that there will never be more than one segment of free objects, which
 will have recently been created with sggc_alloc_zeroed, since
-allocated objects of this kind never become free).  Uncollected
-objects of kind k are added to the 'uncollected[k]' set when
-allocated.
+allocated objects of this kind never become free.  Uncollected objects
+of kind k are added to the 'uncollected[k]' set when allocated, not to
+'free_or_new[k]'.
+
+The sggc_alloc_small_kind_quickly function uses a bit vector, called
+'sggc_next_free_bits[k]', to represent the free objects of kind k in
+the segment that such free objects are currently being taken from,
+with the next free object being 'sggc_next_free_val[k]'.  When
+'sggc_next_free_bits[k]' is zero, allocation of a new object will
+require allocating a new segment, but this is not done by the
+sggc_alloc_small_kind_quickly function, which instead just returns
+SGGC_NO_OBJECT (this reduces the amount of code that is inlined for
+sggc_alloc_small_kind_quickly).  These variables are updated after an
+object is allocated to the values indicating the object that will be
+allocated next (for collected objects, they are also initialized after
+a garbage collection).  For uncollected kinds, 'sggc_next_free_val[k]'
+is in a newly-allocated segment that does not exist in the
+'free_or_new[k]' set (which is always empty for uncollected kinds).
+For collected kinds, the object 'sggc_next_free_val[k]' will be in the
+'free_or_new[k]' set.
 
 At the start of garbage collection at level 1, objects in 'old_gen1[k]' 
 for each kind k are added to the 'free_or_new[k]' set.  For collection

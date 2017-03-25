@@ -314,13 +314,13 @@ static inline sggc_cptr_t sggc_alloc_small_kind_quickly (sggc_kind_t kind)
   extern set_bits_t sggc_next_free_bits[SGGC_N_KINDS];
   extern int sggc_next_segment_not_free[SGGC_N_KINDS];
 
-  sggc_cptr_t nfv = sggc_next_free_val[kind];
+  set_bits_t nfb = sggc_next_free_bits[kind];
 
-  if (nfv == SGGC_NO_OBJECT)
+  if (nfb == 0)
   { return SGGC_NO_OBJECT;
   }
 
-  set_bits_t nfb = sggc_next_free_bits[kind];
+  sggc_cptr_t nfv = sggc_next_free_val[kind];
 
   nfb >>= 1;
   if (nfb != 0)
