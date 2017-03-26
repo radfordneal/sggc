@@ -965,9 +965,10 @@ static void collect_debug (void)
 }
 
 
-/* "MARK" AN OBJECT AS IN USE, BY REMOVING IT FROM FREE SET, ADDING TO OLD. */
+/* PUT AN OBJECT IN THE APPROPRIATE OLD GENERATION.  The object is
+   assumed to have already been removed from it 'free_or_new' set.  */
 
-static void mark_object (sggc_cptr_t v)
+static void put_in_right_old_gen (sggc_cptr_t v)
 {
   if (collect_level == 0)
   { /* must be in generation 0 */
@@ -1134,7 +1135,7 @@ void sggc_collect_look_at (void)
     {
       if (SGGC_DEBUG) printf("sggc_collect: looking at %x\n",(unsigned)v);
 
-      mark_object (v);
+      put_in_right_old_gen (v);
   
       sggc_find_object_ptrs (v);
     }
@@ -1350,7 +1351,10 @@ void sggc_collect (int level)
 
    This procedure is also used as part of the old-to-new scheme to
    check whether an object in the old-to-new set still needs to be
-   there, as well as sometimes marking the objects it points to. */
+   there, as well as sometimes marking the objects it points to.  
+   Note that for this purpose, it is essential that for now the
+   objects looked at are just put in 'to_look_at', not put in the
+   old generation where they will eventually end up. */
 
 void sggc_look_at (sggc_cptr_t cptr)
 {
@@ -1397,7 +1401,7 @@ void sggc_mark (sggc_cptr_t cptr)
   if (SGGC_DEBUG) printf("sggc_mark: %x\n",(unsigned)cptr);
 
   if (set_remove (&free_or_new[SGGC_KIND(cptr)], cptr))
-  { mark_object (cptr);
+  { put_in_right_old_gen (cptr);
   }
 }
 

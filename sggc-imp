@@ -456,46 +456,71 @@ remain there unless it contains only references to constants and to
 other uncollected objects.
 
 The actions to do for old-to-new references when collecting at each
-level are summarized below:
+level are summarized below ("u" means an uncollected object):
 
   level 0:
   
       gen    gen    keep in       stop       mark
      from     to   old-to-new?  looking?  the to ptr?
+
+        u      0       yes         no        yes
+        u      1       yes         no         no (won't anyway)
+        u      2       yes         no         no (won't anyway)
+        u      u        no         no         no (won't anyway)
   
         2      0       yes         no        yes
         2      1       yes         no         no (won't anyway)
         2      2        no         no         no (won't anyway)
+        2      u        no         no         no (won't anyway)
   
         1      0        no         no        yes
         1      1        no         no         no (won't anyway)
         1      2        no         no         no (won't anyway)
+        1      u        no         no         no (won't anyway)
   
   level 1:
   
       gen    gen    keep in       stop       mark
      from     to   old-to-new?  looking?  the to ptr?
+
+        u      0       yes         no        yes
+        u      1       yes         no        yes
+        u      2       yes         no         no (won't anyway)
+        u      u        no         no         no (won't anyway)
   
         2      0       yes         no        yes
         2      1        no         no        yes
         2      2        no         no         no (won't anyway)
+        2      u        no         no         no (won't anyway)
   
         1      0       yes        yes         no
         1      1        no         no         no
         1      2        no         no         no (won't anyway)
+        1      u        no         no         no (won't anyway)
   
   level 2:
   
       gen    gen    keep in       stop       mark
      from     to   old-to-new?  looking?  the to ptr?
+
+        u      0       yes         no        yes
+        u      1       yes         no        yes
+        u      2       yes         no        yes
+        u      u        no         no         no (won't anyway)
   
         2      0       yes        yes         no
         2      1        no         no         no
         2      2        no         no         no
+        2      u        no         no         no (won't anyway)
   
         1      0       yes        yes         no
         1      1        no         no         no
         1      2        no         no         no
+        1      u        no         no         no (won't anyway)
+
+In the above table, "won't anyway" means that the object won't be in
+the 'free_or_new' set for its kind, and hence "marking" it by trying
+to remove it from this set will have no effect.
 
 
 IMPLEMENTATION OPTIONS
