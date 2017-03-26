@@ -144,7 +144,7 @@ static set_bits_t kind_full[SGGC_N_KINDS];
 
 /* SETS OF OBJECTS. */
 
-#define old_to_new sggc_old_to_new_set  /* External for inline use in sggc.h */
+#define old_to_new sggc_old_to_new_set   /* External for inline use in sggc.h */
 
 static struct set free_or_new[SGGC_N_KINDS];  /* Free or newly allocated */
 static struct set unused;                     /* Big segments not being used */
@@ -155,7 +155,8 @@ static struct set to_look_at;                 /* Not yet looked at in sweep */
 static struct set constants;                  /* Prealloc'd constant segments */
 
 #ifdef SGGC_KIND_UNCOLLECTED
-static struct set uncollected[SGGC_N_KINDS];  /* Objects never collected */
+#define uncollected sggc_uncollected_sets /* External for inline use in sggc.h*/
+struct set uncollected[SGGC_N_KINDS];     /* Objects never collected */
 #endif
 
 
@@ -413,6 +414,7 @@ int sggc_init (int max_segments)
   sggc_info.gen0_count = 0;
   sggc_info.gen1_count = 0;
   sggc_info.gen2_count = 0;
+  sggc_info.uncol_count = 0;
   sggc_info.big_chunks = 0;
 
   return 0;
@@ -509,10 +511,12 @@ static sggc_cptr_t sggc_alloc_kind_type_length (sggc_kind_t kind,
 #ifdef SGGC_KIND_UNCOLLECTED
       if (sggc_kind_uncollected[kind])
       { set_add (&uncollected[kind], v);
+        sggc_info.uncol_count += 1;
       }
       else
 #endif
       { set_add (&free_or_new[kind], v);
+        sggc_info.gen0_count += 1;
       }
       index = SET_VAL_INDEX(v);
       seg = SET_SEGMENT(index);
@@ -657,10 +661,12 @@ static sggc_cptr_t sggc_alloc_kind_type_length (sggc_kind_t kind,
 #ifdef SGGC_KIND_UNCOLLECTED
     if (sggc_kind_uncollected[kind])
     { set_add (&uncollected[kind], v);
+      sggc_info.uncol_count += 1;
     }
     else
 #endif
     { set_add (&free_or_new[kind], v);
+      sggc_info.gen0_count += 1;
     }
     if (SGGC_DEBUG) 
     { printf("sggc_alloc: created %x in new segment\n", (unsigned)v);
@@ -773,9 +779,8 @@ static sggc_cptr_t sggc_alloc_kind_type_length (sggc_kind_t kind,
 
   OFFSET(sggc_data,index,SGGC_CHUNK_SIZE);
 
-  /* Update info and return newly allocated object. */
+  /* Return newly allocated object. */
 
-  sggc_info.gen0_count += 1;
   return v;
 
 fail: 
@@ -1332,10 +1337,26 @@ void sggc_collect (int level)
     }
   }
 
+  /* Update info structure. */
+
   sggc_info.gen0_count = 0;
   sggc_info.gen1_count = set_n_elements(&old_gen1);
   sggc_info.gen2_count = set_n_elements(&old_gen2);
   sggc_info.big_chunks = 0;
+
+#ifdef SGGC_KIND_UNCOLLECTED
+  if (1)  /* not expensive, so maybe keep this consistency check enabled */
+  { unsigned cnt = 0;
+    for (k = 0; k < SGGC_N_KINDS; k++)
+    { if (sggc_kind_uncollected[k])
+      { cnt += set_n_elements(&uncollected[k]);
+      }
+    }
+    if (cnt != sggc_info.uncol_count) 
+    { abort();
+    }
+  }
+#endif
 
   collect_level = -1;
 

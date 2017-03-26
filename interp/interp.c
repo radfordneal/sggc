@@ -172,12 +172,18 @@ char *sggc_aux1_read_only (sggc_kind_t kind)
 
 void sggc_find_root_ptrs (void)
 { 
+#ifndef UNCOLLECTED_NIL
+#ifndef UNCOLLECTED_NIL_SYMS
   sggc_mark (nil);  
+#endif
+#endif
 
+#ifndef UNCOLLECTED_NIL_SYMS
   int i;
   for (i = 0; symbol_chars[i]; i++)
   { sggc_mark (symbols[i]);
   }
+#endif
 
   struct ptr_var *p;
   for (p = first_ptr_var; p != NULL; p = p->next)

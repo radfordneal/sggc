@@ -219,12 +219,16 @@ garbage collection:
   {
     unsigned gen0_count;       /* Number of newly-allocated objects */
     unsigned gen1_count;       /* Number of objects in old generation 1 */
-    unsigned gen2_count;       /* Number of objects in old generation 2.
-                                  Does not include constants */
+    unsigned gen2_count;       /* Number of objects in old generation 2 */
+
+    unsigned uncol_count;      /* Number of uncollected objects.  Does not
+                                  inclu */
 
     size_t big_chunks;         /* # of chunks in newly-allocated big objects */
 
-} sggc_info;
+  } sggc_info;
+
+Constants are not included in any of the counts above.
 
 The sggc.h file will also declare the array initialized with the
 application's definition of SGGC_KIND_CHUNKS in sggc-app.h, as

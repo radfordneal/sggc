@@ -32,6 +32,8 @@ typedef unsigned sggc_nchunks_t;/* Type for how many chunks are in a segment */
 
 #ifdef UNCOLLECTED_NIL
 #define SGGC_KIND_UNCOLLECTED { 1, 0, 0, 0 } /* Make () an uncollected object */
+#elif UNCOLLECTED_NIL_SYMS
+#define SGGC_KIND_UNCOLLECTED { 1, 0, 1, 0 } /* () and symbols are uncollected*/
 #endif
 
 #define SGGC_AUX1_SIZE 1        /* Size of auxiliary information 1 */

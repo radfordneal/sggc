@@ -204,8 +204,9 @@ SGGC_EXTERN struct sggc_info
 { 
   unsigned gen0_count;       /* Number of newly-allocated objects */
   unsigned gen1_count;       /* Number of objects in old generation 1 */
-  unsigned gen2_count;       /* Number of objects in old generation 2.
-                                Does not include constants */
+  unsigned gen2_count;       /* Number of objects in old generation 2 */
+
+  unsigned uncol_count;      /* Number of uncollected objects */
 
   size_t big_chunks;         /* # of chunks in newly-allocated big objects */
 
@@ -354,7 +355,17 @@ static inline sggc_cptr_t sggc_alloc_small_kind_quickly (sggc_kind_t kind)
   } while (nch > 0);
 #endif
 
-  sggc_info.gen0_count += 1;
+#ifdef SGGC_KIND_UNCOLLECTED
+  extern const int sggc_kind_uncollected[SGGC_N_KINDS];
+  extern struct set sggc_uncollected_sets[SGGC_N_KINDS];
+  if (sggc_kind_uncollected[kind])
+  { set_add (&sggc_uncollected_sets[kind], nfv);
+    sggc_info.uncol_count += 1;
+  }
+  else
+#endif
+  { sggc_info.gen0_count += 1;
+  }
 
   return nfv;
 }
