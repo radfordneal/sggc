@@ -162,7 +162,7 @@ static struct set uncollected[SGGC_N_KINDS];  /* Objects never collected */
 /* INDICATORS OF WHICH KINDS ARE FOR UNCOLLECTED OBJECTS. */
 
 #ifdef SGGC_KIND_UNCOLLECTED
-static const int kind_uncollected[SGGC_N_KINDS] = SGGC_KIND_UNCOLLECTED;
+const int sggc_kind_uncollected[SGGC_N_KINDS] = SGGC_KIND_UNCOLLECTED;
 #endif
 
 
@@ -380,14 +380,14 @@ int sggc_init (int max_segments)
   for (k = 0; k < SGGC_N_KINDS; k++) 
   { set_init(&free_or_new[k],SET_UNUSED_FREE_NEW);
 #ifdef SGGC_KIND_UNCOLLECTED
-    set_init(&uncollected[k],SET_LOOK_AT_UNCOLLECTED);
+    set_init(&uncollected[k],SET_OLD_GEN2_UNCOL);
 #endif
   }
   set_init(&old_gen1,SET_OLD_GEN1);
-  set_init(&old_gen2,SET_OLD_GEN2_CONST);
+  set_init(&old_gen2,SET_OLD_GEN2_UNCOL);
   set_init(&old_to_new,SET_OLD_TO_NEW);
-  set_init(&to_look_at,SET_LOOK_AT_UNCOLLECTED);
-  set_init(&constants,SET_OLD_GEN2_CONST);
+  set_init(&to_look_at,SET_LOOK_AT);
+  set_init(&constants,SET_OLD_GEN2_UNCOL);
 
   /* Initialize to no free objects of each kind. */
 
@@ -507,7 +507,7 @@ static sggc_cptr_t sggc_alloc_kind_type_length (sggc_kind_t kind,
     if (v != SGGC_NO_OBJECT)
     { if (SGGC_DEBUG) printf("sggc_alloc: found %x in unused\n",(unsigned)v);
 #ifdef SGGC_KIND_UNCOLLECTED
-      if (kind_uncollected[kind])
+      if (sggc_kind_uncollected[kind])
       { set_add (&uncollected[kind], v);
       }
       else
@@ -655,7 +655,7 @@ static sggc_cptr_t sggc_alloc_kind_type_length (sggc_kind_t kind,
 
     v = SGGC_CPTR_VAL(index,0);
 #ifdef SGGC_KIND_UNCOLLECTED
-    if (kind_uncollected[kind])
+    if (sggc_kind_uncollected[kind])
     { set_add (&uncollected[kind], v);
     }
     else
@@ -672,7 +672,7 @@ static sggc_cptr_t sggc_alloc_kind_type_length (sggc_kind_t kind,
     else  /* small segment */
     { 
 #ifdef SGGC_KIND_UNCOLLECTED
-      if (!kind_uncollected[kind])
+      if (!sggc_kind_uncollected[kind])
 #endif
       { set_assign_segment_bits (&free_or_new[kind], v, kind_full[kind]);
       }
@@ -990,7 +990,7 @@ static void put_in_right_old_gen (sggc_cptr_t v)
     { set_add (&old_gen2, v);
       if (SGGC_DEBUG) printf("sggc_collect: %x now old_gen2\n",(unsigned)v);
     }
-    else if (!set_chain_contains (SET_OLD_GEN2_CONST, v))
+    else if (!set_chain_contains (SET_OLD_GEN2_UNCOL, v))
                 /* must be in generation 0 */
     { set_add (&old_gen1, v);
       if (SGGC_DEBUG) printf("sggc_collect: %x now old_gen1\n",(unsigned)v);
@@ -1045,8 +1045,8 @@ void sggc_collect_put_in_free_or_new (void)
     if (collect_level == 2)
     { for (v = set_first(&old_gen2, 0); 
            v != SET_NO_VALUE; 
-           v = set_chain_next_segment(SET_OLD_GEN2_CONST,v))
-      { set_add_segment (&free_or_new[SGGC_KIND(v)], v, SET_OLD_GEN2_CONST);
+           v = set_chain_next_segment(SET_OLD_GEN2_UNCOL,v))
+      { set_add_segment (&free_or_new[SGGC_KIND(v)], v, SET_OLD_GEN2_UNCOL);
         if (SGGC_DEBUG) 
         { DO_FOR_SEGMENT (old_gen2, v,
            printf("sggc_collect: put %x from old_gen2 in free\n",(unsigned)w));
@@ -1088,7 +1088,7 @@ void sggc_collect_old_to_new (void)
     { printf ("sggc_collect: old->new for %x (gen%d)\n", (unsigned)v,
         set_contains(&old_gen2,v) ? 2 : set_contains(&old_gen1,v) ? 1 : 0);
     }
-    if (set_chain_contains (SET_OLD_GEN2_CONST, v)) /* v in old generation 2 */
+    if (set_chain_contains (SET_OLD_GEN2_UNCOL, v)) /* v in old generation 2 */
     { old_to_new_check = 2;
     }
     else /* v is in old generation 1 */
@@ -1201,7 +1201,7 @@ void sggc_collect_remove_free (void)
             if (set_chain_contains(SET_UNUSED_FREE_NEW,w))
               printf("sggc_collect: %x in old_gen2 now free\n",(unsigned)w));
         }
-        sggc_cptr_t nv = set_chain_next_segment(SET_OLD_GEN2_CONST,v);
+        sggc_cptr_t nv = set_chain_next_segment(SET_OLD_GEN2_UNCOL,v);
         set_remove_segment (&old_gen2, v, SET_UNUSED_FREE_NEW);
         if (set_chain_contains_any_in_segment (SET_UNUSED_FREE_NEW, v))
         { set_remove_segment (&old_to_new, v, SET_UNUSED_FREE_NEW);
@@ -1290,7 +1290,7 @@ void sggc_collect (int level)
   { if (sggc_kind_chunks[k] != 0)  /* kind uses small segments */
     {
 #ifdef SGGC_KIND_UNCOLLECTED
-      if (!kind_uncollected[k])
+      if (!sggc_kind_uncollected[k])
 #endif
       { set_value_t n = set_first (&free_or_new[k], 0);
         sggc_next_free_val[k] = n;
@@ -1368,18 +1368,18 @@ void sggc_look_at (sggc_cptr_t cptr)
       { return;
       }
       if (collect_level == 0)
-      { if (!set_chain_contains (SET_OLD_GEN2_CONST, cptr))
+      { if (!set_chain_contains (SET_OLD_GEN2_UNCOL, cptr))
         { old_to_new_check = 0;
         }
       }
       else if (collect_level == 1 && old_to_new_check == 2)
-      { if (!set_chain_contains (SET_OLD_GEN2_CONST, cptr) 
+      { if (!set_chain_contains (SET_OLD_GEN2_UNCOL, cptr) 
               && !set_chain_contains (SET_OLD_GEN1, cptr))
         { old_to_new_check = 0;
         }
       }
       else /* collect_level==2 || collect_level == 1 && old_to_new_check == 1 */
-      { if (!set_chain_contains (SET_OLD_GEN2_CONST, cptr) 
+      { if (!set_chain_contains (SET_OLD_GEN2_UNCOL, cptr) 
               && !set_chain_contains (SET_OLD_GEN1, cptr))
         { old_to_new_check = -1;
         }

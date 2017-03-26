@@ -23,18 +23,7 @@
 #define SET_OFFSET_BITS 6  /* Max is 6 for using 64-bit shift/mask operations */
 
 
-/* CHAINS FOR LINKING SEGMENTS IN SETS.  Chains are shared as follows:
-
-   - the SET_UNUSED_FREE_NEW chain is shared amongst a collection of
-     sets of free or newly-allocated object, one set for each possible
-     kind of object, and the unused set of segments for big objects.
-
-   - the SET_OLD_GEN2_CONST chain is shared between old generation 2 
-     and constants.
-
-   - the SET_LOOK_AT_UNCOLLECTED chain is shared between a set of
-     objects that need to be looked at for references and a collection
-     of sets of uncollected objects, one for each kind.  */
+/* CHAINS FOR LINKING SEGMENTS IN SETS. */
 
 #define SET_CHAINS 5       /* Number of chains that can be used for sets */
 
@@ -42,14 +31,13 @@
 
 #  define SET_OLD_GEN1 1         /* Objects that survived one GC */
 
-#  define SET_OLD_GEN2_CONST 2   /* Objects that survived more than one GC,
-                                    and also constant objects */
+#  define SET_OLD_GEN2_UNCOL 2   /* Objects that survived more than one GC,
+                                    and also constant and uncollected objects */
 
 #  define SET_OLD_TO_NEW 3       /* Objects maybe with old-to-new references */
 
-#  define SET_LOOK_AT_UNCOLLECTED 4  /* Objects that still need to be looked at
-                                        in order to mark objects still in use,
-                                        plus objects of uncollected kinds */
+#  define SET_LOOK_AT 4          /* Objects that still need to be looked at
+                                    in order to mark objects still in use */
 
 
 /* EXTRA INFORMATION STORED IN A SET_SEGMENT STRUCTURE.  Putting it

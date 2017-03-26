@@ -371,39 +371,46 @@ static inline void sggc_old_to_new_check (sggc_cptr_t from_ptr,
   { return;
   }
 
-  /* Can quit now if from_ptr is already in the old-to-new set (which is
-     the only one using the SET_OLD_TO_NEW chain). */
+  /* Can quit now if from_ptr is already in an old-to-new set (which are
+     the only ones using the SET_OLD_TO_NEW chain). */
 
   if (set_chain_contains (SET_OLD_TO_NEW, from_ptr))
   { return;
   }
 
-  /* Note:  from_ptr shouldn't be constant, so below can look in whole chain. */
+  /* Note:  from_ptr shouldn't be a constant, so below can look in whole chain,
+     in order to check for from_ptr being old generation 2 or uncollected. */
 
-  if (set_chain_contains (SET_OLD_GEN2_CONST, from_ptr))
+  if (set_chain_contains (SET_OLD_GEN2_UNCOL, from_ptr))
   { 
-    /* If from_ptr is in old generation 2, only others in old generation 2,
-       constants, and uncollected objects can be referenced without using 
-       old-to-new. */
+    /* If from_ptr is in old generation 2 or uncollected, only others in 
+       old generation 2, uncollected, or constants, can possibly be 
+       referenced without using old-to-new. */
 
-    if (set_chain_contains (SET_OLD_GEN2_CONST, to_ptr) 
-         || set_chain_contains (SET_LOOK_AT_UNCOLLECTED, to_ptr))
-    { return;
-    }
-  }
+    if (set_chain_contains (SET_OLD_GEN2_UNCOL, to_ptr)) 
+    { 
+#ifndef SGGC_KIND_UNCOLLECTED
 
-#ifdef SGGC_KIND_UNCOLLECTED
-  else if (set_chain_contains (SET_LOOK_AT_UNCOLLECTED, from_ptr))
-  {
-    /* If from_ptr is uncollected, only constants and other uncollected
-       objects can be referenced without using old-to-new. */
+      return; /* no need for further checks if can't be an uncollected object */
 
-    if (sggc_is_constant (to_ptr) 
-         || set_chain_contains (SET_LOOK_AT_UNCOLLECTED, to_ptr))
-    { return;
-    }
-  }
+#else
+      /* If the reference is from old generation 2 rather than an uncollected
+         object, we don't need to use old_to_new. */
+
+      extern const int sggc_kind_uncollected[SGGC_N_KINDS];
+      if (!sggc_kind_uncollected[SGGC_KIND(from_ptr)])
+      { return;
+      }
+
+      /* If the reference is from an uncollected object, a reference to a
+         constant or uncollected object doesn't need to use old_to_new. */
+
+      if (sggc_is_constant(to_ptr) || sggc_kind_uncollected[SGGC_KIND(to_ptr)])
+      { return;
+      }
 #endif
+    }
+  }
 
   else /* must be in old generation 1 */
   { 
@@ -427,5 +434,5 @@ static inline void sggc_old_to_new_check (sggc_cptr_t from_ptr,
 
 static inline sggc_cptr_t sggc_next_uncollected_of_kind (sggc_cptr_t obj)
 {
-  return set_chain_next (SET_LOOK_AT_UNCOLLECTED, obj);
+  return set_chain_next (SET_OLD_GEN2_UNCOL, obj);
 }

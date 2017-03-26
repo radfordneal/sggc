@@ -270,17 +270,18 @@ as follows:
   SET_OLD_GEN1          Used for sets of objects in old generation 1,
                         separated by kind, called 'old_gen1[k]'.
 
-  SET_OLD_GEN2_CONST    Used for the set of objects in old generation 2,
-                        separated by kind, called 'old_gen2[k]', and for 
-                        the set of constant objects, called 'constants'.
+  SET_OLD_GEN2_UNCOL    Used for the sets of objects in old generation
+                        2, separated by kind, called 'old_gen2[k]',
+                        for the sets of uncollected objects, by kind,
+                        called 'uncollected[k]', and for the set of
+                        constant objects, called 'constants'.
 
   SET_OLD_TO_NEW        Used for the set of objects possibly having 
                         old-to-new references, called 'old_to_new'.
 
-  SET_LOOK_AT_UNCOLLECTED  Used for the set of objects that need to be
+  SET_LOOK_AT           Used for the set of objects that need to be
                         looked at to follow pointers they contain,
-                        called 'to_look_at', and for sets of uncollected
-                        objects, by kind, called 'uncollected[k]'.
+                        called 'to_look_at'.
 
 Separating 'old_gen1' and 'old_gen2' into different sets for each kind
 is necessary only for identification of newly-freed objects of a given
@@ -296,19 +297,17 @@ from sggc_find_root_ptrs or sggc_find_object_ptrs calling
 sggc_look_at, they are added to the 'to_look_at' set, from which
 objects are repeatedly removed, and passed to sggc_find_object_ptrs,
 until the 'to_look_at' set becomes empty.  This avoids use of
-recursion to following references to objects from other objects.  The
-chain used by 'to_look_at' can be shared with that for the
-'uncollected[k]' sets because objects in these sets are never looked
-at, and they exist in a set of segments disjoint from those containing
-objects that are looked at, since uncollected objects are in kinds
-that are entirely uncollected.
+recursion to following references to objects from other objects.
 
 The 'constants' set is added to only when the application registers a
 new constant object, and never has elements removed.  Constants can be
 distinguished from objects in the 'old_gen2' sets (which share the
-same chain) by 'constant' flag in the segment description.  The fact
-that these two sets share a chain is convenient when checking whether
-a new reference stored in an object in old generation 2 requires
+same chain) by 'constant' flag in the segment description.  The
+'uncollected' sets can share a chain with the 'old_gen2' sets because
+uncollected objects are in a disjoint collection of segments, which
+can be distinguished by their kind.  The fact that old generation 2,
+uncollected, and constant objects are in the same chain is convenient
+when checking whether a new reference stored in an object requires
 putting the object in 'old_to_new'.
 
 Note that with five chains, plus four bytes of extra information used
