@@ -254,7 +254,7 @@ read-only memory.  Constant objects are never looked at or collected
 by the garbage collector.
 
 
-SETS OF OBJECTS AND THEIR USE IN ALLOCATION AND COLLECTION
+SETS OF OBJECTS
 
 SGGC maintains several sets of objects, using the set facilities
 documented in set-doc.  Some of these sets share the same 'chain'.
@@ -290,12 +290,36 @@ produce a slight efficiency advantage.  The 'uncollected[k]' sets are
 needed only to allow implementation of sggc_first_uncollected_of_kind
 and sggc_next_uncollected_of_kind.
 
+When a garbage collection is not in progress, the 'to_look_at' set is
+empty.  During a garbage collection, as objects are marked as in use,
+from sggc_find_root_ptrs or sggc_find_object_ptrs calling
+sggc_look_at, they are added to the 'to_look_at' set, from which
+objects are repeatedly removed, and passed to sggc_find_object_ptrs,
+until the 'to_look_at' set becomes empty.  This avoids use of
+recursion to following references to objects from other objects.  The
+chain used by 'to_look_at' can be shared with that for the
+'uncollected[k]' sets because objects in these sets are never looked
+at, and they exist in a set of segments disjoint from those containing
+objects that are looked at, since uncollected objects are in kinds
+that are entirely uncollected.
+
+The 'constants' set is added to only when the application registers a
+new constant object, and never has elements removed.  Constants can be
+distinguished from objects in the 'old_gen2' sets (which share the
+same chain) by 'constant' flag in the segment description.  The fact
+that these two sets share a chain is convenient when checking whether
+a new reference stored in an object in old generation 2 requires
+putting the object in 'old_to_new'.
+
 Note that with five chains, plus four bytes of extra information used
 by SGGC, the size of a set_segment structure is 64 bytes, which may be
 a good size for cache performance.  As a power of two, it also allows
 efficient indexing in an array of segments, which is used with one
 implementation option (the alternative being to use an array of
 pointers to segments).
+
+
+ALLOCATING AND FREEING OBJECTS
 
 Between calls of sggc_collect, for collected kinds, k, that use small
 segments, the set 'free_or_new[[k]' contains objects in segments that
@@ -355,27 +379,6 @@ at) added to 'old_gen1[k]' if newly-allocated, or to 'old_gen2[k]' if
 currently in 'old_gen1[k]', or left in 'old_gen2[k]' if it was already
 there.  Note that the kind, k, for an object is determinable from the
 compressed pointer to it, via the structure describing its segment.
-
-The 'constants' set is added to only when the application registers a
-new constant object, and never has elements removed.  Constants can be
-distinguished from objects in the 'old_gen2' sets (which share the
-same chain) by 'constant' flag in the segment description.  The fact
-that these two sets share a chain is convenient when checking whether
-a new reference stored in an object in old generation 2 requires
-putting the object in 'old_to_new'.
-
-When a garbage collection is not in progress, the 'to_look_at' set is
-empty.  During a garbage collection, as objects are marked as in use,
-from sggc_find_root_ptrs or sggc_find_object_ptrs calling
-sggc_look_at, they are added to the 'to_look_at' set, from which
-objects are repeatedly removed, and passed to sggc_find_object_ptrs,
-until the 'to_look_at' set becomes empty.  This avoids use of
-recursion to following references to objects from other objects.  The
-chain used by 'to_look_at' can be shared with that for the
-'uncollected[k]' sets because objects in these sets are never looked
-at, and they exist in a set of segments disjoint from those containing
-objects that are looked at, since uncollected objects are in kinds
-that are entirely uncollected.
 
 Once the marking process has finished, the objects in all the
 'free_or_new' sets are known to be unused.  However, some of them may
@@ -617,6 +620,13 @@ include the following:
     but one might expect that there would be little benefit for them,
     since they would almost always have a reference to the youngest
     generation.
+
+    Alternatively, storing a reference to a collected object in an
+    uncollected object could cause the collected object to be put in
+    old generation 2, and in the 'old-to-new' set if it was not
+    already in old generation 2 (in case it references younger
+    objects).  It would then always be OK to scan the old-to-new set
+    for uncollected objects only for level 2 garbage collections.
 
   o More information could be maintained in sggc_info to help the
     application decide when to call sggc_collect.
