@@ -195,7 +195,7 @@ static set_offset_t next_segment;             /* Number of segments in use */
 /* GLOBAL VARIABLES USED FOR LOOKING AT OLD-NEW REFERENCES. */
 
 static int collect_level = -1; /* Level of current garbage collection */
-static int old_to_new_check;   /* Controls whether old-to-new processing done */
+static int old_to_new_check;   /* Controls how old-to-new processing is done */
 
 
 /* MACRO TO DO SOMETHING FOR ELEMENT AND THOSE FOLLOWING IN THE SAME SEGMENT. 
@@ -1071,10 +1071,11 @@ void sggc_collect_put_in_free_or_new (void)
   /* Handle old-to-new references.  Done in cooperation with
      sggc_look_at, using the global variables collect_level (the level
      of collection being done) and old_to_new_check (which contains
-     the generation of the referring object, always 1 or 2, except it
-     is cleared to 0 to indicate that further special processing is
-     unnecessary.  (That may also mean that the old-to-new entry is 
-     still needed). */
+     the generation of the referring object (1 or 2, or 3 for
+     uncollected), except it is cleared to 0 to indicate that further
+     special processing is unnecessary (which may also mean that the
+     old-to-new entry is still needed), and to -1 to indicate that
+     furthermore subsequent calls of sggc_look_at should be ignored. */
 
 void sggc_collect_old_to_new (void)
 {
@@ -1088,8 +1089,13 @@ void sggc_collect_old_to_new (void)
     { printf ("sggc_collect: old->new for %x (gen%d)\n", (unsigned)v,
         set_contains(&old_gen2,v) ? 2 : set_contains(&old_gen1,v) ? 1 : 0);
     }
-    if (set_chain_contains (SET_OLD_GEN2_UNCOL, v)) /* v in old generation 2 */
+    if (set_chain_contains (SET_OLD_GEN2_UNCOL, v)) /* v is oldgen2 or uncol */
     { old_to_new_check = 2;
+#ifdef SGGC_KIND_UNCOLLECTED
+      if (sggc_kind_uncollected[SGGC_KIND(v)])
+      { old_to_new_check = 3;
+      }
+#endif
     }
     else /* v is in old generation 1 */
     { if (collect_level == 0)
@@ -1351,10 +1357,12 @@ void sggc_collect (int level)
 
    This procedure is also used as part of the old-to-new scheme to
    check whether an object in the old-to-new set still needs to be
-   there, as well as sometimes marking the objects it points to.  
-   Note that for this purpose, it is essential that for now the
-   objects looked at are just put in 'to_look_at', not put in the
-   old generation where they will eventually end up. */
+   there, as well as sometimes marking the objects it points to.  Note
+   that for this purpose, it is essential that for now the objects
+   looked at are just put in 'to_look_at', not put in the old
+   generation where they will eventually end up.  Also note that we
+   cannot test for an object being in generation 0 by checking if it
+   is in 'free_or_new', since it may have already been removed. */
 
 void sggc_look_at (sggc_cptr_t cptr)
 {
@@ -1367,20 +1375,28 @@ void sggc_look_at (sggc_cptr_t cptr)
     { if (old_to_new_check < 0)
       { return;
       }
-      if (collect_level == 0)
-      { if (!set_chain_contains (SET_OLD_GEN2_UNCOL, cptr))
+#ifdef SGGC_KIND_UNCOLLECTED
+      else if (old_to_new_check == 3) /* reference from an uncollected object */
+      { if (!sggc_is_constant(cptr)   /* not to a constant or uncollected obj */
+              && !sggc_kind_uncollected[SGGC_KIND(cptr)])
+        { old_to_new_check = 0;
+        }
+      }
+#endif
+      else if (collect_level == 0) /* ref won't be from generation 1 */
+      { if (!set_chain_contains (SET_OLD_GEN2_UNCOL, cptr)) /* to gen 0 or 1 */
         { old_to_new_check = 0;
         }
       }
       else if (collect_level == 1 && old_to_new_check == 2)
-      { if (!set_chain_contains (SET_OLD_GEN2_UNCOL, cptr) 
-              && !set_chain_contains (SET_OLD_GEN1, cptr))
+      { if (!set_chain_contains (SET_OLD_GEN2_UNCOL, cptr) /* reference is to */
+              && !set_chain_contains (SET_OLD_GEN1, cptr)) /* generation 0 */
         { old_to_new_check = 0;
         }
       }
       else /* collect_level==2 || collect_level == 1 && old_to_new_check == 1 */
-      { if (!set_chain_contains (SET_OLD_GEN2_UNCOL, cptr) 
-              && !set_chain_contains (SET_OLD_GEN1, cptr))
+      { if (!set_chain_contains (SET_OLD_GEN2_UNCOL, cptr) /* reference is to */
+              && !set_chain_contains (SET_OLD_GEN1, cptr)) /* generation 0 */
         { old_to_new_check = -1;
         }
         return;
