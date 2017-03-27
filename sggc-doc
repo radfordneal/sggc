@@ -142,10 +142,7 @@ use during a garbage collection:
                         This procedure may call sggc_not_marked to see
                         which objects are known to be in use, and may
                         call sggc_look_at (or sggc_mark) to mark 
-                        additional objects as in use.  It may also do
-                        special operations on objects that are being
-                        freed by using the sggc_first_free_of_kind and
-                        sggc_next_free_of_kind procedures.
+                        additional objects as in use.
 
 The following may be defined to specify the maximum number of segments
 allowed at compile time, so that they will be statically rather than
