@@ -110,7 +110,7 @@ struct set
    If SET_STATIC is defined as non-zero, all API procedures are
    static.  This makes sense only if this .c file is included at
    compile time in any module using it, rather than being compiled
-   compiled separately and then linked. */
+   separately and then linked. */
 
 #if SET_STATIC
 #  define SET_PROC_CLASS static

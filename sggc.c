@@ -1447,7 +1447,7 @@ void sggc_mark (sggc_cptr_t cptr)
 
 sggc_cptr_t sggc_first_uncollected_of_kind (sggc_kind_t kind)
 {
-#ifdef SGGC_UNCOLLECTED_KIND
+#ifdef SGGC_KIND_UNCOLLECTED
   return set_first (&uncollected[kind], 0);
 #else
   return SGGC_NO_OBJECT;
