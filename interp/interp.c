@@ -57,8 +57,8 @@
                                 evaluates e1, e2, ...; returns the last of them
 
      (? w a b)       Conditional expression, evaluates w, then returns result of
-                       evaluating a if w is a list (not () or a symbol), and
-                       otherwise returns result of evaluing b (default ())
+                     evaluating a if w is a list (not () or a symbol), and
+                     otherwise returns result of evaluing b (default ())
 
      (! w e1 e2 ...) Looping expression, evaluates w, then if it is a list
                      (not () or a symbol), e1, e2, ..., then does it again,
@@ -69,11 +69,11 @@
      (` a)          Evaluates a, then returns the result of evaluating that
 
      (@ v e)        Assignment expression, evaluates e, then changes the most
-                       recent binding of symbol v to be the value of e; value
-                       returned is v (unevaluated)
+                    recent binding of symbol v to be the value of e; value
+                    returned is v (unevaluated)
 
      (= a b)        Returns '(=) if the results of evaluating a and b are equal,
-                       () if not
+                    () if not
 
      (. a)          If a evaluates to a list, returns its first element
 
@@ -113,6 +113,9 @@ struct type_binding { ptr_t value, next; };  /* Binding, symbol is in aux1 */
 #define TYPE_LIST 1
 #define TYPE_SYMBOL 2
 #define TYPE_BINDING 3
+
+#define KIND_GLOBAL_BINDING 4  /* Used if UNCOLLECTED_NIL_SYMS_GLOBALS defined*/
+
 
 #define LIST(v) ((struct type_list *) SGGC_DATA(v))
 #define SYMBOL(v) ((struct type_symbol *) SGGC_DATA(v))
@@ -174,15 +177,19 @@ void sggc_find_root_ptrs (void)
 { 
 #ifndef UNCOLLECTED_NIL
 #ifndef UNCOLLECTED_NIL_SYMS
+#ifndef UNCOLLECTED_NIL_SYMS_GLOBALS
   sggc_mark (nil);  
+#endif
 #endif
 #endif
 
 #ifndef UNCOLLECTED_NIL_SYMS
+#ifndef UNCOLLECTED_NIL_SYMS_GLOBALS
   int i;
   for (i = 0; symbol_chars[i]; i++)
   { sggc_mark (symbols[i]);
   }
+#endif
 #endif
 
   struct ptr_var *p;
@@ -190,7 +197,9 @@ void sggc_find_root_ptrs (void)
   { sggc_look_at (*p->var);
   }
 
+#ifndef UNCOLLECTED_NIL_SYMS_GLOBALS
   sggc_look_at (global_bindings);  
+#endif
 }
 
 void sggc_find_object_ptrs (sggc_cptr_t cptr)
@@ -206,14 +215,14 @@ void sggc_find_object_ptrs (sggc_cptr_t cptr)
   }
 }
 
-
 /* ALLOCATE FUNCTION FOR THIS APPLICATION.  Calls the garbage collector
    when necessary, or otherwise every 100th allocation, with every 500th
    being level 1, and every 2000th being level 2. */
 
+static unsigned alloc_count = 1;  /* 1 for allocation of nil at init */
+
 static ptr_t alloc (sggc_type_t type)
 {
-  static unsigned alloc_count = 1;  /* 1 for allocation of nil at init */
   sggc_cptr_t a;
 
   /* Do optional garbage collections according to the scheme.  Do this first,
@@ -641,9 +650,15 @@ int main (void)
   for (i = 0; symbol_chars[i]; i++)
   { symbols[i] = alloc (TYPE_SYMBOL);
     SYMBOL(symbols[i]) -> symbol = symbol_chars[i];
+#ifdef UNCOLLECTED_NIL_SYM_GLOBALS
+    n = sggc_alloc_small_kind (KIND_GLOBAL_BINDING);
+    alloc_count += 1;
+#else
     n = alloc (TYPE_BINDING);
-    BOUND_SYMBOL(n) = symbol_chars[i];
-    BINDING(n) -> next = global_bindings;
+#endif
+    BOUND_SYMBOL(n) = symbol_chars[i];     /* no old-to-new check needed:   */
+    BINDING(n) -> next = global_bindings;  /*   either n is new, or n is    */
+    BINDING(n) -> value = nil;             /*   uncollected, and so is "to" */
     global_bindings = n;
   }
 

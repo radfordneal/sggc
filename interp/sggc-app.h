@@ -25,16 +25,31 @@
 typedef unsigned sggc_length_t; /* Type for holding an object length */
 typedef unsigned sggc_nchunks_t;/* Type for how many chunks are in a segment */
 
-#define SGGC_N_KINDS 4          /* Number of kinds of segments */
 
+/* Kinds correspond to types unless UNCOLLECTED_NIL_SYMS_GLOBALS defined,
+   in which case there is one more kind for uncollected global bindings. */
+
+#ifdef UNCOLLECTED_NIL_SYMS_GLOBALS
+#define SGGC_N_KINDS 5          /* Number of kinds of segments */
+#define SGGC_KIND_CHUNKS { 0, 1, 1, 1, 1 }
+#define SGGC_KIND_TYPES { 0, 1, 2, 3, 3 }
+#else
+#define SGGC_N_KINDS 4          /* Number of kinds of segments */
 #define SGGC_KIND_CHUNKS { 0, 1, 1, 1 }
 #define SGGC_KIND_TYPES { 0, 1, 2, 3 }
+#endif
+
+
+/* Set up uncollected flags if one of the relevant symbols is defined. */
 
 #ifdef UNCOLLECTED_NIL
 #define SGGC_KIND_UNCOLLECTED { 1, 0, 0, 0 } /* Make () an uncollected object */
 #elif UNCOLLECTED_NIL_SYMS
 #define SGGC_KIND_UNCOLLECTED { 1, 0, 1, 0 } /* () and symbols are uncollected*/
+#elif UNCOLLECTED_NIL_SYMS_GLOBALS
+#define SGGC_KIND_UNCOLLECTED { 1, 0, 1, 0, 1 } /* ...and global bindings too */
 #endif
+
 
 #define SGGC_AUX1_SIZE 1        /* Size of auxiliary information 1 */
 #define SGGC_AUX1_BLOCK_SIZE 4  /* Number of blocks in aux1 allocations */

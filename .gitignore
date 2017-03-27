@@ -20,5 +20,7 @@ interp/interp-memset-quickly
 interp/interp-seg-direct
 interp/interp-seg-direct-no-max
 interp/interp-uncollected-nil
+interp/interp-uncollected-nil-syms
+interp/interp-uncollected-nil-syms-globals
 interp/o-e-i
 interp/o-e-r
