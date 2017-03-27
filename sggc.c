@@ -681,13 +681,12 @@ static sggc_cptr_t sggc_alloc_kind_type_length (sggc_kind_t kind,
       if (!sggc_kind_uncollected[kind])
 #endif
       { set_assign_segment_bits (&free_or_new[kind], v, kind_full[kind]);
-      }
-
-      if (SGGC_DEBUG)
-      { printf(
-          "sggc_alloc: new segment has bits %016llx, %d in free_or_new[%d]\n", 
-          (unsigned long long) set_chain_segment_bits (SET_UNUSED_FREE_NEW, v),
-          set_n_elements(&free_or_new[kind]), kind);
+        if (SGGC_DEBUG)
+        { printf(
+           "sggc_alloc: new segment has bits %016llx, %d in free_or_new[%d]\n", 
+           (unsigned long long) set_chain_segment_bits (SET_UNUSED_FREE_NEW, v),
+           set_n_elements(&free_or_new[kind]), kind);
+        }
       }
 
       sggc_next_free_bits[kind] = kind_full[kind] >> sggc_kind_chunks[kind];

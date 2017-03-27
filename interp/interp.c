@@ -678,7 +678,7 @@ int main (void)
 static unsigned count_uncol (sggc_kind_t kind)
 {
   unsigned cnt = 0;
-  sggc_cptr_t u = sggc_first_uncollected_of_kind(TYPE_NIL);
+  sggc_cptr_t u = sggc_first_uncollected_of_kind(kind);
 
   while (u != SGGC_NO_OBJECT)
   { cnt += 1;
