@@ -170,7 +170,7 @@ char *sggc_aux1_read_only (sggc_kind_t kind)
   static const char spaces[SGGC_CHUNKS_IN_SMALL_SEGMENT+1] =
     "                                                                ";
 
-  return kind == TYPE_BINDING ? NULL : (char *) spaces;
+  return kind >= TYPE_BINDING ? NULL : (char *) spaces;
 }
 
 void sggc_find_root_ptrs (void)
@@ -650,7 +650,7 @@ int main (void)
   for (i = 0; symbol_chars[i]; i++)
   { symbols[i] = alloc (TYPE_SYMBOL);
     SYMBOL(symbols[i]) -> symbol = symbol_chars[i];
-#ifdef UNCOLLECTED_NIL_SYM_GLOBALS
+#ifdef UNCOLLECTED_NIL_SYMS_GLOBALS
     n = sggc_alloc_small_kind (KIND_GLOBAL_BINDING);
     alloc_count += 1;
 #else
