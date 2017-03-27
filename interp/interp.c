@@ -175,31 +175,25 @@ char *sggc_aux1_read_only (sggc_kind_t kind)
 
 void sggc_find_root_ptrs (void)
 { 
-#ifndef UNCOLLECTED_NIL
-#ifndef UNCOLLECTED_NIL_SYMS
-#ifndef UNCOLLECTED_NIL_SYMS_GLOBALS
-  sggc_mark (nil);  
-#endif
-#endif
-#endif
+# if UNCOLLECT_LEVEL < 1
+    sggc_mark (nil);  
+# endif
 
-#ifndef UNCOLLECTED_NIL_SYMS
-#ifndef UNCOLLECTED_NIL_SYMS_GLOBALS
-  int i;
-  for (i = 0; symbol_chars[i]; i++)
-  { sggc_mark (symbols[i]);
-  }
-#endif
-#endif
+# if UNCOLLECT_LEVEL < 2
+    int i;
+    for (i = 0; symbol_chars[i]; i++)
+    { sggc_mark (symbols[i]);
+    }
+# endif
+
+# if UNCOLLECT_LEVEL < 3
+    sggc_look_at (global_bindings);  
+# endif
 
   struct ptr_var *p;
   for (p = first_ptr_var; p != NULL; p = p->next)
   { sggc_look_at (*p->var);
   }
-
-#ifndef UNCOLLECTED_NIL_SYMS_GLOBALS
-  sggc_look_at (global_bindings);  
-#endif
 }
 
 void sggc_find_object_ptrs (sggc_cptr_t cptr)
@@ -320,7 +314,9 @@ static void print (ptr_t a)
 }
 
 
-/* READ A CHARACTER.  Skips white space and comments.  Exits on EOF. */
+/* READ A CHARACTER.  Skips white space and comments.  Calls end_prog on EOF. */
+
+static void end_prog(void);
 
 static char read_char (void)
 {
@@ -329,7 +325,7 @@ static char read_char (void)
   for (;;)
   {
     if (scanf(" %c",&c) != 1) 
-    { exit(0);
+    { end_prog();
     }
 
     if (c != '#')
@@ -650,12 +646,12 @@ int main (void)
   for (i = 0; symbol_chars[i]; i++)
   { symbols[i] = alloc (TYPE_SYMBOL);
     SYMBOL(symbols[i]) -> symbol = symbol_chars[i];
-#ifdef UNCOLLECTED_NIL_SYMS_GLOBALS
-    n = sggc_alloc_small_kind (KIND_GLOBAL_BINDING);
-    alloc_count += 1;
-#else
-    n = alloc (TYPE_BINDING);
-#endif
+#   if UNCOLLECT_LEVEL >= 3
+      n = sggc_alloc_small_kind (KIND_GLOBAL_BINDING);
+      alloc_count += 1;
+#   else
+      n = alloc (TYPE_BINDING);
+#   endif
     BOUND_SYMBOL(n) = symbol_chars[i];     /* no old-to-new check needed:   */
     BINDING(n) -> next = global_bindings;  /*   either n is new, or n is    */
     BINDING(n) -> value = nil;             /*   uncollected, and so is "to" */
@@ -674,6 +670,43 @@ int main (void)
   }
 
   return 0;
+}
+
+
+/* COUNT OBJECTS OF AN UNCOLLECTED KIND. */
+
+static unsigned count_uncol (sggc_kind_t kind)
+{
+  unsigned cnt = 0;
+  sggc_cptr_t u = sggc_first_uncollected_of_kind(TYPE_NIL);
+
+  while (u != SGGC_NO_OBJECT)
+  { cnt += 1;
+    u = sggc_next_uncollected_of_kind(u);
+  }
+
+  return cnt;
+}
+
+
+/* TERMINATE PROGRAM.  Checks that the numbers and types of uncollected 
+   objects (if any) are as they ought to be, then exits. */
+
+static void end_prog (void)
+{
+# if UNCOLLECT_LEVEL >= 1
+    if (count_uncol(TYPE_NIL) != 1) abort();
+# endif
+
+# if UNCOLLECT_LEVEL >= 2
+    if (count_uncol(TYPE_SYMBOL) + 1 != sizeof symbol_chars) abort();
+# endif
+
+# if UNCOLLECT_LEVEL >= 3
+    if (count_uncol(KIND_GLOBAL_BINDING) + 1 != sizeof symbol_chars) abort();
+# endif
+
+  exit(0);
 }
 
 
