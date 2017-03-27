@@ -1104,7 +1104,11 @@ void sggc_collect_old_to_new (void)
   { int remove = 0;
     if (SGGC_DEBUG) 
     { printf ("sggc_collect: old->new for %x (gen%d)\n", (unsigned)v,
-        set_contains(&old_gen2,v) ? 2 : set_contains(&old_gen1,v) ? 1 : 0);
+        set_chain_contains(SET_OLD_GEN2_UNCOL,v) ? 2 
+#ifdef SGGC_KIND_UNCOLLECTED
+          + sggc_kind_uncollected[SGGC_KIND(v)]
+#endif
+        : set_contains(&old_gen1,v) ? 1 : 0);
     }
     if (set_chain_contains (SET_OLD_GEN2_UNCOL, v)) /* v is oldgen2 or uncol */
     { old_to_new_check = 2;
