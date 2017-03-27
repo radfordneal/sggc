@@ -932,6 +932,7 @@ sggc_cptr_t sggc_constant (sggc_type_t type, sggc_kind_t kind, int n_objects,
 static void collect_debug (void)
 { 
   int k;
+
   printf(
   "  unused: %d, old_gen1: %d, old_gen2: %d, old_to_new: %d, to_look_at: %d, const: %d\n",
        set_n_elements(&unused), 
@@ -940,11 +941,21 @@ static void collect_debug (void)
        set_n_elements(&old_to_new),
        set_n_elements(&to_look_at),
        set_n_elements(&constants));
+
+#ifdef SGGC_KIND_UNCOLLECTED
+  printf("  uncollected");
+  for (k = 0; k < SGGC_N_KINDS; k++) 
+  { printf(" [%d]: %3d ",k,set_n_elements(&uncollected[k]));
+  }
+  printf("\n");
+#endif
+
   printf("  free_or_new");
   for (k = 0; k < SGGC_N_KINDS; k++) 
   { printf(" [%d]: %3d ",k,set_n_elements(&free_or_new[k]));
   }
   printf("\n");
+
   printf("next_free_val");
   for (k = 0; k < SGGC_N_KINDS; k++) 
   { if (sggc_next_free_val[k] == SGGC_NO_OBJECT)
@@ -956,11 +967,13 @@ static void collect_debug (void)
     }
   }
   printf("\n");
+
   printf("             ");
   for (k = 0; k < SGGC_N_KINDS; k++) 
   { printf(" %08lx ",(unsigned long)(sggc_next_free_bits[k]>>32));
   }
   printf("\n");
+
   printf("             ");
   for (k = 0; k < SGGC_N_KINDS; k++) 
   { printf(" %08lx ",(unsigned long)(sggc_next_free_bits[k]&0xffffffff));
