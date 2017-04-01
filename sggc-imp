@@ -268,13 +268,17 @@ as follows:
                         segments, called 'unused'.
 
   SET_OLD_GEN1          Used for sets of objects in old generation 1,
-                        separated by kind, called 'old_gen1[k]'.
+                        separated by kind, called 'old_gen1[k]', plus
+                        'old_gen1_big' (= 'old_gen1[SGGC_N_KINDS]') 
+                        for the big kinds.
 
-  SET_OLD_GEN2_UNCOL    Used for the sets of objects in old generation
-                        2, separated by kind, called 'old_gen2[k]',
-                        for the sets of uncollected objects, by kind,
-                        called 'uncollected[k]', and for the set of
-                        constant objects, called 'constants'.
+  SET_OLD_GEN2_UNCOL    Used for sets of objects in old generation 2,
+                        separated by kind, called 'old_gen2[k]', plus
+                        'old_gen2_big' (= 'old_gen2[SGGC_N_KINDS]') 
+                        for the big kinds, as well as for the sets of
+                        uncollected objects, by kind, called
+                        'uncollected[k]', and for the set of constant
+                        objects, called 'constants'.
 
   SET_OLD_TO_NEW        Used for the set of objects possibly having 
                         old-to-new references, called 'old_to_new'.
@@ -287,9 +291,17 @@ Separating 'old_gen1' and 'old_gen2' into different sets for each kind
 is necessary only for identification of newly-freed objects of a given
 kind, in order to implement sggc_call_for_newly_freed_object.  There
 is little overhead to this separation, however, and it may even
-produce a slight efficiency advantage.  The 'uncollected[k]' sets are
-needed only to allow implementation of sggc_first_uncollected_of_kind
-and sggc_next_uncollected_of_kind.
+produce a slight efficiency advantage.  Note that big kinds must be
+put in a separate, single, set since big segments can change their
+kind, and would not be removed from a per-kind old_gen set in a way
+that would allow them to change to another set sharing the same chain
+(something possible only for removal with set_first).  This is OK,
+because the 'free_or_new[k]' set for a big kind k contains all and
+only the newly-free big objects of kind k (with no objects freed in
+earlier collections).
+
+The 'uncollected[k]' sets are needed only to allow implementation of
+sggc_first_uncollected_of_kind and sggc_next_uncollected_of_kind.
 
 When a garbage collection is not in progress, the 'to_look_at' set is
 empty.  During a garbage collection, as objects are marked as in use,
