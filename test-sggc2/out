@@ -1,31 +1,31 @@
 STARTING TEST: segs = 5, iters = 50
 
 ABOUT TO CALL sggc_init
-test_calloc: 1 in use after:: 0x7fa800c031c0
-test_calloc: 2 in use after:: 0x7fa800c031f0
-test_calloc: 3 in use after:: 0x7fa800c03220
+test_calloc: 1 in use after:: 0x7ff83fc02760
+test_calloc: 2 in use after:: 0x7ff83fc02790
+test_calloc: 3 in use after:: 0x7ff83fc027c0
 DONE sggc_init
 ALLOCATING nil
 sggc_alloc: type 0, length 0, kind 0
-test_calloc: 4 in use after:: 0x7fa800c03230
-sggc_alloc: called alloc_zeroed for data (big 0, 1 chunks):: 0x7fa800c03230
-test_calloc: 5 in use after:: 0x7fa800c03240
+test_calloc: 4 in use after:: 0x7ff83fc027d0
+sggc_alloc: called alloc_zeroed for data (big 0, 1 chunks):: 0x7ff83fc027d0
+test_calloc: 5 in use after:: 0x7ff83fc027e0
 sggc_alloc: created 0 in new segment
 ALLOC RETURNING 0
 
 ITERATION 1
 ALLOCATING a, leaving contents as nil
 sggc_alloc: type 1, length 2, kind 1
-test_calloc: 6 in use after:: 0x7fa801000600
-test_calloc: 7 in use after:: 0x7fa800c03280
+test_calloc: 6 in use after:: 0x7ff840002000
+test_calloc: 7 in use after:: 0x7ff83fc02820
 sggc_alloc: created 40 in new segment
 sggc_alloc: new segment has bits ffffffffffffffff, 64 in free_or_new[1]
 sggc_alloc: next_free_val[1]=41, next_free_bits[1]=7fffffffffffffff
 ALLOC RETURNING 40
 ALLOCATING b, setting contents to 100*i .. 100*i+9
 sggc_alloc: type 2, length 10, kind 5
-test_calloc: 8 in use after:: 0x7fa801000a00
-test_calloc: 9 in use after:: 0x7fa800c032c0
+test_calloc: 8 in use after:: 0x7ff840002400
+test_calloc: 9 in use after:: 0x7ff83fc02860
 sggc_alloc: created 80 in new segment
 sggc_alloc: new segment has bits 1249249249249249, 21 in free_or_new[5]
 sggc_alloc: next_free_val[5]=83, next_free_bits[5]=0249249249249249
@@ -37,8 +37,8 @@ sggc_alloc: next_free_val[1]=42, next_free_bits[1]=3fffffffffffffff
 ALLOC RETURNING 41
 ALLOCATING d, setting contents to 7777
 sggc_alloc: type 2, length 1, kind 3
-test_calloc: 10 in use after:: 0x7fa801003600
-test_calloc: 11 in use after:: 0x7fa800c03300
+test_calloc: 10 in use after:: 0x7ff840002800
+test_calloc: 11 in use after:: 0x7ff83fc028a0
 sggc_alloc: created c0 in new segment
 sggc_alloc: new segment has bits ffffffffffffffff, 64 in free_or_new[3]
 sggc_alloc: next_free_val[3]=c1, next_free_bits[3]=7fffffffffffffff
@@ -3152,7 +3152,7 @@ SGGC_INFO:  gen0: 4, gen1: 9, gen2: 4, big chunks: 0
 
 FINAL YOUNGEST:  nil 0, a 1, b 1, c 1, d 1, e 0
 
-COLLECTING EVERYTHING
+COLLECTING EVERYTHING, EXCEPT nil
 
 sggc_collect: level 2
   unused: 0, old_to_new: 0, to_look_at: 0, constants: 0

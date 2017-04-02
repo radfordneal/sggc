@@ -183,7 +183,7 @@ int main (int argc, char **argv)
   printf("\nFINAL LENGTHS:  nil %u, a %u, b %u, c %u, d %u, e %u\n",
          LENGTH(nil), LENGTH(a), LENGTH(b), LENGTH(c), LENGTH(d), LENGTH(e));
 
-  printf("\nCOLLECTING EVERYTHING\n\n");
+  printf("\nCOLLECTING EVERYTHING, EXCEPT nil\n\n");
   a = b = c = d = e = nil;
   sggc_collect(2);
 

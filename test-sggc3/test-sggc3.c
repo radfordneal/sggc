@@ -162,7 +162,7 @@ int main (int argc, char **argv)
 
 # include "test-common.h"
 
-  printf("\nCOLLECTING EVERYTHING\n\n");
+  printf("\nCOLLECTING EVERYTHING, EXCEPT nil\n\n");
   a = b = c = d = e = nil;
   sggc_collect(2);
 

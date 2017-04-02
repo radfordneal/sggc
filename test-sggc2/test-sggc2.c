@@ -154,6 +154,12 @@ static ptr_t alloc (sggc_type_t type, sggc_length_t length)
 
 /* MAIN TEST PROGRAM. */
 
+static int freed (sggc_cptr_t v)
+{ printf("CALLED_FOR_NEWLY_FREE: Object %x of kind %d being freed at end\n",
+          (unsigned)v, SGGC_KIND(v));
+  return 0;
+}
+
 int main (int argc, char **argv)
 { 
   int segs = argc<2 ? 5 /* min for no failure */ : atoi(argv[1]);
@@ -161,7 +167,12 @@ int main (int argc, char **argv)
 
 # include "test-common.h"
 
-  printf("\nCOLLECTING EVERYTHING\n\n");
+  sggc_kind_t k;
+  for (k = 2; k < SGGC_N_KINDS; k++)
+  { sggc_call_for_newly_freed_object (2, freed);
+  }
+
+  printf("\nCOLLECTING EVERYTHING, EXCEPT nil\n\n");
   a = b = c = d = e = nil;
   sggc_collect(2);
 
