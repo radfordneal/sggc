@@ -1225,8 +1225,8 @@ void sggc_collect_look_at (void)
 
   /* Remove small objects still in the free_or_new set from the old
      generations that were collected.  Also remove them from the
-     old-to-new set.  For big objects, put them in 'unused', and free
-     their data storage (but not their auxiliary information). */
+     old-to-new set.  Also calls any functions set up for small kinds
+     with sggc_call_for_newly_freed_object. */
 
 void sggc_collect_remove_free_small (void)
 {
@@ -1237,9 +1237,65 @@ void sggc_collect_remove_free_small (void)
   { 
     if (sggc_kind_chunks[k] != 0)  /* kind is for small objects */
     {
-      /* Scan the old generation sets, not the free sets, since this
-         is likely faster, if lots of objects were allocated but not
-         used for long, and hence are in the free sets. */
+      int (*call)(sggc_cptr_t) = call_for_newly_freed[k];
+
+      /* If a function to call for newly-freed objects has been set up
+         for this kind (with sggc_call_for_newly_freed_object), we
+         need to do a preliminary scan of objects in free_or_new[k] up
+         to the point where we reach objects that were freed before
+         this collection and weren't allocated since (which may now be
+         mixed in with objects that were moved from old generations,
+         if collect_level is greater than zero).  If one of these
+         newly-freed objects is in an old generation, we remove it now
+         (but note that this doesn't get all free objects, so we still
+         need the scan done below). */
+
+      if (call)
+      {
+        v = set_first (&free_or_new[k], 0);
+
+        while (v != sggc_next_free_val[k])
+        { 
+          sggc_cptr_t ov = v;
+          v = set_chain_next (SET_UNUSED_FREE_NEW, v);
+
+          /* Call the function to call for a newly-freed object of this
+             kind, if there is one.  If it returns a non-zero value, don't
+             free this object after all. */
+  
+          if ((*call)(ov))
+          { if (SGGC_DEBUG) 
+            { printf ("sggc_collect: not freeing %x after all\n", (unsigned)ov);
+            }
+            (void) set_remove (&free_or_new[k], ov);
+            put_in_right_old_gen(ov);
+            continue;
+          }
+  
+          /* Remove the object from any old_gen or old_to_new, if it's there.
+             (Otherwise, we'd call the function again below.) */
+  
+          if (collect_level > 0)
+          { if (set_remove (&old_gen1_big, ov))
+            { if (SGGC_DEBUG)
+              { printf("sggc_collect: %x in old_gen1 now free\n",(unsigned)ov);
+              }
+              (void) set_remove (&old_to_new, v);
+            }
+            else if (collect_level > 1 && set_remove (&old_gen2_big, ov))
+            { if (SGGC_DEBUG)
+              { printf("sggc_collect: %x in old_gen2 now free\n",(unsigned)ov);
+              }
+              (void) set_remove (&old_to_new, ov);
+            }
+          }
+        }
+      }
+
+      /* Scan the old generation sets, not the free sets (unless
+         necessary above), since this is likely faster, if lots of
+         objects were allocated but not used for long, and hence are
+         in the free sets. */
 
       if (!SGGC_SEGMENT_AT_A_TIME || call_for_newly_freed[k])
       { 
@@ -1248,28 +1304,50 @@ void sggc_collect_remove_free_small (void)
         if (collect_level == 2)
         { v = set_first (&old_gen2[k], 0); 
           while (v != SET_NO_VALUE)
-          { int remove = set_chain_contains (SET_UNUSED_FREE_NEW, v);
-            if (SGGC_DEBUG && remove) 
-            { printf("sggc_collect: %x in old_gen2 now free\n",(unsigned)v);
+          { sggc_cptr_t ov = v;
+            v = set_chain_next (SET_OLD_GEN2_UNCOL, v);
+            if (set_chain_contains (SET_UNUSED_FREE_NEW, ov))
+            { if (call && (*call)(ov))
+              { if (SGGC_DEBUG) 
+                { printf ("sggc_collect: not freeing %x after all\n",
+                           (unsigned) ov);
+                }
+                (void) set_remove (&free_or_new[k], ov);
+                put_in_right_old_gen(ov);
+                continue;
+              }
+              if (SGGC_DEBUG)
+              { printf("sggc_collect: %x in old_gen2 now free\n",
+                        (unsigned) ov);
+              }
+              set_remove (&old_to_new, ov);
+              set_remove (&old_gen2[k], ov);
             }
-            if (remove)
-            { set_remove (&old_to_new, v);
-            }
-            v = set_next (&old_gen2[k], v, remove);
           }
         }
     
         if (collect_level >= 1)
         { v = set_first (&old_gen1[k], 0); 
           while (v != SET_NO_VALUE)
-          { int remove = set_chain_contains (SET_UNUSED_FREE_NEW, v);
-            if (SGGC_DEBUG && remove) 
-            { printf("sggc_collect: %x in old_gen1 now free\n",(unsigned)v);
+          { sggc_cptr_t ov = v;
+            v = set_chain_next (SET_OLD_GEN1, v);
+            if (set_chain_contains (SET_UNUSED_FREE_NEW, ov))
+            { if (call && (*call)(ov))
+              { if (SGGC_DEBUG) 
+                { printf ("sggc_collect: not freeing %x after all\n",
+                           (unsigned) ov);
+                }
+                (void) set_remove (&free_or_new[k], ov);
+                put_in_right_old_gen(ov);
+                continue;
+              }
+              if (SGGC_DEBUG)
+              { printf("sggc_collect: %x in old_gen1 now free\n",
+                        (unsigned) ov);
+              }
+              set_remove (&old_to_new, ov);
+              set_remove (&old_gen1[k], ov);
             }
-            if (remove)
-            { set_remove (&old_to_new, v);
-            }
-            v = set_next (&old_gen1[k], v, remove);
           }
         }
       }
@@ -1332,7 +1410,9 @@ void sggc_collect_remove_free_big (void)
     { 
       /* Scan the free_or_new[k] set (which contains only newly-free
          objects), which we have to look at to free their data even if
-         they are not in old_gen1_big or old_gen2_big.  */
+         they are not in old_gen1_big or old_gen2_big.  Note that since
+         big objects are stored one-per-segment, there is nothing to be
+         gained by trying to do this a segment at a time. */
 
       while ((v = set_first (&free_or_new[k], 1)) != SGGC_NO_OBJECT)
       { 
