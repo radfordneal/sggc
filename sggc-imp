@@ -269,16 +269,14 @@ as follows:
 
   SET_OLD_GEN1          Used for sets of objects in old generation 1,
                         separated by kind, called 'old_gen1[k]', plus
-                        'old_gen1_big' (= 'old_gen1[SGGC_N_KINDS]') 
-                        for the big kinds.
+                        'old_gen1_big' for the big kinds.
 
   SET_OLD_GEN2_UNCOL    Used for sets of objects in old generation 2,
                         separated by kind, called 'old_gen2[k]', plus
-                        'old_gen2_big' (= 'old_gen2[SGGC_N_KINDS]') 
-                        for the big kinds, as well as for the sets of
-                        uncollected objects, by kind, called
-                        'uncollected[k]', and for the set of constant
-                        objects, called 'constants'.
+                        'old_gen2_big' for the big kinds, as well as
+                        for the sets of uncollected objects, by kind,
+                        called 'uncollected[k]', and for the set of
+                        constant objects, called 'constants'.
 
   SET_OLD_TO_NEW        Used for the set of objects possibly having 
                         old-to-new references, called 'old_to_new'.
