@@ -1276,13 +1276,13 @@ void sggc_collect_remove_free_small (void)
              (Otherwise, we'd call the function again below.) */
   
           if (collect_level > 0)
-          { if (set_remove (&old_gen1_big, ov))
+          { if (set_remove (&old_gen1[k], ov))
             { if (SGGC_DEBUG)
               { printf("sggc_collect: %x in old_gen1 now free\n",(unsigned)ov);
               }
               (void) set_remove (&old_to_new, v);
             }
-            else if (collect_level > 1 && set_remove (&old_gen2_big, ov))
+            else if (collect_level > 1 && set_remove (&old_gen2[k], ov))
             { if (SGGC_DEBUG)
               { printf("sggc_collect: %x in old_gen2 now free\n",(unsigned)ov);
               }
