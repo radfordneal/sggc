@@ -624,11 +624,10 @@ macros) below, which have (if functions) prototypes as shown:
                                          int (*fun) (sggc_cptr_t))
 
     This procedure tells the garbage collector that at the end of
-    every garbage collection (after sggc_after_marking is called) the
-    function 'fun' should be called for every newly-free object of the
-    specified kind (in some arbitrary order).  Calling this procedure
-    with 0 for 'fun' cancels any previously set up function for the
-    given kind.
+    every garbage collection (after any call of sggc_after_marking has
+    finished) the function 'fun' should be called for every newly-free
+    object of the specified kind (in some arbitrary order).  This will
+    be done before the data area for the object has been freed.
 
     The value returned by 'fun' should be 0 if the object should
     indeed be freed, or 1 if the object should not be freed after all.
@@ -640,6 +639,9 @@ macros) below, which have (if functions) prototypes as shown:
     'fun' was called.  Note also that 'fun' is not allowed to call
     sggc_look_at, sggc_mark, sggc_collect, or sggc_alloc or related
     functions.
+
+    If 'fun' is 0, any previous set up of a function to call for this
+    kind is cancelled.
 
 
 FUNCTIONS THE APPLICATION MUST PROVIDE TO SGGC

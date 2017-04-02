@@ -169,6 +169,11 @@ const int sggc_kind_uncollected[SGGC_N_KINDS] = SGGC_KIND_UNCOLLECTED;
 #endif
 
 
+/* FUNCTIONS TO BE CALLED WHEN OBJECTS OF SPECIFIED KINDS ARE FREED. */
+
+static int (*call_for_newly_freed[SGGC_N_KINDS])(sggc_cptr_t);
+
+
 /* RECORDS OF NEXT FREE OBJECTS FOR EACH KIND.  These are used only
    for small kinds.  (Big kinds use 'unused'.)
 
@@ -1218,12 +1223,12 @@ void sggc_collect_look_at (void)
   } while (set_first (&to_look_at, 0) != SGGC_NO_OBJECT);
 }
 
-  /* Remove objects still in the free_or_new set from the old generations 
-     that were collected.  Also remove them from the old-to-new set.
-     For big objects, put them in 'unused', and free their data storage
-     (but not their auxiliary information). */
+  /* Remove small objects still in the free_or_new set from the old
+     generations that were collected.  Also remove them from the
+     old-to-new set.  For big objects, put them in 'unused', and free
+     their data storage (but not their auxiliary information). */
 
-void sggc_collect_remove_free (void)
+void sggc_collect_remove_free_small (void)
 {
   sggc_kind_t k;
   sggc_cptr_t v;
@@ -1234,13 +1239,12 @@ void sggc_collect_remove_free (void)
     {
       /* Scan the old generation sets, not the free sets, since this
          is likely faster, if lots of objects were allocated but not
-         used for long, and hence are in the free sets.
+         used for long, and hence are in the free sets. */
 
-         Two versions are maintained, an old one doing it one object
-         at a time, and a new one that does it a segment at a time. */
-
-      if (!SGGC_SEGMENT_AT_A_TIME) /* do it the old way, one object at a time */
+      if (!SGGC_SEGMENT_AT_A_TIME || call_for_newly_freed[k])
       { 
+        /* Do it one object at a time. */
+
         if (collect_level == 2)
         { v = set_first (&old_gen2[k], 0); 
           while (v != SET_NO_VALUE)
@@ -1269,8 +1273,10 @@ void sggc_collect_remove_free (void)
           }
         }
       }
-      else /* do it a segment at a time */
+      else 
       { 
+        /* Do it a segment at a time. */
+
         if (collect_level == 2)
         { v = set_first(&old_gen2[k], 0); 
           while (v != SET_NO_VALUE)
@@ -1306,16 +1312,44 @@ void sggc_collect_remove_free (void)
         }
       }
     }
+  }
+}
 
-    else  /* kind is for big objects */
+  /* Remove big objects still in the free_or_new set from the old
+     generations that were collected.  Also remove them from the
+     old-to-new set, put them in 'unused', and free their data storage
+     (but not their auxiliary information).  Also calls any functions
+     set up for big kinds with sggc_call_for_newly_freed_object. */
 
+void sggc_collect_remove_free_big (void)
+{
+  sggc_kind_t k;
+  sggc_cptr_t v;
+
+  for (k = 0; k < SGGC_N_KINDS; k++)
+  { 
+    if (sggc_kind_chunks[k] == 0)  /* kind is for big objects */
     { 
       /* Scan the free_or_new[k] set (which contains only newly-free
          objects), which we have to look at to free their data even if
-         they are not in old_gen1_big or old_gen2_big. */
+         they are not in old_gen1_big or old_gen2_big.  */
 
       while ((v = set_first (&free_or_new[k], 1)) != SGGC_NO_OBJECT)
       { 
+        /* Call the function to call for a newly-freed object of this
+           kind, if there is one.  If it returns a non-zero value, don't
+           free this object after all. */
+
+        if (call_for_newly_freed[k] && (*call_for_newly_freed[k])(v))
+        { if (SGGC_DEBUG) 
+          { printf ("sggc_collect: not freeing %x after all\n", (unsigned)v);
+          }
+          put_in_right_old_gen(v);
+          continue;
+        }
+
+        /* Remove the object from any old_gen or old_to_new, if it's there. */
+
         if (collect_level > 0)
         { if (set_remove (&old_gen1_big, v))
           { if (SGGC_DEBUG)
@@ -1331,6 +1365,8 @@ void sggc_collect_remove_free (void)
           }
         }
 
+        /* Free the object's data area. */
+
         set_index_t index = SET_VAL_INDEX(v);
         if (SGGC_DEBUG) 
         { printf ("sggc_collect: calling free for data for %x:: %p\n", 
@@ -1342,12 +1378,13 @@ void sggc_collect_remove_free (void)
         { printf("sggc_collect: putting %x in unused\n",(unsigned)v);
         }
 
+        /* Put it in 'unused', for later re-use. */
+
         set_add (&unused, v); /* allowed because v was removed with set_first */
                               /*   and it was the only value in its segment   */
       }
     }
   }
-
 }
 
 void sggc_collect (int level)
@@ -1371,7 +1408,8 @@ void sggc_collect (int level)
   sggc_find_root_ptrs();
 
   sggc_collect_look_at();
-  sggc_collect_remove_free();
+  sggc_collect_remove_free_small();
+  sggc_collect_remove_free_big();
 
   /* For each kind, set up sggc_next_free_val, and sggc_next_free_bits to 
      use all of free_or_new.  For uncollected kinds, we just leave these as
@@ -1516,7 +1554,7 @@ void sggc_look_at (sggc_cptr_t cptr)
 }
 
 
-/* MARK AN OBJECT AS IN USE, BUT DON"T FOLLOW REFERENCES WITHIN IT. */
+/* MARK AN OBJECT AS IN USE, BUT DON'T FOLLOW REFERENCES WITHIN IT. */
 
 void sggc_mark (sggc_cptr_t cptr)
 {
@@ -1538,3 +1576,13 @@ sggc_cptr_t sggc_first_uncollected_of_kind (sggc_kind_t kind)
   return SGGC_NO_OBJECT;
 #endif
 }
+
+
+/* REGISTER A FUNCTION TO BE CALLED FOR NEWLY-FREED OBJECTS. */
+
+void sggc_call_for_newly_freed_object (sggc_kind_t kind,
+                                       int (*fun) (sggc_cptr_t))
+{
+  call_for_newly_freed[kind] = fun;
+}
+
