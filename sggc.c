@@ -1250,18 +1250,22 @@ void sggc_collect_remove_free_small (void)
          (but note that this doesn't get all free objects, so we still
          need the scan done below). */
 
-      if (call)
+      if (call && (v = set_first (&free_or_new[k], 0)) != SGGC_NO_OBJECT)
       {
-        v = set_first (&free_or_new[k], 0);
+        sggc_index_t first_seg = SGGC_SEGMENT_INDEX(v);
 
-        while (v != sggc_next_free_val[k])
+        while (v != SGGC_NO_OBJECT && v != sggc_next_free_val[k])
         { 
           sggc_cptr_t ov = v;
-          v = set_chain_next (SET_UNUSED_FREE_NEW, v);
 
-          /* Call the function to call for a newly-freed object of this
-             kind, if there is one.  If it returns a non-zero value, don't
-             free this object after all. */
+          v = set_chain_next (SET_UNUSED_FREE_NEW, v);
+          if (v != SGGC_NO_OBJECT && sggc_next_segment_not_free[k] 
+                                  && SGGC_SEGMENT_INDEX(v) != first_seg)
+          { v = SGGC_NO_OBJECT;
+          }
+
+          /* Call the function to call for a newly-freed object of this kind.
+             If it returns a non-zero value, don't free the object after all. */
   
           if ((*call)(ov))
           { if (SGGC_DEBUG) 
