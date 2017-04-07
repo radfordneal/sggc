@@ -136,6 +136,10 @@ static ptr_t symbols[SGGC_CHUNKS_IN_SMALL_SEGMENT];
 static ptr_t nil;              /* The nil object, () */
 static ptr_t global_bindings;  /* Global bindings of symbols with values */
 
+#if CALL_NEWLY_FREED
+static long long freed_count;  /* Count of freed objects, if doing that */
+#endif
+
 
 /* SCHEME FOR PROTECTING POINTERS FROM GARBAGE COLLECTION. */
 
@@ -627,6 +631,19 @@ done:
 }
 
 
+/* FUNCTION TO CALL FOR NEWLY-FREED OBJECTS. */
+
+#if CALL_NEWLY_FREED
+
+int freed_fun (sggc_cptr_t cptr)
+{
+  freed_count += 1;
+  return 0;
+}
+
+#endif
+
+
 /* MAIN PROGRAM. */
 
 int main (void)
@@ -634,6 +651,14 @@ int main (void)
   int seqno = 1;
 
   sggc_init (10000);
+
+# if CALL_NEWLY_FREED
+  { sggc_kind_t k;
+    for (k = 0; k < SGGC_N_KINDS; k++) 
+    { sggc_call_for_newly_freed_object(k,freed_fun);
+    }
+  }
+# endif
 
   nil = sggc_alloc (TYPE_NIL, 1);
   if (nil != 0) abort();  /* want nil to be zero for auto initialization */
@@ -689,11 +714,17 @@ static unsigned count_uncol (sggc_kind_t kind)
 }
 
 
-/* TERMINATE PROGRAM.  Checks that the numbers and types of uncollected 
+/* TERMINATE PROGRAM.  Prints number of freed objects, if that's
+   enabled, then checks that the numbers and types of uncollected
    objects (if any) are as they ought to be, then exits. */
 
 static void end_prog (void)
 {
+# if CALL_NEWLY_FREED
+    sggc_collect(2);
+    printf("Number of freed objects: %lld\n",freed_count);
+# endif
+
 # if UNCOLLECT_LEVEL >= 1
     if (count_uncol(TYPE_NIL) != 1) abort();
 # endif
