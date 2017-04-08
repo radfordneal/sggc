@@ -1245,24 +1245,32 @@ void sggc_collect_remove_free_small (void)
          to the point where we reach objects that were freed before
          this collection and weren't allocated since (which may now be
          mixed in with objects that were moved from old generations,
-         if collect_level is greater than zero).  If one of these
-         newly-freed objects is in an old generation, we remove it now
-         (but note that this doesn't get all free objects, so we still
-         need the scan done below). */
+         if collect_level is greater than zero).  (Note that we also
+         have to handle the case where we've used all of the free set
+         and are now allocating from a single newly-created segment.)
+         If one of these newly-freed objects is in an old generation,
+         we remove it now (but note that this doesn't get all free
+         objects, so we still need the scan done below). */
 
       if (call && (v = set_first (&free_or_new[k], 0)) != SGGC_NO_OBJECT)
       {
-        sggc_index_t first_seg = SGGC_SEGMENT_INDEX(v);
+        sggc_cptr_t next_free = sggc_next_free_val[k];
 
-        while (v != SGGC_NO_OBJECT && v != sggc_next_free_val[k])
+        for (;;)
         { 
+          if (v == next_free)
+          { if (sggc_next_segment_not_free[k])
+            { v = set_chain_next_segment (SET_UNUSED_FREE_NEW, v);
+            }
+          }
+
+          if (v == SGGC_NO_OBJECT || v == next_free)
+          { break;
+          }
+
           sggc_cptr_t ov = v;
 
           v = set_chain_next (SET_UNUSED_FREE_NEW, v);
-          if (v != SGGC_NO_OBJECT && sggc_next_segment_not_free[k] 
-                                  && SGGC_SEGMENT_INDEX(v) != first_seg)
-          { v = SGGC_NO_OBJECT;
-          }
 
           /* Call the function to call for a newly-freed object of this kind.
              If it returns a non-zero value, don't free the object after all. */
