@@ -215,8 +215,8 @@ int sggc_next_segment_not_free[SGGC_N_KINDS];
 
 /* MAXIMUM NUMBER OF SEGMENTS, AND INDEX OF NEXT SEGMENT TO USE. */
 
-static set_offset_t maximum_segments;         /* Max segments, fixed for now */
-static set_offset_t next_segment;             /* Number of segments in use */
+static set_index_t maximum_segments;         /* Max segments, fixed for now */
+static set_index_t next_segment;             /* Number of segments in use */
 
 
 /* GLOBAL VARIABLES USED FOR LOOKING AT OLD-NEW REFERENCES. */
@@ -524,7 +524,7 @@ static sggc_cptr_t sggc_alloc_kind_type_length (sggc_kind_t kind,
 
   char *data;               /* pointer to data area for segment used */
 
-  sggc_index_t index;       /* index of segment that object will be in */
+  unsigned index;           /* index of segment that object will be in */
   struct set_segment * restrict seg;  /* ptr to struct for seg object goes in */
   sggc_cptr_t v;            /* pointer to object, to be returned as value */
 
@@ -1748,4 +1748,29 @@ void sggc_call_for_newly_freed_object (sggc_kind_t kind,
 void sggc_no_reuse (int enable)
 {
   do_not_reuse_memory = enable;
+}
+
+
+/* TRY TO CRASH IF COMPRESSED POINTER IS NOT VALID. 
+
+   Currently, doesn't try to distinguish free from recently-allocated
+   objects in UNUSED_FREE_NEW.  This might be possible without huge
+   effort using a flag in a segment saying whether any objects in it
+   are free. */
+
+sggc_cptr_t sggc_check_valid_cptr (sggc_cptr_t cptr)
+{
+  unsigned index = SGGC_SEGMENT_INDEX(cptr);
+  if (index >= next_segment)
+  { abort();
+  }
+
+  if (!sggc_is_constant(cptr)
+   && !set_chain_contains(SET_UNUSED_FREE_NEW,cptr)
+   && !set_chain_contains(SET_OLD_GEN1,cptr)
+   && !set_chain_contains(SET_OLD_GEN2_UNCOL,cptr))
+  { abort();
+  }
+
+  return cptr;
 }

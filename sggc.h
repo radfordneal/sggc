@@ -41,7 +41,6 @@
 
 /* COMPRESSED POINTER (INDEX, OFFSET) TYPE, AND NO OBJECT CONSTANT. */
 
-typedef set_index_t sggc_index_t; /* Type of segment index */
 typedef set_value_t sggc_cptr_t;  /* Type of compressed pointer (index,offset)*/
 
 #define SGGC_CPTR_VAL(i,o) SET_VAL((i),(o))
@@ -267,6 +266,7 @@ int sggc_is_uncollected (sggc_cptr_t cptr);
 void sggc_call_for_newly_freed_object (sggc_kind_t kind,
                                        int (*fun) (sggc_cptr_t));
 void sggc_no_reuse (int enable);
+sggc_cptr_t sggc_check_valid_cptr (sggc_cptr_t cptr);
 sggc_cptr_t sggc_constant (sggc_type_t type, sggc_kind_t kind, int n_objects,
                            char *data
 #ifdef SGGC_AUX1_SIZE

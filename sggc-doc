@@ -208,9 +208,6 @@ An application may optionally define the following in sggc-app.h:
 The sggc.h file should be included after the above have been defined,
 at the end of sggc-app.h.  It will define the following types:
 
-  sggc_index_t          Type for holding the index of a segment.
-                        Currently int32_t.
-
   sggc_cptr_t           Type for holding a compressed pointer.
                         Currently uint32_t.
 
@@ -669,11 +666,21 @@ macros) below, which have (if functions) prototypes as shown:
   
     If 'enable' is non-zero, newly-freed objects will no longer have
     their data and auxiliary information reused for new objects.  This
-    is meant for use as an extreme measure to try to find a bug.  It
+    is meant for use as a desparate measure to try to find a bug.  It
     obviously may result in extremely high memory usage.  Calling this
     function with zero for 'enable' will restore normal behaviour for
     the future, but will not recover memory for objects freed when
     'enable' was non-zero.
+
+  sggc_cptr_t sggc_check_valid_cptr (sggc_cptr_t cptr)
+
+    Attempts to cause a program crash if 'cptr' is not a valid
+    compressed pointer, to an object that has not been freed.  This is
+    done on a "best effort" basis, with no guarantee that all invalid
+    pointers cause a crash.  The nature of the crash may vary (eg, a
+    memory fault or a call of 'abort').  If 'cptr' is valid, it is
+    returned as the value of this function, which will take a fairly
+    small amount of time to do so.
 
 
 FUNCTIONS THE APPLICATION MUST PROVIDE TO SGGC

@@ -117,10 +117,16 @@ struct type_binding { ptr_t value, next; };  /* Binding, symbol is in aux1 */
 #define KIND_GLOBAL_BINDING 4  /* Used if UNCOLLECTED_NIL_SYMS_GLOBALS defined*/
 
 
-#define LIST(v) ((struct type_list *) SGGC_DATA(v))
-#define SYMBOL(v) ((struct type_symbol *) SGGC_DATA(v))
-#define BINDING(v) ((struct type_binding *) SGGC_DATA(v))
-#define BOUND_SYMBOL(v) (* (char *) SGGC_AUX1(v))
+#ifdef CHECK_VALID
+#define CHK(x) sggc_check_valid_cptr(x)
+#else
+#define CHK(x) (x)
+#endif
+
+#define LIST(v) ((struct type_list *) SGGC_DATA(CHK(v)))
+#define SYMBOL(v) ((struct type_symbol *) SGGC_DATA(CHK(v)))
+#define BINDING(v) ((struct type_binding *) SGGC_DATA(CHK(v)))
+#define BOUND_SYMBOL(v) (* (char *) SGGC_AUX1(CHK(v)))
 
 
 /* VALID SYMBOLS. */

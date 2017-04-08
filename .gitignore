@@ -25,6 +25,7 @@ interp/interp-uncollected-nil-syms-globals
 interp/interp-call-freed
 interp/interp-clear-free
 interp/interp-clear-free-no-reuse
+interp/interp-check-valid
 interp/o-e-i
 interp/o-e-r
 interp/o-e-i-big
