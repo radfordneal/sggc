@@ -137,7 +137,7 @@ static ptr_t nil;              /* The nil object, () */
 static ptr_t global_bindings;  /* Global bindings of symbols with values */
 
 #if CALL_NEWLY_FREED
-static long long freed_count;  /* Count of freed objects, if doing that */
+static unsigned freed_count;  /* Count of freed objects, if doing that */
 #endif
 
 
@@ -343,10 +343,19 @@ static char read_char (void)
 
 /* READ AN OBJECT.  Passed the next character of input; reads more if
    appropriate, but doesn't read past end of expression.  Prints an
-   error message and exits if there is a syntax error. */
+   error message and exits if there is a syntax error. 
+
+   As a special fudge for testing, if the first character is '^', a
+   level 2 garbage collection is done, and then this character is
+   skipped. */
 
 static ptr_t read (char c)
 {
+  while (c == '^') 
+  { sggc_collect(2);
+    c = read_char();
+  }
+
   if (strchr(symbol_chars,c))
   { return symbols [strchr(symbol_chars,c) - symbol_chars];
   }
@@ -714,15 +723,27 @@ static unsigned count_uncol (sggc_kind_t kind)
 }
 
 
-/* TERMINATE PROGRAM.  Prints number of freed objects, if that's
-   enabled, then checks that the numbers and types of uncollected
-   objects (if any) are as they ought to be, then exits. */
+/* TERMINATE PROGRAM.  Prints number of allocations and current usage,
+   plus freed objects, if that's enabled, then checks that the numbers
+   and types of uncollected objects (if any) are as they ought to be,
+   then exits. */
 
 static void end_prog (void)
 {
+  unsigned total;
+
+  printf("Allocated objects: %u\n",alloc_count);
+  printf("Gen0: %u, Gen1: %d, Gen2: %d, Uncollected: %d\n",
+          sggc_info.gen0_count, sggc_info.gen1_count, sggc_info.gen2_count,
+          sggc_info.uncol_count);
 # if CALL_NEWLY_FREED
-    sggc_collect(2);
-    printf("Number of freed objects: %lld\n",freed_count);
+    printf("Number of freed objects: %u\n",freed_count);
+    total =  sggc_info.gen0_count + sggc_info.gen1_count + sggc_info.gen2_count
+              + sggc_info.uncol_count + freed_count;
+    printf("Freed + still around: %u\n",total);
+    if (total != alloc_count)
+    { printf("DOESN'T MATCH ALLOC COUNT!\n");
+    }
 # endif
 
 # if UNCOLLECT_LEVEL >= 1
