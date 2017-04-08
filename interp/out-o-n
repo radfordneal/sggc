@@ -17,3 +17,5 @@
 17 \ s
 18 \ ()
 19 \ (O O O O O O O I I O I)
+Allocated objects: 7098
+Gen0: 99, Gen1: 53, Gen2: 406, Uncollected: 0
