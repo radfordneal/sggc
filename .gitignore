@@ -25,4 +25,8 @@ interp/interp-uncollected-nil-syms-globals
 interp/interp-call-freed
 interp/o-e-i
 interp/o-e-r
+interp/o-e-i-big
+interp/o-e-r-big
+interp/o-e-i-bigger
+interp/o-e-r-bigger
 interp/o-o-n
