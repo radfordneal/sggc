@@ -4,7 +4,8 @@ all:	interp interp-db interp-pg interp-no-offset interp-no-set-static \
 	interp-alloc-small-kind-quickly \
 	interp-memset-quickly interp-seg-direct interp-seg-direct-no-max \
 	interp-uncollected-nil interp-uncollected-nil-syms \
-	interp-uncollected-nil-syms-globals interp-call-freed interp-clear-free
+	interp-uncollected-nil-syms-globals interp-call-freed \
+	interp-clear-free interp-clear-free-no-reuse
 
 CC=gcc
 
@@ -115,3 +116,9 @@ interp-clear-free:	interp.c sggc.c set.c sggc-app.h sggc.h set-app.h set.h
 	 -DSGGC_MAX_SEGMENTS=10000 -DSET_STATIC=1 -DSGGC_USE_OFFSET_POINTERS=1 \
 	 -DSGGC_CLEAR_FREE \
 	 interp.c sggc.c -o interp-clear-free
+
+interp-clear-free-no-reuse:	interp.c sggc.c set.c sggc-app.h sggc.h set-app.h set.h
+	$(CC) -g -O3 -march=native -mtune=native \
+	 -DSGGC_MAX_SEGMENTS=10000000 -DSET_STATIC=1 -DSGGC_USE_OFFSET_POINTERS=1 \
+	 -DSGGC_CLEAR_FREE -DNO_REUSE=1 \
+	 interp.c sggc.c -o interp-clear-free-no-reuse

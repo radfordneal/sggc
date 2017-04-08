@@ -257,7 +257,6 @@ static ptr_t alloc (sggc_type_t type)
     a = sggc_alloc(type,1); /* length argument is ignored */
     if (a == SGGC_NO_OBJECT)
     { printf("CAN'T ALLOCATE\n");
-      abort();
       exit(1);
     }
   }
@@ -659,7 +658,15 @@ int main (void)
 {
   int seqno = 1;
 
-  sggc_init (10000);
+# if NO_REUSE
+    sggc_init (SGGC_MAX_SEGMENTS);
+# else
+    sggc_init (10000);
+# endif
+
+# if NO_REUSE
+    sggc_no_reuse(1);
+# endif
 
 # if CALL_NEWLY_FREED
   { sggc_kind_t k;

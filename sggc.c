@@ -225,6 +225,11 @@ static int collect_level = -1; /* Level of current garbage collection */
 static int old_to_new_check;   /* Controls how old-to-new processing is done */
 
 
+/* SUPPRESS MEMORY REUSE FLAG. */
+
+static int do_not_reuse_memory;  /* Non-zero to suppress reuse */
+
+
 /* MACRO TO DO SOMETHING FOR ELEMENT AND THOSE FOLLOWING IN THE SAME SEGMENT. 
    The statement references the element as 'w'. */
 
@@ -1449,6 +1454,14 @@ void sggc_collect_remove_free_small (void)
         }
       }
 #     endif
+
+      /* Remove all objects from the free set if we aren't reusing them. */
+
+      if (do_not_reuse_memory)
+      { do
+        { v = set_first (&free_or_new[k], 1); 
+        } while (v != SGGC_NO_OBJECT);
+      }
     }
   }
 }
@@ -1522,6 +1535,12 @@ void sggc_collect_remove_free_big (void)
         }
 #       endif
 
+        /* Don't free memory or put in 'unused' if we're not reusing memory. */
+
+        if (do_not_reuse_memory)
+        { continue;
+        }
+
         /* Free the object's data area. */
 
         set_index_t index = SET_VAL_INDEX(v);
@@ -1530,12 +1549,12 @@ void sggc_collect_remove_free_big (void)
                    v, SGGC_DATA(v));
         }
         sggc_free ((char *) SGGC_DATA(v));
-        if (SGGC_DEBUG) 
-        { printf("sggc_collect: putting %x in unused\n",(unsigned)v);
-        }
 
         /* Put it in 'unused', for later re-use. */
 
+        if (SGGC_DEBUG) 
+        { printf("sggc_collect: putting %x in unused\n",(unsigned)v);
+        }
         set_add (&unused, v); /* allowed because v was removed with set_first */
                               /*   and it was the only value in its segment   */
       }
@@ -1722,3 +1741,11 @@ void sggc_call_for_newly_freed_object (sggc_kind_t kind,
   call_for_newly_freed[kind] = fun;
 }
 
+
+
+/* ENABLE OR DISABLE SUPPRESSION OF MEMORY REUSE. */
+
+void sggc_no_reuse (int enable)
+{
+  do_not_reuse_memory = enable;
+}
