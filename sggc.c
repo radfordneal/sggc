@@ -58,6 +58,25 @@
 #define EXTRA_CHECKS 0
 
 
+/* CLEARING OF FREED DATA AREAS. */
+
+#ifdef SGGC_CLEAR_FREE
+
+#ifndef SGGC_CLEAR_DATA_BYTE
+#define SGGC_CLEAR_DATA_BYTE 0
+#endif
+
+#ifndef SGGC_CLEAR_AUX1_BYTE
+#define SGGC_CLEAR_AUX1_BYTE 0
+#endif
+
+#ifndef SGGC_CLEAR_AUX2_BYTE
+#define SGGC_CLEAR_AUX2_BYTE 0
+#endif
+
+#endif
+
+
 /* ALLOCATE / FREE MACROS.  Defaults to the system calloc/free if something
    else is not defined in sggc-app.h. */
 
@@ -1401,6 +1420,35 @@ void sggc_collect_remove_free_small (void)
           }
         }
       }
+
+      /* Clear freed data and aux areas for small kinds if asked to do so. */
+
+#     ifdef SGGC_CLEAR_FREE
+      { sggc_nchunks_t nch = sggc_kind_chunks[k];
+        sggc_cptr_t p;
+        for (p = set_first (&free_or_new[k], 0); 
+             p != SGGC_NO_OBJECT;
+             p = set_next (&free_or_new[k], p, 0))
+        { if (SGGC_DATA(p) != NULL)
+          { memset (SGGC_DATA(p), SGGC_CLEAR_DATA_BYTE, SGGC_CHUNK_SIZE * nch);
+          }
+#         ifdef SGGC_AUX1_SIZE
+#         ifdef SGGC_AUX1_READ_ONLY
+          if (!kind_aux1_read_only[k])
+#         endif
+          { memset (SGGC_AUX1(p), SGGC_CLEAR_AUX1_BYTE, SGGC_AUX1_SIZE * nch);
+          }
+#         endif
+#         ifdef SGGC_AUX2_SIZE
+#         ifdef SGGC_AUX2_READ_ONLY
+          if (!kind_aux2_read_only[k])
+#         endif
+          { memset (SGGC_AUX2(p), SGGC_CLEAR_AUX2_BYTE, SGGC_AUX2_SIZE * nch);
+          }
+#         endif
+        }
+      }
+#     endif
     }
   }
 }
@@ -1457,6 +1505,23 @@ void sggc_collect_remove_free_big (void)
           }
         }
 
+        /* Clear data and auxiliary info areas if asked to do so.  Note that
+           big objects can't have read-only auxiliary information. */
+
+#       ifdef SGGC_CLEAR_FREE
+        { sggc_nchunks_t nch = sggc_kind_chunks[k];
+          memset (SGGC_DATA(v), SGGC_CLEAR_DATA_BYTE, SGGC_CHUNK_SIZE * nch);
+#         ifdef SGGC_AUX1_SIZE
+          { memset (SGGC_AUX1(v), SGGC_CLEAR_AUX1_BYTE, SGGC_AUX1_SIZE * nch);
+          }
+#         endif
+#         ifdef SGGC_AUX2_SIZE
+          { memset (SGGC_AUX2(v), SGGC_CLEAR_AUX2_BYTE, SGGC_AUX2_SIZE * nch);
+          }
+#         endif
+        }
+#       endif
+
         /* Free the object's data area. */
 
         set_index_t index = SET_VAL_INDEX(v);
@@ -1464,8 +1529,7 @@ void sggc_collect_remove_free_big (void)
         { printf ("sggc_collect: calling free for data for %x:: %p\n", 
                    v, SGGC_DATA(v));
         }
-        UNDO_OFFSET(sggc_data,index,SGGC_CHUNK_SIZE);
-        sggc_free ((char *) sggc_data[index]);
+        sggc_free ((char *) SGGC_DATA(v));
         if (SGGC_DEBUG) 
         { printf("sggc_collect: putting %x in unused\n",(unsigned)v);
         }
@@ -1490,8 +1554,8 @@ void sggc_collect (int level)
 
   if (set_first(&to_look_at, 0) != SET_NO_VALUE) abort();
 
-  sggc_collect_put_in_free_or_new();
-  sggc_collect_old_to_new();
+  sggc_collect_put_in_free_or_new(); /* put collected generations in free set */
+  sggc_collect_old_to_new();         /* handle old-to-new references */
 
   /* Get the application to take root pointers out of the free_or_new set,
      and put them in the to_look_at set. */
@@ -1499,9 +1563,9 @@ void sggc_collect (int level)
   old_to_new_check = 0;  /* no special old-to-new processing in sggc_look_at */
   sggc_find_root_ptrs();
 
-  sggc_collect_look_at();
-  sggc_collect_remove_free_small();
-  sggc_collect_remove_free_big();
+  sggc_collect_look_at();            /* look at objects until no more to see */
+  sggc_collect_remove_free_small();  /* handle freed small objects */
+  sggc_collect_remove_free_big();    /* handle freed big objects */
 
   /* For each kind, set up sggc_next_free_val, and sggc_next_free_bits to 
      use all of free_or_new.  For uncollected kinds, we just leave these as
@@ -1523,26 +1587,6 @@ void sggc_collect (int level)
                                      >> SET_VAL_OFFSET(n);
         }
         sggc_next_segment_not_free[k] = 0;
-      }
-    }
-  }
-
-  /* Code below can be enabled to wipe out data in free objects, storing
-     up to two copies of SGGC_NO_OBJECT at the front, to help debugging. */
-
-  if (EXTRA_CHECKS)
-  { for (k = 0; k < SGGC_N_KINDS; k++)
-    { if (sggc_kind_chunks[k] != 0)
-      { sggc_cptr_t p;
-        for (p = set_first (&free_or_new[k], 0); 
-             p != SGGC_NO_OBJECT;
-             p = set_next (&free_or_new[k], p, 0))
-        { if (SGGC_DATA(p) != NULL)
-          { sggc_cptr_t *d =  (sggc_cptr_t *) SGGC_DATA(p);
-            if (sizeof (sggc_cptr_t) < SGGC_CHUNK_SIZE) *d++ = SGGC_NO_OBJECT;
-            if (2 * sizeof (sggc_cptr_t) < SGGC_CHUNK_SIZE) *d = SGGC_NO_OBJECT;
-          }
-        }
       }
     }
   }

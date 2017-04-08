@@ -23,6 +23,7 @@ interp/interp-uncollected-nil
 interp/interp-uncollected-nil-syms
 interp/interp-uncollected-nil-syms-globals
 interp/interp-call-freed
+interp/interp-clear-free
 interp/o-e-i
 interp/o-e-r
 interp/o-e-i-big
