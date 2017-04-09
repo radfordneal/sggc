@@ -64,7 +64,7 @@ typedef set_value_t sggc_cptr_t;  /* Type of compressed pointer (index,offset)*/
    'small' segment, having total number of chunks no more than given by
    SGGC_CHUNKS_IN_SMALL_SEGMENT. */
 
-#ifdef SGGC_USE_OFFSET_POINTERS
+#if SGGC_USE_OFFSET_POINTERS
 typedef uintptr_t sggc_dptr;       /* So out-of-bounds arithmetic well-defined*/
 #else
 typedef char * restrict sggc_dptr; /* Ordinary pointer arithmetic */
