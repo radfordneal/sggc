@@ -266,7 +266,7 @@ static int do_not_reuse_memory;  /* Non-zero to suppress reuse */
 
    Returns zero if successful, non-zero if allocation fails. */
 
-int sggc_init (int max_segments)
+int sggc_init (unsigned max_segments)
 {
   int i, j, k;
 
@@ -431,7 +431,8 @@ int sggc_init (int max_segments)
     sggc_next_segment_not_free[k] = 0;
   }
 
-  /* Record maximum segments, and initialize to no segments in use. */
+  /* Record the maximum number of segments, adjusting it downwards if
+     it exceeds SGGC_MAX_SEGMENTS, or the maximum possible. */
 
   maximum_segments = max_segments;
 # ifdef SGGC_MAX_SEGMENTS
@@ -439,6 +440,9 @@ int sggc_init (int max_segments)
   { maximum_segments = SGGC_MAX_SEGMENTS;
   }
 # endif
+  if (maximum_segments > ((~(uint32_t)0) >> SET_OFFSET_BITS) + 1)
+  { maximum_segments = ((~(uint32_t)0) >> SET_OFFSET_BITS) + 1;
+  }
 
   /* Initialize next segment that can be used.  Skip segment 0 if
      SGGC_NO_OBJECT has all 0 bits. */

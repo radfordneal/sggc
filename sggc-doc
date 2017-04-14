@@ -447,13 +447,14 @@ macros) below, which have (if functions) prototypes as shown:
     Returns the offset within a segment of a compressed pointer.  This
     is needed only in a few specialized contexts.
 
-  int sggc_init (int max_segments)
+  int sggc_init (unsigned max_segments)
 
     Initializes the SGGC facility, with the maximum number of segments
     being as specified, except that this argument is silently reduced
     to SGGC_MAX_SEGMENTS if it is larger, if that constant was
-    specified at compile time.  Returns zero if no error, and non-zero
-    if allocation failed.
+    specified at compile time.  Also silently reduced to the maximum
+    allowed by the number of bits in a segment index.  Returns zero if
+    no error, and non-zero if allocation failed.
 
   sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length)
 
