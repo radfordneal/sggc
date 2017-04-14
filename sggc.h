@@ -207,13 +207,17 @@ SGGC_EXTERN const int sggc_kind_chunks[SGGC_N_KINDS];
 
 SGGC_EXTERN struct sggc_info
 { 
-  unsigned gen0_count;       /* Number of newly-allocated objects */
-  unsigned gen1_count;       /* Number of objects in old generation 1 */
-  unsigned gen2_count;       /* Number of objects in old generation 2 */
+  unsigned gen0_count;     /* Number of newly-allocated objects */
+  unsigned gen1_count;     /* Number of objects in old generation 1 */
+  unsigned gen2_count;     /* Number of objects in old generation 2 */
+  unsigned uncol_count;    /* Number of uncollected objects */
 
-  unsigned uncol_count;      /* Number of uncollected objects */
+  size_t gen0_big_chunks;  /* # of chunks in newly-allocated big objects */
+  size_t gen1_big_chunks;  /* # of chunks in big objects in old generation 1*/
+  size_t gen2_big_chunks;  /* # of chunks in big objects in old generation 2*/
+  size_t uncol_big_chunks; /* # of chunks in uncollected big objects */
 
-  size_t big_chunks;         /* # of chunks in newly-allocated big objects */
+  size_t total_mem_usage;  /* Approximate total memory usage (in bytes) */
 
 } sggc_info;
 

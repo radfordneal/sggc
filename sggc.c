@@ -455,7 +455,13 @@ int sggc_init (unsigned max_segments)
   sggc_info.gen1_count = 0;
   sggc_info.gen2_count = 0;
   sggc_info.uncol_count = 0;
-  sggc_info.big_chunks = 0;
+
+  sggc_info.gen0_big_chunks = 0;
+  sggc_info.gen1_big_chunks = 0;
+  sggc_info.gen2_big_chunks = 0;
+  sggc_info.uncol_big_chunks = 0;
+
+  sggc_info.total_mem_usage = 0;
 
   return 0;
 }
@@ -511,6 +517,35 @@ static void next_aux_pos (sggc_kind_t kind, char **block, unsigned char *pos,
 }
 
 
+/* ALLOCATE A NEW SEGMENT.  Returns -1 if unable to allocate (reached 
+   maximum segments, or memory allocation failed).  Otherwise, returns
+   the index of the new segment, which will have been initialized, but
+   will not have its type or kind set yet (flags will all be 0). */
+
+static set_index_t new_segment (void)
+{
+  struct set_segment * restrict seg;
+
+  if (next_segment == maximum_segments)
+  { return -1;
+  }
+
+# ifdef SGGC_SEG_DIRECT
+    seg = sggc_segment + next_segment;
+# else
+    seg = sggc_alloc_zeroed (sizeof **sggc_segment);
+    if (seg == NULL)
+    { return -1;
+    }
+    sggc_segment[next_segment] = seg;
+# endif
+
+  set_segment_init (seg);
+
+  return next_segment++;
+}
+
+
 /* ALLOCATE AN OBJECT OF SPECIFIED KIND, TYPE, AND LENGTH.  The length
    is used only for big kinds. The value returned is SGGC_NO_OBJECT if
    allocation fails (but note that it might succeed if retried after
@@ -531,7 +566,7 @@ static sggc_cptr_t sggc_alloc_kind_type_length (sggc_kind_t kind,
 
   char *data;               /* pointer to data area for segment used */
 
-  unsigned index;           /* index of segment that object will be in */
+  set_index_t index;        /* index of segment that object will be in */
   struct set_segment * restrict seg;  /* ptr to struct for seg object goes in */
   sggc_cptr_t v;            /* pointer to object, to be returned as value */
 
@@ -678,24 +713,12 @@ static sggc_cptr_t sggc_alloc_kind_type_length (sggc_kind_t kind,
 
   if (v == SGGC_NO_OBJECT)  /* new segment, big or small */
   { 
-    if (next_segment == maximum_segments)
+    index = new_segment();
+    if (index < 0)
     { goto fail;
     }
-
-#   ifdef SGGC_SEG_DIRECT
-      seg = sggc_segment+next_segment;
-#   else
-      seg = sggc_alloc_zeroed (sizeof **sggc_segment);  /* flags initially 0 */
-      if (seg == NULL)
-      { goto fail;
-      }
-      sggc_segment[next_segment] = seg;
-#   endif
-
-    index = next_segment; 
-    next_segment += 1;
-    set_segment_init (seg);
     sggc_type[index] = type;
+    seg = SET_SEGMENT(index);
     seg->x.big.kind = kind;  /* small.kind and big.kind are the same place */
 
     v = SGGC_CPTR_VAL(index,0);
@@ -810,7 +833,7 @@ static sggc_cptr_t sggc_alloc_kind_type_length (sggc_kind_t kind,
     { seg->x.big.alloc_chunks = nch >> SGGC_HUGE_SHIFT;
       seg->x.big.huge = 1;
     }
-    sggc_info.big_chunks += nch;
+    sggc_info.gen0_big_chunks += nch;
   }
 
   sggc_data[index] = (sggc_dptr) data;
@@ -906,28 +929,13 @@ sggc_cptr_t sggc_constant (sggc_type_t type, sggc_kind_t kind, int n_objects,
   { bits |= 1 << (i*sggc_kind_chunks[kind]);
   }
 
-  if (next_segment == maximum_segments)
+  set_index_t index = new_segment();
+  if (index < 0)
   { return SGGC_NO_OBJECT;
   }
 
-  struct set_segment *seg;
-
-# ifdef SGGC_SEG_DIRECT
-    seg = sggc_segment+next_segment;
-# else
-    seg = sggc_alloc_zeroed (sizeof **sggc_segment);  /* flags initially 0 */
-    if (seg == NULL)
-    { return SGGC_NO_OBJECT;
-    }
-    sggc_segment[next_segment] = seg;
-# endif
-
-  set_index_t index = next_segment; 
+  struct set_segment *seg = SET_SEGMENT(index);
   sggc_cptr_t v = SGGC_CPTR_VAL(index,0);
-
-  next_segment += 1;
-
-  set_segment_init (seg);
 
   /* The seg->x.small fields below coincide with the seg->x.big fields. */
 
@@ -1623,7 +1631,7 @@ void sggc_collect (int level)
 
   /* Update info structure. */
 
-  sggc_info.big_chunks = 0;
+  sggc_info.gen0_big_chunks = 0;
   sggc_info.gen0_count = 0;
 
   sggc_info.gen1_count = set_n_elements(&old_gen1_big);

@@ -654,6 +654,3 @@ include the following:
     already in old generation 2 (in case it references younger
     objects).  It would then always be OK to scan the old-to-new set
     for uncollected objects only for level 2 garbage collections.
-
-  o More information could be maintained in sggc_info to help the
-    application decide when to call sggc_collect.
