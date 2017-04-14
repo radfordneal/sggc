@@ -178,6 +178,13 @@ calls sggc_no_reuse (see below).
   SGGC_CLEAR_AUX2_BYTE  The byte to set free auxiliary information 2 
                         to, if it is not read-only; default 0.
 
+The following may be defined to change the bit pattern used to
+represent SGGC_NO_OBJECT:
+
+  SGGC_NO_OBJECT_ZERO   If defined (as anything), SGGC_NO_OBJECT will
+                        be represented by all 0 bits, rather than the
+                        default of all 1 bits.
+
 The following types must be defined in sggc-app.h:
 
   sggc_length_t         Type for the "length" of an object.  The
