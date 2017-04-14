@@ -526,6 +526,7 @@ macros) below, which have (if functions) prototypes as shown:
 
     It is not necessary (but is allowed) to call sggc_look_at for a
     pointer to a constant object, or an object of an uncollected kind.
+    Calling it with SGGC_NO_OBJECT is allowed, and does nothing.
 
   void sggc_mark (sggc_cptr_t cptr)
 

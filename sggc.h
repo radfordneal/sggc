@@ -23,6 +23,13 @@
      discussion of the implementation of SGGC. */
 
 
+/* SELECT WHETHER SGGC_NO_OBJECT IS ALL 0s OR ALL 1s. */
+
+#ifdef SGGC_NO_OBJECT_ZERO
+#define SET_NO_VALUE_ZERO
+#endif
+
+
 /* CONTROL EXTERN DECLARATIONS FOR GLOBAL VARIABLES.  SGGC_EXTERN will
    be defined as nothing in sggc.c, where globals will actually be
    defined, but will be "extern" elsewhere. */
@@ -30,7 +37,6 @@
 #ifndef SGGC_EXTERN
 #define SGGC_EXTERN extern
 #endif
-
 
 #include "set-app.h"
 

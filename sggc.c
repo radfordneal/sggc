@@ -440,7 +440,10 @@ int sggc_init (int max_segments)
   }
 # endif
 
-  next_segment = 0;
+  /* Initialize next segment that can be used.  Skip segment 0 if
+     SGGC_NO_OBJECT has all 0 bits. */
+
+  next_segment = SGGC_NO_OBJECT==0 ? 1 : 0;
 
   /* Initialize the sggc_info structure. */
 
@@ -1719,8 +1722,10 @@ void sggc_mark (sggc_cptr_t cptr)
 {
   if (SGGC_DEBUG) printf("sggc_mark: %x\n",(unsigned)cptr);
 
-  if (set_remove (&free_or_new[SGGC_KIND(cptr)], cptr))
-  { put_in_right_old_gen (cptr);
+  if (cptr != SGGC_NO_OBJECT)
+  { if (set_remove (&free_or_new[SGGC_KIND(cptr)], cptr))
+    { put_in_right_old_gen (cptr);
+    }
   }
 }
 

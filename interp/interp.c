@@ -267,7 +267,7 @@ static ptr_t alloc (sggc_type_t type)
     }
   }
 
-  /* Initialize the object if it contains pointers. */
+  /* Initialize the object. */
 
   if (type == TYPE_LIST)
   { LIST(a)->head = nil;
@@ -683,7 +683,10 @@ int main (void)
 # endif
 
   nil = sggc_alloc (TYPE_NIL, 1);
-  if (nil != 0) abort();  /* want nil to be zero for auto initialization */
+
+# ifndef SGGC_NO_OBJECT_ZERO
+    if (nil != 0) abort();
+# endif
 
   global_bindings = nil;
 
