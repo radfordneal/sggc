@@ -251,11 +251,16 @@ garbage collection:
     size_t gen2_big_chunks;  /* # of chunks in big objects in old generation 2*/
     size_t uncol_big_chunks; /* # of chunks in uncollected big objects */
 
+    unsigned n_segments;     /* Number of segments in use */
     size_t total_mem_usage;  /* Approximate total memory usage (in bytes) */
 
   } sggc_info;
 
-Constants are not included in any of the counts or sizes above.
+Constants are not included in any of the counts or sizes above, except
+for n_segments.  Shared read-only auxiliary information areas are also
+not counted.  The total memory usage estimate is for physical memory,
+and assumes that virtual memory space that has not been used will not
+have been assigned physical memory.
 
 The sggc.h file will also declare the array initialized with the
 application's definition of SGGC_KIND_CHUNKS in sggc-app.h, as
@@ -626,13 +631,14 @@ macros) below, which have (if functions) prototypes as shown:
     SGGC_AUX1_SIZE or SGGC_AUX2_SIZE are defined.
 
     If called several times before any calls of sggc_alloc (or related
-    functions), the segments will have indexes 0, 1, 2, etc., which
-    fact may be used when setting up their contents if they reference
-    each other.  Constant objects should reference only other constant
-    objects.
+    functions), the segments used will have indexes 0, 1, 2, ... if
+    SGGC_NO_OBJECT_ZERO is not defined, and indexes 1, 2, 3, ... if it
+    is defined.  This fact may be used when setting up their contents
+    if they reference each other.  Constant objects should reference
+    only other constant objects.
 
     Note that although this function is primarily meant for creating
-    objects that are actually unchanging constants, an application is
+    objects that actually are unchanging constants, an application is
     allowed to change the data or auxiliary information in the object,
     as long as no references to other objects that need to be found by
     the garbage collector are stored there.  If an application never

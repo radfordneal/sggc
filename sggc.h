@@ -217,6 +217,7 @@ SGGC_EXTERN struct sggc_info
   size_t gen2_big_chunks;  /* # of chunks in big objects in old generation 2*/
   size_t uncol_big_chunks; /* # of chunks in uncollected big objects */
 
+  unsigned n_segments;     /* Number of segments in use */
   size_t total_mem_usage;  /* Approximate total memory usage (in bytes) */
 
 } sggc_info;
