@@ -130,6 +130,14 @@ static int kind_objects[SGGC_N_KINDS];
 static int kind_chunk_end[SGGC_N_KINDS];
 
 
+/* MACRO TO FIND THE NUMBER OF CHUNKS ALLOCATED FOR A BIG SEGMENT. */
+
+#define CHUNKS_ALLOCATED(seg) \
+  ((seg)->x.big.huge ? (seg)->x.big.alloc_chunks << SGGC_HUGE_SHIFT
+                     : (seg)->x.big.alloc_chunks)
+
+
+
 /* BLOCKS OF SPACE ALLOCATED FOR AUXILIARY INFORMATION. */
 
 #ifdef SGGC_AUX1_SIZE
@@ -1601,7 +1609,7 @@ void sggc_collect_remove_free_big (void)
         { continue;
         }
 
-        /* Free the object's data area. */
+        /* Free the object's data area, and update memory usage in sggc_info. */
 
         set_index_t index = SET_VAL_INDEX(v);
         if (SGGC_DEBUG) 
@@ -1609,6 +1617,10 @@ void sggc_collect_remove_free_big (void)
                    v, SGGC_DATA(v));
         }
         sggc_free ((char *) SGGC_DATA(v));
+
+        struct set_segment *seg = SET_SEGMENT(index);
+        sggc_info.total_mem_usage -= 
+                               (size_t) SGGC_CHUNK_SIZE * CHUNKS_ALLOCATED(seg);
 
         /* Put it in 'unused', for later re-use. */
 
