@@ -133,7 +133,7 @@ static int kind_chunk_end[SGGC_N_KINDS];
 /* MACRO TO FIND THE NUMBER OF CHUNKS ALLOCATED FOR A BIG SEGMENT. */
 
 #define CHUNKS_ALLOCATED(seg) \
-  ((seg)->x.big.huge ? (seg)->x.big.alloc_chunks << SGGC_HUGE_SHIFT
+  ((seg)->x.big.huge ? (seg)->x.big.alloc_chunks << SGGC_HUGE_SHIFT \
                      : (seg)->x.big.alloc_chunks)
 
 
