@@ -167,6 +167,13 @@ int main (int argc, char **argv)
 
 # include "test-common.h"
 
+  sggc_call_for_newly_freed_object (1, freed1);
+  sggc_call_for_newly_freed_object (2, freed2);
+
+  printf("\nCOLLECTING EVERYTHING, EXCEPT TYPE 2 AND nil\n\n");
+  a = b = c = d = e = nil;
+  sggc_collect(2);
+
   printf("\nSGGC INFO\n\n");
   printf("Counts... Gen0: %u, Gen1: %d, Gen2: %d, Uncollected: %d\n",
           sggc_info.gen0_count, sggc_info.gen1_count, 
@@ -178,20 +185,13 @@ int main (int argc, char **argv)
           sggc_info.n_segments, (unsigned long long) sggc_info.total_mem_usage);
 
   sggc_call_for_newly_freed_object (1, freed1);
-  sggc_call_for_newly_freed_object (2, freed2);
-
-  printf("\nCOLLECTING EVERYTHING, EXCEPT TYPE 2 AND nil\n\n");
-  a = b = c = d = e = nil;
-  sggc_collect(2);
-
-  sggc_call_for_newly_freed_object (1, freed1);
   sggc_call_for_newly_freed_object (2, 0);
 
   printf("\nCOLLECTING EVERYTHING\n\n");
   nil = a = b = c = d = e = SGGC_NO_OBJECT;
   sggc_collect(2);
 
-  printf("\nFINAL SGGC INFO\n\n");
+  printf("\nSGGC INFO\n\n");
   printf("Counts... Gen0: %u, Gen1: %d, Gen2: %d, Uncollected: %d\n",
           sggc_info.gen0_count, sggc_info.gen1_count, 
           sggc_info.gen2_count, sggc_info.uncol_count);

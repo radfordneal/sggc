@@ -875,7 +875,14 @@ static sggc_cptr_t sggc_alloc_kind_type_length (sggc_kind_t kind,
     { seg->x.big.alloc_chunks = nch >> SGGC_HUGE_SHIFT;
       seg->x.big.huge = 1;
     }
-    sggc_info.gen0_big_chunks += nch;
+#ifdef SGGC_KIND_UNCOLLECTED
+    if (sggc_kind_uncollected[kind])
+    { sggc_info.uncol_big_chunks += nch;
+    }
+    else
+#endif
+    { sggc_info.gen0_big_chunks += nch;
+    }
   }
 
   sggc_data[index] = (sggc_dptr) data;
@@ -1569,21 +1576,38 @@ void sggc_collect_remove_free_big (void)
           continue;
         }
 
-        /* Remove the object from any old_gen or old_to_new, if it's there. */
+        /* Find the number of chunks used by the object. */
 
-        if (collect_level > 0)
-        { if (set_remove (&old_gen1_big, v))
-          { if (SGGC_DEBUG)
-            { printf("sggc_collect: %x in old_gen1 now free\n",(unsigned)v);
-            }
-            (void) set_remove (&old_to_new, v);
+        sggc_nchunks_t nch = CHUNKS_ALLOCATED (SET_SEGMENT (SET_VAL_INDEX(v)));
+
+        /* Remove the object from any old_gen or old_to_new, if it's there.
+           Modify the sggc_info count of chunks accordingly.  (Chunk counts
+           were previously updated for older generations assuming objects
+           will remain in use.) */
+
+        if (collect_level > 0 && set_remove (&old_gen1_big, v))
+        { if (SGGC_DEBUG)
+          { printf("sggc_collect: %x in old_gen1 now free (%d chunks)\n",
+                    (unsigned)v, nch);
           }
-          else if (collect_level > 1 && set_remove (&old_gen2_big, v))
-          { if (SGGC_DEBUG)
-            { printf("sggc_collect: %x in old_gen2 now free\n",(unsigned)v);
-            }
-            (void) set_remove (&old_to_new, v);
+          (void) set_remove (&old_to_new, v);
+          sggc_info.gen2_big_chunks -= nch;
+        }
+        else if (collect_level > 1 && set_remove (&old_gen2_big, v))
+        { if (SGGC_DEBUG)
+          { printf("sggc_collect: %x in old_gen2 now free (%d chunks)\n",
+                    (unsigned)v, nch);
           }
+          (void) set_remove (&old_to_new, v);
+          sggc_info.gen2_big_chunks -= nch;
+        }
+        else
+        { if (SGGC_DEBUG)
+          { printf(
+              "sggc_collect: %x that was newly-allocated is free (%d chunks)\n",
+               (unsigned)v, nch);
+          }
+          sggc_info.gen1_big_chunks -= nch;
         }
 
         /* Clear data and auxiliary info areas if asked to do so.  Note that
@@ -1611,16 +1635,12 @@ void sggc_collect_remove_free_big (void)
 
         /* Free the object's data area, and update memory usage in sggc_info. */
 
-        set_index_t index = SET_VAL_INDEX(v);
         if (SGGC_DEBUG) 
         { printf ("sggc_collect: calling free for data for %x:: %p\n", 
                    v, SGGC_DATA(v));
         }
         sggc_free ((char *) SGGC_DATA(v));
-
-        struct set_segment *seg = SET_SEGMENT(index);
-        sggc_info.total_mem_usage -= 
-                               (size_t) SGGC_CHUNK_SIZE * CHUNKS_ALLOCATED(seg);
+        sggc_info.total_mem_usage -= (size_t) SGGC_CHUNK_SIZE * nch;
 
         /* Put it in 'unused', for later re-use. */
 
@@ -1645,8 +1665,22 @@ void sggc_collect (int level)
 
   if (set_first(&to_look_at, 0) != SET_NO_VALUE) abort();
 
-  sggc_collect_put_in_free_or_new(); /* put collected generations in free set */
-  sggc_collect_old_to_new();         /* handle old-to-new references */
+  /* Do preliminary update of big chunk counts, which will be modified 
+     later when some big objects are found to be free. */
+
+  if (level > 0) 
+  { sggc_info.gen2_big_chunks += sggc_info.gen1_big_chunks;
+    sggc_info.gen1_big_chunks = 0;
+  }
+  sggc_info.gen1_big_chunks += sggc_info.gen0_big_chunks;
+
+  /* Put collected generations in free sets. */
+
+  sggc_collect_put_in_free_or_new();
+
+  /* Handle old-to-new references. */
+
+  sggc_collect_old_to_new();
 
   /* Get the application to take root pointers out of the free_or_new set,
      and put them in the to_look_at set. */
@@ -1654,9 +1688,17 @@ void sggc_collect (int level)
   old_to_new_check = 0;  /* no special old-to-new processing in sggc_look_at */
   sggc_find_root_ptrs();
 
-  sggc_collect_look_at();            /* look at objects until no more to see */
-  sggc_collect_remove_free_small();  /* handle freed small objects */
-  sggc_collect_remove_free_big();    /* handle freed big objects */
+  /* Look at objects until no more to see. */
+
+  sggc_collect_look_at();
+
+  /* Handle freed small objects. */
+
+  sggc_collect_remove_free_small();
+
+  /* Handle freed big objects. */
+
+  sggc_collect_remove_free_big();
 
   /* For each kind, set up sggc_next_free_val, and sggc_next_free_bits to 
      use all of free_or_new.  For uncollected kinds, we just leave these as
@@ -1682,7 +1724,7 @@ void sggc_collect (int level)
     }
   }
 
-  /* Update info structure. */
+  /* Update info structure (older big chunks counts already updated). */
 
   sggc_info.gen0_big_chunks = 0;
   sggc_info.gen0_count = 0;
