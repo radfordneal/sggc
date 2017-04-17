@@ -564,11 +564,17 @@ static set_index_t new_segment (void)
       { return -1;
       }
       seg_block_remaining = SGGC_SEG_BLOCKING;
-      if ((uintptr_t)sb % sizeof (struct set_segment) != 0)
-      { sb += sizeof (struct set_segment) 
-                - (uintptr_t)sb % sizeof (struct set_segment);
+
+      /* Align to 64-byte boundary. */
+
+      if (((uintptr_t)sb & 63) != 0)
+      { if (0) /* can enable to see what's happening on this platform */
+        { printf("Aligning segment block %p to 64-byte boundary\n",sb);
+        }
+        sb = (char *) (((uintptr_t)sb + 63) & ~(uintptr_t)63);
         seg_block_remaining -= 1;
       }
+
       seg_block = (struct set_segment *) sb;
     }
     seg = seg_block;
