@@ -163,6 +163,15 @@ static char *kind_aux2_read_only[SGGC_N_KINDS];
 #endif
 
 
+/* CURRENT BLOCK OF SPACE TO ALLOCATE SEGMENTS FROM.  Only present if
+   SGGC_SEG_BLOCKING is defined (and greater than 1). */
+
+#if SGGC_SEG_BLOCKING > 1
+static struct set_segment *seg_block; /* Pointer to next segment in block */
+static int seg_block_remaining;       /* # of segments remaining in seg_block */
+#endif
+
+
 /* BIT VECTORS FOR FULL SEGMENTS.  Computed at initialization from 
    sggc_kind_chunks and SET_OFFSET_BITS. */
 
@@ -457,6 +466,10 @@ int sggc_init (unsigned max_segments)
 
   next_segment = SGGC_NO_OBJECT==0 ? 1 : 0;
 
+# if SGGC_SEG_BLOCKING > 1
+  seg_block_remaining = 0;
+# endif
+
   /* Initialize the sggc_info structure. */
 
   sggc_info.gen0_count = 0;
@@ -543,6 +556,25 @@ static set_index_t new_segment (void)
 
 # ifdef SGGC_SEG_DIRECT
     seg = sggc_segment + next_segment;
+# elif SGGC_SEG_BLOCKING > 1
+    if (seg_block_remaining == 0)
+    { char *sb;
+      sb = sggc_alloc_zeroed (SGGC_SEG_BLOCKING * sizeof (struct set_segment));
+      if (sb == NULL)
+      { return -1;
+      }
+      seg_block_remaining = SGGC_SEG_BLOCKING;
+      if ((uintptr_t)sb % sizeof (struct set_segment) != 0)
+      { sb += sizeof (struct set_segment) 
+                - (uintptr_t)sb % sizeof (struct set_segment);
+        seg_block_remaining -= 1;
+      }
+      seg_block = (struct set_segment *) sb;
+    }
+    seg = seg_block;
+    sggc_segment[next_segment] = seg;
+    seg_block += 1;
+    seg_block_remaining -= 1;
 # else
     seg = sggc_alloc_zeroed (sizeof **sggc_segment);
     if (seg == NULL)

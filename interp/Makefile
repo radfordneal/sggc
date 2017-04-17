@@ -6,7 +6,7 @@ all:	interp interp-db interp-pg interp-no-offset interp-no-set-static \
 	interp-uncollected-nil interp-uncollected-nil-syms \
 	interp-uncollected-nil-syms-globals interp-call-freed \
 	interp-clear-free interp-clear-free-no-reuse interp-check-valid \
-	interp-no-object-zero
+	interp-no-object-zero interp-seg-blocking
 
 CC=gcc
 
@@ -135,3 +135,9 @@ interp-no-object-zero:	interp.c sggc.c set.c sggc-app.h sggc.h set-app.h set.h
 	 -DSGGC_MAX_SEGMENTS=10000 -DSET_STATIC=1 -DSGGC_USE_OFFSET_POINTERS=1 \
 	 -DSGGC_NO_OBJECT_ZERO \
 	 interp.c sggc.c -o interp-no-object-zero
+
+interp-seg-blocking:	interp.c sggc.c set.c sggc-app.h sggc.h set-app.h set.h
+	$(CC) -g -O3 -march=native -mtune=native \
+	 -DSGGC_MAX_SEGMENTS=10000 -DSET_STATIC=1 -DSGGC_USE_OFFSET_POINTERS=1 \
+	 -DSGGC_SEG_BLOCKING=20 \
+	 interp.c sggc.c -o interp-seg-blocking
