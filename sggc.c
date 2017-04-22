@@ -54,8 +54,8 @@
 
 /* BLOCKING FOR SMALL DATA AREAS. */
 
-#ifndef SGGC_SMALL_DATA_BLOCKING
-#define SGGC_SMALL_DATA_BLOCKING 1
+#ifndef SGGC_SMALL_DATA_AREA_BLOCKING
+#define SGGC_SMALL_DATA_AREA_BLOCKING 1
 #endif
 
 
@@ -661,11 +661,11 @@ static void get_small_data_area (void)
   { 
 #   if SGGC_SMALL_DATA_AREA_ALIGN
       small_data_area_next = 
-        sggc_alloc_zeroed (SMALL_DATA_AREA_SIZE * SGGC_SMALL_DATA_BLOCKING
+       sggc_alloc_zeroed (SMALL_DATA_AREA_SIZE * SGGC_SMALL_DATA_AREA_BLOCKING
                             + SGGC_SMALL_DATA_AREA_ALIGN - 1);
 #   else
       small_data_area_next = 
-        sggc_alloc_zeroed (SMALL_DATA_AREA_SIZE * SGGC_SMALL_DATA_BLOCKING);
+       sggc_alloc_zeroed (SMALL_DATA_AREA_SIZE * SGGC_SMALL_DATA_AREA_BLOCKING);
 #   endif
     if (small_data_area_next == NULL)
     { return;
@@ -675,8 +675,8 @@ static void get_small_data_area (void)
        (((uintptr_t)small_data_area_next + SGGC_SMALL_DATA_AREA_ALIGN - 1) 
            & ~ ((uintptr_t)SGGC_SMALL_DATA_AREA_ALIGN - 1));
 #   endif
-    small_data_area_end = 
-      small_data_area_next + SMALL_DATA_AREA_SIZE * SGGC_SMALL_DATA_BLOCKING;;
+    small_data_area_end = small_data_area_next +
+                           SMALL_DATA_AREA_SIZE * SGGC_SMALL_DATA_AREA_BLOCKING;
   }
 
   small_data_area_next += SMALL_DATA_AREA_SIZE;
