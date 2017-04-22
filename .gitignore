@@ -28,6 +28,7 @@ interp/interp-clear-free-no-reuse
 interp/interp-check-valid
 interp/interp-no-object-zero
 interp/interp-seg-blocking
+interp/interp-data-blocking
 interp/o-e-i
 interp/o-e-r
 interp/o-e-i-big
