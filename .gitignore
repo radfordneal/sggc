@@ -1,6 +1,6 @@
 .DS_Store
 *.o
-*.DSYM
+*.dSYM
 test-sggc*/test-sggc?
 test-set/test-set
 test-sggc*/o
