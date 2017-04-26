@@ -1775,6 +1775,7 @@ void sggc_collect (int level)
     sggc_info.gen1_big_chunks = 0;
   }
   sggc_info.gen1_big_chunks += sggc_info.gen0_big_chunks;
+  sggc_info.gen0_big_chunks = 0;
 
   /* Put collected generations in free sets. */
 
@@ -1826,9 +1827,8 @@ void sggc_collect (int level)
     }
   }
 
-  /* Update info structure (older big chunks counts already updated). */
+  /* Update counts in the info structure (big chunks already updated). */
 
-  sggc_info.gen0_big_chunks = 0;
   sggc_info.gen0_count = 0;
 
   sggc_info.gen1_count = set_n_elements(&old_gen1_big);
