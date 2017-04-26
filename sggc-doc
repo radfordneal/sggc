@@ -740,10 +740,10 @@ before sggc.h is included):
 
   void sggc_find_root_ptrs (void)
 
-    This procedure must call sggc_look_at for every "root" pointer via
-    which an object might be referenced, passing sggc_look_at (or
-    sggc_mark) the compressed pointer for that object.  See the
-    discussion above for more context.
+    This procedure must call sggc_look_at (or sggc_mark) for every
+    "root" pointer via which an object might be referenced, passing
+    sggc_look_at (or sggc_mark) the compressed pointer for that
+    object.  See the discussion above for more context.
 
   void sggc_find_object_ptrs (sggc_cptr_t cptr)
 
