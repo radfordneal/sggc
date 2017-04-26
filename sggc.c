@@ -967,6 +967,7 @@ static sggc_cptr_t sggc_alloc_kind_type_length (sggc_kind_t kind,
   if (big)
   { if (nch < HUGE_CHUNKS)
     { seg->x.big.alloc_chunks = nch;
+      seg->x.big.huge = 0;
     }
     else
     { seg->x.big.alloc_chunks = nch >> SGGC_HUGE_SHIFT;
