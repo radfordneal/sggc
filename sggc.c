@@ -1961,8 +1961,9 @@ void sggc_look_at (sggc_cptr_t cptr)
         return;
       }
     }
-    if (set_remove (&free_or_new[SGGC_KIND(cptr)], cptr))
-    { set_add (&to_look_at, cptr);
+    if (set_chain_contains(SET_UNUSED_FREE_NEW,cptr)) /*faster than set_remove*/
+    { set_remove (&free_or_new[SGGC_KIND(cptr)], cptr);
+      set_add (&to_look_at, cptr);
       if (SGGC_DEBUG) printf("sggc_look_at: will look at %x\n",(unsigned)cptr);
     }
   }
@@ -1976,8 +1977,9 @@ void sggc_mark (sggc_cptr_t cptr)
   if (SGGC_DEBUG) printf("sggc_mark: %x\n",(unsigned)cptr);
 
   if (cptr != SGGC_NO_OBJECT)
-  { if (set_remove (&free_or_new[SGGC_KIND(cptr)], cptr))
-    { put_in_right_old_gen (cptr);
+  { if (set_chain_contains(SET_UNUSED_FREE_NEW,cptr)) /*faster than set_remove*/
+    { set_remove (&free_or_new[SGGC_KIND(cptr)], cptr);
+      put_in_right_old_gen (cptr);
     }
   }
 }
