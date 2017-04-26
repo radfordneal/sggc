@@ -29,6 +29,7 @@ interp/interp-check-valid
 interp/interp-no-object-zero
 interp/interp-seg-blocking
 interp/interp-data-blocking
+interp/interp-find-obj-ret
 interp/o-e-i
 interp/o-e-r
 interp/o-e-i-big
