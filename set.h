@@ -110,11 +110,6 @@ struct set
 };
 
 
-/* NO FUNCTION DECLARATIONS/DEFINITIONS IF SET_NO_FUNCTIONS DEFINED. */
-
-#ifndef SET_NO_FUNCTIONS
-
-
 /* INLINE FUNCTIONS USED BY THE APPLICATION. */
 
 /* First, do anything that needs doing at this point from set-app.h. */
@@ -397,15 +392,19 @@ static inline int set_remove (struct set *set, set_value_t val)
 
 /* NON-INLINE FUNCTIONS USED BY THE APPLICATION.
 
-   If SET_STATIC is defined as non-zero, the non-inline API procedures are
-   static, and defined here by including set.c.  Otherwise, prototypes
-   only are declared here, and set.c must be compiled and linked to
-   the program. */
+   There are no non-inline function declarations if SET_NO_FUNCTIONS
+   is defined.
+
+   If SET_STATIC is defined as non-zero, the non-inline API procedures
+   are static, and if used by the module, must be defined by including
+   set.c after set.h.  Otherwise, prototypes only are declared here,
+   and set.c must be compiled and linked to the program. */
+
+#ifndef SET_NO_FUNCTIONS
 
 #if SET_STATIC
 
 #define SET_PROC_CLASS static
-#include "set.c"
 
 #else
 

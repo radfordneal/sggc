@@ -156,8 +156,8 @@ or be put in SET_DO_BEFORE_INLINE.)
 
 The set-app.h file should be included in application modules that use
 the set facility.  If SET_NO_FUNCTIONS is defined before it is
-included, functions declarations will be omitted, with only types and
-macros defined.  
+included, non-inline functions declarations will be omitted, with only
+types, macros, and inline functions defined.
 
 There are two options for how an application accesses the procedures
 in set.c.

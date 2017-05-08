@@ -270,7 +270,7 @@ void sggc_after_marking (int level, int rep);
 #endif
 
 
-/* NO FUNCTION DECLARATIONS/DEFINITIONS IF SGGC_NO_FUNCTIONS DEFINED. */
+/* NO NON-INLINE FUNCTION DECLARATIONS IF SGGC_NO_FUNCTIONS DEFINED. */
 
 #ifndef SGGC_NO_FUNCTIONS
 
@@ -302,6 +302,8 @@ sggc_cptr_t sggc_constant (sggc_type_t type, sggc_kind_t kind, int n_objects,
                          , char *aux2
 #endif
 );
+
+#endif
 
 
 /* INLINE FUNCTIONS USED BY THE APPLICATION. */
@@ -479,5 +481,3 @@ static inline sggc_cptr_t sggc_next_uncollected_of_kind (sggc_cptr_t obj)
 {
   return set_chain_next (SET_OLD_GEN2_UNCOL, obj);
 }
-
-#endif
