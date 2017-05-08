@@ -30,10 +30,6 @@
 #define SGGC_EXTERN    /* So globals will be declared here without 'extern' */
 #include "sggc-app.h"
 
-#if SET_STATIC
-#  include "set.c"     /* Define set procedures here as static, not linked */
-#endif
-
 
 /* DEBUGGING FLAG.  Set to 1 to enable debug output.  May be set by a compiler
    flag, in which case it isn't overridden here. */

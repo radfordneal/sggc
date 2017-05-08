@@ -110,35 +110,12 @@ struct set
 };
 
 
-/* FUNCTIONS USED BY THE APPLICATION.
+/* NO FUNCTION DECLARATIONS/DEFINITIONS IF SET_NO_FUNCTIONS DEFINED. */
 
-   If SET_STATIC is defined as non-zero, all API procedures are
-   static.  This makes sense only if this .c file is included at
-   compile time in any module using it, rather than being compiled
-   separately and then linked. */
-
-#if SET_STATIC
-#  define SET_PROC_CLASS static
-#else
-#  define SET_PROC_CLASS
-#endif
-
-SET_PROC_CLASS void set_init (struct set *set, int chain);
-SET_PROC_CLASS void set_segment_init (struct set_segment *seg);
-SET_PROC_CLASS set_value_t set_first (struct set *set, int remove);
-SET_PROC_CLASS set_value_t set_next (struct set *set, set_value_t val, 
-                                     int remove);
-SET_PROC_CLASS set_bits_t set_first_bits (struct set *set);
-SET_PROC_CLASS void set_move_first (struct set *src, struct set *dst);
-SET_PROC_CLASS void set_move_next (struct set *src, set_value_t val,
-                                   struct set *dst);
-SET_PROC_CLASS void set_add_segment (struct set *set, set_value_t val, 
-                                     int chain);
-SET_PROC_CLASS void set_remove_segment (struct set *set, set_value_t val,
-                                        int chain);
+#ifndef SET_NO_FUNCTIONS
 
 
-/**** Functions below are defined here as "static inline" for speed. ****/
+/* INLINE FUNCTIONS USED BY THE APPLICATION. */
 
 /* First, do anything that needs doing at this point from set-app.h. */
 
@@ -416,3 +393,34 @@ static inline int set_remove (struct set *set, set_value_t val)
 
   return 1;
 }
+
+
+/* NON-INLINE FUNCTIONS USED BY THE APPLICATION.
+
+   If SET_STATIC is defined as non-zero, the non-inline API procedures are
+   static, and defined here by including set.c.  Otherwise, prototypes
+   only are declared here, and set.c must be compiled and linked to
+   the program. */
+
+#if SET_STATIC
+
+#define SET_PROC_CLASS static
+#include "set.c"
+
+#else
+
+#define SET_PROC_CLASS
+
+void set_init (struct set *set, int chain);
+void set_segment_init (struct set_segment *seg);
+set_value_t set_first (struct set *set, int remove);
+set_value_t set_next (struct set *set, set_value_t val, int remove);
+set_bits_t set_first_bits (struct set *set);
+void set_move_first (struct set *src, struct set *dst);
+void set_move_next (struct set *src, set_value_t val, struct set *dst);
+void set_add_segment (struct set *set, set_value_t val, int chain);
+void set_remove_segment (struct set *set, set_value_t val, int chain);
+
+#endif
+
+#endif

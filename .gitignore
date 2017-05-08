@@ -3,6 +3,7 @@
 *.dSYM
 test-sggc*/test-sggc?
 test-set/test-set
+test-set/test-set-static
 test-sggc*/o
 test-set/o
 interp/interp

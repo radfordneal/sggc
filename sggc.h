@@ -38,8 +38,12 @@
 #define SGGC_EXTERN extern
 #endif
 
-#include "set-app.h"
+#ifdef SGGC_NO_FUNCTIONS
+#define SET_NO_FUNCTIONS
+#endif
 
+#include "set-app.h"
+#include <stdlib.h>
 #ifdef SGGC_USE_MEMSET
 #include <string.h>
 #endif
@@ -266,7 +270,12 @@ void sggc_after_marking (int level, int rep);
 #endif
 
 
-/* FUNCTIONS USED BY THE APPLICATION. */
+/* NO FUNCTION DECLARATIONS/DEFINITIONS IF SGGC_NO_FUNCTIONS DEFINED. */
+
+#ifndef SGGC_NO_FUNCTIONS
+
+
+/* NON-INLINE FUNCTIONS USED BY THE APPLICATION. */
 
 int sggc_init (unsigned max_segments);
 sggc_cptr_t sggc_alloc (sggc_type_t type, sggc_length_t length);
@@ -295,7 +304,7 @@ sggc_cptr_t sggc_constant (sggc_type_t type, sggc_kind_t kind, int n_objects,
 );
 
 
-/**** Functions below are defined here as "static inline" for speed. ****/
+/* INLINE FUNCTIONS USED BY THE APPLICATION. */
 
 
 /* CHECK WHETHER AN OBJECT IS IN THE YOUNGEST GENERATION.  */
@@ -470,3 +479,5 @@ static inline sggc_cptr_t sggc_next_uncollected_of_kind (sggc_cptr_t obj)
 {
   return set_chain_next (SET_OLD_GEN2_UNCOL, obj);
 }
+
+#endif
