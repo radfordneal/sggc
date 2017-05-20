@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "set-app.h"
-#if SET_STATIC
+#if SBSET_STATIC
 #include "set.c"
 #endif
 
@@ -31,7 +31,7 @@ int main (void)
 { 
   FILE *f;
   int i, j, x, o, r;
-  int use_set_chain_next = 0;
+  int use_sbset_chain_next = 0;
   char s[1000];
   char c; 
 
@@ -42,22 +42,22 @@ int main (void)
   }
 
   for (j = 0; j<N_SEG; j++)
-  { set_segment_init (&segment[j]);
+  { sbset_segment_init (&segment[j]);
   }
   for (i = 0; i<N_SET; i++) 
-  { set_init (&set[i], i<SET_CHAINS ? i : SET_CHAINS-1);
+  { sbset_init (&set[i], i<SBSET_CHAINS ? i : SBSET_CHAINS-1);
   }
 
   /* Loop to do commands from script.  Commands are:
 
-        c  set  index  offset        set_contains
-        a  set  index  offset        set_add
-        r  set  index  offset        set_remove
-        b  set  index  offset        set_assign_segment_bits (to 7)
-        n  set  index  offset        set_move_next (to other of set 1/2)
-        m  set                       set_move_first (to other of set 1/2)
-        A  set  index  offset        set_add_segment (from chain 0)
-        R  set  index  offset        set_remove_segment (from chain 0)
+        c  set  index  offset        sbset_contains
+        a  set  index  offset        sbset_add
+        r  set  index  offset        sbset_remove
+        b  set  index  offset        sbset_assign_segment_bits (to 7)
+        n  set  index  offset        sbset_move_next (to other of set 1/2)
+        m  set                       sbset_move_first (to other of set 1/2)
+        A  set  index  offset        sbset_add_segment (from chain 0)
+        R  set  index  offset        sbset_remove_segment (from chain 0)
   */
 
   for (;;)
@@ -99,7 +99,7 @@ int main (void)
       { printf("Invalid segment\n");
         continue;
       }
-      if (o < 0 || o >= 1<<SET_OFFSET_BITS) 
+      if (o < 0 || o >= 1<<SBSET_OFFSET_BITS) 
       { printf("Invalid offset\n");
         continue;
       }
@@ -109,35 +109,35 @@ int main (void)
 
     switch (c) 
     { case 'c': 
-      { printf("result: %d\n", set_contains (&set[i], SET_VAL(x,o)));
+      { printf("result: %d\n", sbset_contains (&set[i], SBSET_VAL(x,o)));
         break;
       }
       case 'a':
-      { printf("result: %d\n", set_add (&set[i], SET_VAL(x,o)));
+      { printf("result: %d\n", sbset_add (&set[i], SBSET_VAL(x,o)));
         break;
       }
       case 'r':
-      { printf("result: %d\n", set_remove (&set[i], SET_VAL(x,o)));
+      { printf("result: %d\n", sbset_remove (&set[i], SBSET_VAL(x,o)));
         break;
       }
       case 'b':
-      { set_assign_segment_bits (&set[i], SET_VAL(x,o), 7);
+      { sbset_assign_segment_bits (&set[i], SBSET_VAL(x,o), 7);
         break;
       }
       case 'n':
-      { set_move_next (&set[i], SET_VAL(x,o), &set [i==1 ? 2 : 1]);
+      { sbset_move_next (&set[i], SBSET_VAL(x,o), &set [i==1 ? 2 : 1]);
         break;
       }
       case 'm':
-      { set_move_first (&set[i], &set [i==1 ? 2 : 1]);
+      { sbset_move_first (&set[i], &set [i==1 ? 2 : 1]);
         break;
       }
       case 'A':
-      { set_add_segment (&set[i], SET_VAL(x,o), 0);
+      { sbset_add_segment (&set[i], SBSET_VAL(x,o), 0);
         break;
       }
       case 'R':
-      { set_remove_segment (&set[i], SET_VAL(x,o), 0);
+      { sbset_remove_segment (&set[i], SBSET_VAL(x,o), 0);
         break;
       }
       
@@ -147,27 +147,27 @@ int main (void)
       }
     }
 
-    /* Show the contents of all the sets, using either set_next or 
-       set_chain_next. */
+    /* Show the contents of all the sets, using either sbset_next or 
+       sbset_chain_next. */
 
     for (i = 0; i<N_SET; i++)
-    { set_value_t v;
+    { sbset_value_t v;
       printf ("Set %d (chain %d), %d elements:",
-              i, set_chain(&set[i]), set_n_elements(&set[i]));
-      v = set_first (&set[i], 0);
-      if (v == SET_NO_VALUE)
+              i, sbset_chain(&set[i]), sbset_n_elements(&set[i]));
+      v = sbset_first (&set[i], 0);
+      if (v == SBSET_NO_VALUE)
       { printf(" empty\n");
         continue;
       }
-      printf (" %016llx :", (long long) set_first_bits (&set[i]));
-      while (v != SET_NO_VALUE)
-      { printf(" %d.%d",SET_VAL_INDEX(v),SET_VAL_OFFSET(v));
-        v = use_set_chain_next ? set_chain_next (set[i].chain, v)
-                               : set_next (&set[i], v, 0);
+      printf (" %016llx :", (long long) sbset_first_bits (&set[i]));
+      while (v != SBSET_NO_VALUE)
+      { printf(" %d.%d",SBSET_VAL_INDEX(v),SBSET_VAL_OFFSET(v));
+        v = use_sbset_chain_next ? sbset_chain_next (set[i].chain, v)
+                               : sbset_next (&set[i], v, 0);
       }
       printf("\n");
     }
 
-    use_set_chain_next = !use_set_chain_next;
+    use_sbset_chain_next = !use_sbset_chain_next;
   }
 }

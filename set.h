@@ -26,43 +26,43 @@
 #include <stdint.h>
 
 
-#ifndef SET_USE_BUILTINS
-#define SET_USE_BUILTINS (defined(__GNUC__) || defined(__clang__))
+#ifndef SBSET_USE_BUILTINS
+#define SBSET_USE_BUILTINS (defined(__GNUC__) || defined(__clang__))
 #endif
 
 
-/* TYPES FOR (INDEX, OFFSET) PAIRS.  The set_value_t type is for the pair,
-   and is designed to be 32 bits.  The set_index_t type must be signed,
-   and should also be 32 bits, to limit space used.  The set_offset_t type
+/* TYPES FOR (INDEX, OFFSET) PAIRS.  The sbset_value_t type is for the pair,
+   and is designed to be 32 bits.  The sbset_index_t type must be signed,
+   and should also be 32 bits, to limit space used.  The sbset_offset_t type
    is not used in data structures, and can be int, as that is big enough
    and presumably most efficient. */
 
-typedef int set_offset_t;
-typedef int32_t set_index_t;
-typedef uint32_t set_value_t;
+typedef int sbset_offset_t;
+typedef int32_t sbset_index_t;
+typedef uint32_t sbset_value_t;
 
 
 /* MACROS TO CREATE / ACCESS (INDEX, OFFSET) PAIRS. */
 
-#define SET_VAL(index,offset) \
-  (((set_value_t)(index) << SET_OFFSET_BITS) | (offset))
-#define SET_VAL_INDEX(val) \
-  ((val) >> SET_OFFSET_BITS)
-#define SET_VAL_OFFSET(val) \
-  ((val) & (((set_value_t)1 << SET_OFFSET_BITS) - 1))
+#define SBSET_VAL(index,offset) \
+  (((sbset_value_t)(index) << SBSET_OFFSET_BITS) | (offset))
+#define SBSET_VAL_INDEX(val) \
+  ((val) >> SBSET_OFFSET_BITS)
+#define SBSET_VAL_OFFSET(val) \
+  ((val) & (((sbset_value_t)1 << SBSET_OFFSET_BITS) - 1))
 
 
 /* TYPE OF THE BIT VECTOR RECORDING SET MEMBERSHIP IN A SEGMENT.  Must
    be unsigned. */
 
-#if SET_OFFSET_BITS == 3
-  typedef uint8_t set_bits_t;
-#elif SET_OFFSET_BITS == 4
-  typedef uint16_t set_bits_t;
-#elif SET_OFFSET_BITS == 5
-  typedef uint32_t set_bits_t;
-#elif SET_OFFSET_BITS == 6
-  typedef uint64_t set_bits_t;
+#if SBSET_OFFSET_BITS == 3
+  typedef uint8_t sbset_bits_t;
+#elif SBSET_OFFSET_BITS == 4
+  typedef uint16_t sbset_bits_t;
+#elif SBSET_OFFSET_BITS == 5
+  typedef uint32_t sbset_bits_t;
+#elif SBSET_OFFSET_BITS == 6
+  typedef uint64_t sbset_bits_t;
 #endif
 
 
@@ -70,18 +70,18 @@ typedef uint32_t set_value_t;
    index and offset.  This value must not be used for an actual
    element in a set. */
 
-#ifdef SET_NO_VALUE_ZERO
-#define SET_NO_VALUE ((set_value_t)0)
+#ifdef SBSET_NO_VALUE_ZERO
+#define SBSET_NO_VALUE ((sbset_value_t)0)
 #else
-#define SET_NO_VALUE (~(set_value_t)0)
+#define SBSET_NO_VALUE (~(sbset_value_t)0)
 #endif
 
 
 /* SPECIAL INDEXES USED IN CHAINS.  These are not used in real (index, offset)
    pairs, in which the index is unsigned. */
 
-#define SET_NOT_IN_CHAIN -1
-#define SET_END_OF_CHAIN -2
+#define SBSET_NOT_IN_CHAIN -1
+#define SBSET_END_OF_CHAIN -2
 
 
 /* DATA FOR A SEGMENT.  Records which objects in the segment are present in
@@ -91,11 +91,11 @@ typedef uint32_t set_value_t;
    of adjusting the size of the structure to a power of two (advantageous for
    speed of indexing, and possibly cache performance). */
 
-struct set_segment
-{ set_bits_t bits[SET_CHAINS];  /* Bits indicating membership in sets */
-  set_index_t next[SET_CHAINS]; /* Next / SET_NOT_IN_CHAIN / SET_END_OF_CHAIN */
-# ifdef SET_EXTRA_INFO
-  SET_EXTRA_INFO                /* Extra info of use to the application, or  */
+struct sbset_segment
+{ sbset_bits_t bits[SBSET_CHAINS];  /* Bits indicating membership in sets */
+  sbset_index_t next[SBSET_CHAINS]; /* Next / SBSET_NOT_IN_CHAIN / SBSET_END_OF_CHAIN */
+# ifdef SBSET_EXTRA_INFO
+  SBSET_EXTRA_INFO                /* Extra info of use to the application, or  */
 # endif                         /*  padding to make struct size a power of 2 */
 };
 
@@ -105,8 +105,8 @@ struct set_segment
 
 struct set
 { int chain;                    /* Number of chain used for this set */
-  set_index_t first;            /* First segment, or SET_END_OF_CHAIN */
-  set_value_t n_elements;       /* Number of elements in set */
+  sbset_index_t first;            /* First segment, or SBSET_END_OF_CHAIN */
+  sbset_value_t n_elements;       /* Number of elements in set */
 };
 
 
@@ -114,14 +114,14 @@ struct set
 
 /* First, do anything that needs doing at this point from set-app.h. */
 
-#ifdef SET_DO_BEFORE_INLINE
-SET_DO_BEFORE_INLINE
+#ifdef SBSET_DO_BEFORE_INLINE
+SBSET_DO_BEFORE_INLINE
 #endif
 
 
 /* RETURN THE CHAIN USED BY A SET. */
 
-static inline int set_chain (struct set *set)
+static inline int sbset_chain (struct set *set)
 { 
   return set->chain;
 }
@@ -132,11 +132,11 @@ static inline int set_chain (struct set *set)
    This is implemented by just looking at the right bit in the bits for
    the chain. */
 
-static inline int set_chain_contains (int chain, set_value_t val)
+static inline int sbset_chain_contains (int chain, sbset_value_t val)
 {
-  set_index_t index = SET_VAL_INDEX(val);
-  set_offset_t offset = SET_VAL_OFFSET(val);
-  struct set_segment *seg = SET_SEGMENT(index);
+  sbset_index_t index = SBSET_VAL_INDEX(val);
+  sbset_offset_t offset = SBSET_VAL_OFFSET(val);
+  struct sbset_segment *seg = SBSET_SEGMENT(index);
 
   return (seg->bits[chain] >> offset) & 1;
 }
@@ -147,10 +147,10 @@ static inline int set_chain_contains (int chain, set_value_t val)
    This is implemented by just checking whether any bits for that chain in the
    segment. */
 
-static inline int set_chain_contains_any_in_segment(int chain, set_value_t val)
+static inline int sbset_chain_contains_any_in_segment(int chain, sbset_value_t val)
 {
-  set_index_t index = SET_VAL_INDEX(val);
-  struct set_segment *seg = SET_SEGMENT(index);
+  sbset_index_t index = SBSET_VAL_INDEX(val);
+  struct sbset_segment *seg = SBSET_SEGMENT(index);
 
   return seg->bits[chain] != 0;
 }
@@ -158,15 +158,15 @@ static inline int set_chain_contains_any_in_segment(int chain, set_value_t val)
 
 /* CHECK WHETHER A SET, OR ANY SET USING THE SAME CHAIN, CONTAINS A VALUE. */
 
-static inline int set_contains (struct set *set, set_value_t val)
+static inline int sbset_contains (struct set *set, sbset_value_t val)
 {
-  return set_chain_contains (set->chain, val);
+  return sbset_chain_contains (set->chain, val);
 }
 
 
 /* RETURN THE NUMBER OF ELEMENTS IN A SET. */
 
-static inline set_value_t set_n_elements (struct set *set)
+static inline sbset_value_t sbset_n_elements (struct set *set)
 {
   return set->n_elements;
 }
@@ -176,9 +176,9 @@ static inline set_value_t set_n_elements (struct set *set)
 
    Fast for gcc and clang, using their builtin functions. */
 
-static inline int set_bit_count (set_bits_t b)
+static inline int sbset_bit_count (sbset_bits_t b)
 { 
-# if SET_USE_BUILTINS
+# if SBSET_USE_BUILTINS
     return sizeof b <= sizeof (unsigned) ? __builtin_popcount(b) 
          : sizeof b <= sizeof (unsigned long) ? __builtin_popcountl(b) 
          : __builtin_popcountll(b);
@@ -200,9 +200,9 @@ static inline int set_bit_count (set_bits_t b)
 
    Fast for gcc and clang, using their builtin functions. */
 
-static inline int set_first_bit_pos (set_bits_t b)
+static inline int sbset_first_bit_pos (sbset_bits_t b)
 { 
-# if SET_USE_BUILTINS
+# if SBSET_USE_BUILTINS
     return sizeof b <= sizeof (unsigned) ? __builtin_ctz(b) 
          : sizeof b <= sizeof (unsigned long) ? __builtin_ctzl(b) 
          : __builtin_ctzll(b);
@@ -221,10 +221,10 @@ static inline int set_first_bit_pos (set_bits_t b)
 
 /* RETURN BITS INDICATING MEMBERSHIP FOR THE SEGMENT CONTAINING AN ELEMENT. */
 
-static inline set_bits_t set_chain_segment_bits (int chain, set_value_t val)
+static inline sbset_bits_t sbset_chain_segment_bits (int chain, sbset_value_t val)
 {
-  set_index_t index = SET_VAL_INDEX(val);
-  struct set_segment *seg = SET_SEGMENT(index);
+  sbset_index_t index = SBSET_VAL_INDEX(val);
+  struct sbset_segment *seg = SBSET_SEGMENT(index);
 
   return seg->bits[chain];
 }
@@ -232,15 +232,15 @@ static inline set_bits_t set_chain_segment_bits (int chain, set_value_t val)
 
 /* ASSIGN BITS INDICATING MEMBERSHIP FOR THE SEGMENT CONTAINING AN ELEMENT. */
 
-static inline void set_assign_segment_bits (struct set *set, 
-                                            set_value_t val, set_bits_t b)
+static inline void sbset_assign_segment_bits (struct set *set, 
+                                            sbset_value_t val, sbset_bits_t b)
 {
-  set_index_t index = SET_VAL_INDEX(val);
-  struct set_segment *seg = SET_SEGMENT(index);
+  sbset_index_t index = SBSET_VAL_INDEX(val);
+  struct sbset_segment *seg = SBSET_SEGMENT(index);
 
-  set->n_elements -= set_bit_count(seg->bits[set->chain]);
+  set->n_elements -= sbset_bit_count(seg->bits[set->chain]);
   seg->bits[set->chain] = b;
-  set->n_elements += set_bit_count(b);
+  set->n_elements += sbset_bit_count(b);
 }
 
 
@@ -250,34 +250,34 @@ static inline void set_assign_segment_bits (struct set *set,
    unused segments that are skipped are deleted from the list, to save
    time in any future searches. */
 
-static inline set_value_t set_chain_next (int chain, set_value_t val)
+static inline sbset_value_t sbset_chain_next (int chain, sbset_value_t val)
 {
-  set_index_t index = SET_VAL_INDEX(val);
-  set_offset_t offset = SET_VAL_OFFSET(val);
-  struct set_segment *seg = SET_SEGMENT(index);
+  sbset_index_t index = SBSET_VAL_INDEX(val);
+  sbset_offset_t offset = SBSET_VAL_OFFSET(val);
+  struct sbset_segment *seg = SBSET_SEGMENT(index);
 
   /* Get the bits after the one for the element we are looking after. */
 
-  set_bits_t b = seg->bits[chain] >> offset;
+  sbset_bits_t b = seg->bits[chain] >> offset;
   offset += 1;
   b >>= 1;
 
   /* If no bits are set after the one we are starting at, go to the
      next segment, removing ones that are unused.  We may discover
-     that there is no next element, and return SET_NO_VALUE. */
+     that there is no next element, and return SBSET_NO_VALUE. */
 
   if (b == 0)
-  { set_index_t nindex;
-    struct set_segment *nseg;
+  { sbset_index_t nindex;
+    struct sbset_segment *nseg;
 
     for (;;)
     { 
       nindex = seg->next[chain];
-      if (nindex == SET_END_OF_CHAIN) 
-      { return SET_NO_VALUE;
+      if (nindex == SBSET_END_OF_CHAIN) 
+      { return SBSET_NO_VALUE;
       }
 
-      nseg = SET_SEGMENT(nindex);
+      nseg = SBSET_SEGMENT(nindex);
 
       b = nseg->bits[chain];
       if (b != 0) 
@@ -285,48 +285,48 @@ static inline set_value_t set_chain_next (int chain, set_value_t val)
       }
 
       seg->next[chain] = nseg->next[chain];
-      nseg->next[chain] = SET_NOT_IN_CHAIN;
+      nseg->next[chain] = SBSET_NOT_IN_CHAIN;
     }
 
     index = nindex;
     offset = 0;
   }
 
-  offset += set_first_bit_pos(b);
+  offset += sbset_first_bit_pos(b);
 
-  return SET_VAL(index,offset);
+  return SBSET_VAL(index,offset);
 }
 
 
 /* FIND THE NEXT ELEMENT IN A SET THAT IS IN A DIFFERENT SEGMENT. */
 
-static inline set_value_t set_chain_next_segment (int chain, set_value_t val)
+static inline sbset_value_t sbset_chain_next_segment (int chain, sbset_value_t val)
 {
-  set_index_t index = SET_VAL_INDEX(val);
-  struct set_segment *seg = SET_SEGMENT(index);
+  sbset_index_t index = SBSET_VAL_INDEX(val);
+  struct sbset_segment *seg = SBSET_SEGMENT(index);
 
-  set_index_t nindex;
-  struct set_segment *nseg;
+  sbset_index_t nindex;
+  struct sbset_segment *nseg;
 
   /* Go to the next segment, removing any segments that are unused. If there
-     is no next segment, return SET_NO_VALUE. */
+     is no next segment, return SBSET_NO_VALUE. */
 
   for (;;)
   { 
     nindex = seg->next[chain];
-    if (nindex == SET_END_OF_CHAIN) 
-    { return SET_NO_VALUE;
+    if (nindex == SBSET_END_OF_CHAIN) 
+    { return SBSET_NO_VALUE;
     }
 
-    nseg = SET_SEGMENT(nindex);
+    nseg = SBSET_SEGMENT(nindex);
 
-    set_bits_t b = nseg->bits[chain];
+    sbset_bits_t b = nseg->bits[chain];
     if (b != 0) 
-    { return SET_VAL (nindex, set_first_bit_pos(b));
+    { return SBSET_VAL (nindex, sbset_first_bit_pos(b));
     }
 
     seg->next[chain] = nseg->next[chain];
-    nseg->next[chain] = SET_NOT_IN_CHAIN;
+    nseg->next[chain] = SBSET_NOT_IN_CHAIN;
   }
 }
 
@@ -340,19 +340,19 @@ static inline set_value_t set_chain_next_segment (int chain, set_value_t val)
    This segment is then added to the linked list of segments for this
    set if it is not there already, and the element count is updated. */
 
-static inline int set_add (struct set *set, set_value_t val)
+static inline int sbset_add (struct set *set, sbset_value_t val)
 {
-  set_index_t index = SET_VAL_INDEX(val);
-  struct set_segment *seg = SET_SEGMENT(index);
+  sbset_index_t index = SBSET_VAL_INDEX(val);
+  struct sbset_segment *seg = SBSET_SEGMENT(index);
 
-  set_bits_t b = seg->bits[set->chain];
-  set_bits_t t = (set_bits_t)1 << SET_VAL_OFFSET(val);
+  sbset_bits_t b = seg->bits[set->chain];
+  sbset_bits_t t = (sbset_bits_t)1 << SBSET_VAL_OFFSET(val);
 
   if (b & t)
   { return 1;
   }
 
-  if (seg->next[set->chain] == SET_NOT_IN_CHAIN)
+  if (seg->next[set->chain] == SBSET_NOT_IN_CHAIN)
   { seg->next[set->chain] = set->first;
     set->first = index;
   }
@@ -371,13 +371,13 @@ static inline int set_add (struct set *set, set_value_t val)
    chain, within the segment structure for this value's index, and updating
    the count of elements in the set. */
 
-static inline int set_remove (struct set *set, set_value_t val)
+static inline int sbset_remove (struct set *set, sbset_value_t val)
 {
-  set_index_t index = SET_VAL_INDEX(val);
-  struct set_segment *seg = SET_SEGMENT(index);
+  sbset_index_t index = SBSET_VAL_INDEX(val);
+  struct sbset_segment *seg = SBSET_SEGMENT(index);
 
-  set_bits_t b = seg->bits[set->chain];
-  set_bits_t t = (set_bits_t)1 << SET_VAL_OFFSET(val);
+  sbset_bits_t b = seg->bits[set->chain];
+  sbset_bits_t t = (sbset_bits_t)1 << SBSET_VAL_OFFSET(val);
 
   if ((b & t) == 0)
   { return 0;
@@ -392,33 +392,33 @@ static inline int set_remove (struct set *set, set_value_t val)
 
 /* NON-INLINE FUNCTIONS USED BY THE APPLICATION.
 
-   There are no non-inline function declarations if SET_NO_FUNCTIONS
+   There are no non-inline function declarations if SBSET_NO_FUNCTIONS
    is defined.
 
-   If SET_STATIC is defined as non-zero, the non-inline API procedures
+   If SBSET_STATIC is defined as non-zero, the non-inline API procedures
    are static, and if used by the module, must be defined by including
    set.c after set.h.  Otherwise, prototypes only are declared here,
    and set.c must be compiled and linked to the program. */
 
-#ifndef SET_NO_FUNCTIONS
+#ifndef SBSET_NO_FUNCTIONS
 
-#if SET_STATIC
+#if SBSET_STATIC
 
-#define SET_PROC_CLASS static
+#define SBSET_PROC_CLASS static
 
 #else
 
-#define SET_PROC_CLASS
+#define SBSET_PROC_CLASS
 
-void set_init (struct set *set, int chain);
-void set_segment_init (struct set_segment *seg);
-set_value_t set_first (struct set *set, int remove);
-set_value_t set_next (struct set *set, set_value_t val, int remove);
-set_bits_t set_first_bits (struct set *set);
-void set_move_first (struct set *src, struct set *dst);
-void set_move_next (struct set *src, set_value_t val, struct set *dst);
-void set_add_segment (struct set *set, set_value_t val, int chain);
-void set_remove_segment (struct set *set, set_value_t val, int chain);
+void sbset_init (struct set *set, int chain);
+void sbset_segment_init (struct sbset_segment *seg);
+sbset_value_t sbset_first (struct set *set, int remove);
+sbset_value_t sbset_next (struct set *set, sbset_value_t val, int remove);
+sbset_bits_t sbset_first_bits (struct set *set);
+void sbset_move_first (struct set *src, struct set *dst);
+void sbset_move_next (struct set *src, sbset_value_t val, struct set *dst);
+void sbset_add_segment (struct set *set, sbset_value_t val, int chain);
+void sbset_remove_segment (struct set *set, sbset_value_t val, int chain);
 
 #endif
 

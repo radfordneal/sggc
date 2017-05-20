@@ -20,7 +20,7 @@
 
 #include <stdlib.h>
 
-#if !SET_STATIC
+#if !SBSET_STATIC
 #  include "set-app.h"
 #endif
 
@@ -34,43 +34,43 @@
 
 
 /* DEBUGGING CHECKS.  These check validity of data, calling abort if
-   the check fails.  Enabled only if SET_DEBUG is defined to be 1.
+   the check fails.  Enabled only if SBSET_DEBUG is defined to be 1.
    This may be done with a compiler flag, in which case it isn't
    overridden here. */
 
 static void check_n_elements (struct set *set);
 
-#ifndef SET_DEBUG
-#define SET_DEBUG 0
+#ifndef SBSET_DEBUG
+#define SBSET_DEBUG 0
 #endif
 
 #define CHK_CHAIN(chain) \
   do { \
-    if (SET_DEBUG && ((chain) < 0 || (chain) >= SET_CHAINS)) abort(); \
+    if (SBSET_DEBUG && ((chain) < 0 || (chain) >= SBSET_CHAINS)) abort(); \
   } while (0)
 
 #define CHK_SET(set) \
   do { \
     CHK_CHAIN((set)->chain); \
-    if (SET_DEBUG && (set)->first < 0 \
-                  && (set)->first != SET_END_OF_CHAIN) abort(); \
-    if (SET_DEBUG && (set)->n_elements != 0 \
-                  && (set)->first == SET_END_OF_CHAIN) abort(); \
-    if (SET_DEBUG) check_n_elements(set); \
+    if (SBSET_DEBUG && (set)->first < 0 \
+                  && (set)->first != SBSET_END_OF_CHAIN) abort(); \
+    if (SBSET_DEBUG && (set)->n_elements != 0 \
+                  && (set)->first == SBSET_END_OF_CHAIN) abort(); \
+    if (SBSET_DEBUG) check_n_elements(set); \
   } while (0)
 
-#define CHK_SET_INDEX(set,index) \
+#define CHK_SBSET_INDEX(set,index) \
   do { \
-    if (SET_DEBUG && !check_has_seg((set),(index))) abort(); \
+    if (SBSET_DEBUG && !check_has_seg((set),(index))) abort(); \
   } while (0)
 
 #define CHK_SEGMENT(seg,chain) \
   do { \
     CHK_CHAIN(chain); \
-    if (SET_DEBUG && (seg)->next[chain] < 0 \
-                  && (seg)->next[chain] != SET_NOT_IN_CHAIN \
-                  && (seg)->next[chain] != SET_END_OF_CHAIN) abort(); \
-    if (SET_DEBUG && (seg)->next[chain] == SET_NOT_IN_CHAIN \
+    if (SBSET_DEBUG && (seg)->next[chain] < 0 \
+                  && (seg)->next[chain] != SBSET_NOT_IN_CHAIN \
+                  && (seg)->next[chain] != SBSET_END_OF_CHAIN) abort(); \
+    if (SBSET_DEBUG && (seg)->next[chain] == SBSET_NOT_IN_CHAIN \
                   && (seg)->bits[chain] != 0) abort(); \
   } while (0)
 
@@ -79,13 +79,13 @@ static void check_n_elements (struct set *set);
 
 static inline void remove_empty (struct set *set)
 {
-  struct set_segment *seg;
+  struct sbset_segment *seg;
 
   CHK_SET(set);
 
-  while (set->first != SET_END_OF_CHAIN)
+  while (set->first != SBSET_END_OF_CHAIN)
   { 
-    seg = SET_SEGMENT(set->first);
+    seg = SBSET_SEGMENT(set->first);
     CHK_SEGMENT(seg,set->chain);
 
     if (seg->bits[set->chain] != 0)
@@ -93,7 +93,7 @@ static inline void remove_empty (struct set *set)
     }
 
     set->first = seg->next[set->chain];
-    seg->next[set->chain] = SET_NOT_IN_CHAIN;
+    seg->next[set->chain] = SBSET_NOT_IN_CHAIN;
   }
 }
 
@@ -102,18 +102,18 @@ static inline void remove_empty (struct set *set)
 
 static void check_n_elements (struct set *set)
 {
-  struct set_segment *seg;
-  set_index_t index;
-  set_value_t cnt;
+  struct sbset_segment *seg;
+  sbset_index_t index;
+  sbset_value_t cnt;
   int chain;
 
   chain = set->chain;
   cnt = set->n_elements;
   index = set->first;
 
-  while (index != SET_END_OF_CHAIN)
-  { seg = SET_SEGMENT(index);
-    cnt -= set_bit_count (seg->bits[chain]);
+  while (index != SBSET_END_OF_CHAIN)
+  { seg = SBSET_SEGMENT(index);
+    cnt -= sbset_bit_count (seg->bits[chain]);
     index = seg->next[chain];
   }
 
@@ -123,14 +123,14 @@ static void check_n_elements (struct set *set)
 
 /* CHECK WHETHER A SET CONTAINS A SEGMENT WITH GIVEN INDEX. */
 
-static int check_has_seg (struct set *set, set_index_t index)
+static int check_has_seg (struct set *set, sbset_index_t index)
 {
-  set_index_t ix = set->first;
-  while (ix != SET_END_OF_CHAIN)
+  sbset_index_t ix = set->first;
+  while (ix != SBSET_END_OF_CHAIN)
   { if (ix == index) 
     { return 1;
     }
-    ix = SET_SEGMENT(ix) -> next[set->chain];
+    ix = SBSET_SEGMENT(ix) -> next[set->chain];
   }
   return 0;
 }
@@ -141,24 +141,24 @@ static int check_has_seg (struct set *set, set_index_t index)
 
 /* INITIALIZE A SET, AS EMPTY. */
 
-SET_PROC_CLASS void set_init (struct set *set, int chain)
+SBSET_PROC_CLASS void sbset_init (struct set *set, int chain)
 {
   CHK_CHAIN(chain);
 
   set->chain = chain;
-  set->first = SET_END_OF_CHAIN;
+  set->first = SBSET_END_OF_CHAIN;
   set->n_elements = 0;
 }
 
 
 /* INITIALIZE A SEGMENT STRUCTURE. */
 
-SET_PROC_CLASS void set_segment_init (struct set_segment *seg)
+SBSET_PROC_CLASS void sbset_segment_init (struct sbset_segment *seg)
 {
   int j;
-  for (j = 0; j < SET_CHAINS; j++)
+  for (j = 0; j < SBSET_CHAINS; j++)
   { seg->bits[j] = 0;
-    seg->next[j] = SET_NOT_IN_CHAIN;
+    seg->next[j] = SBSET_NOT_IN_CHAIN;
   }
 }
 
@@ -173,30 +173,30 @@ SET_PROC_CLASS void set_segment_init (struct set_segment *seg)
    ensure that if the segment no longer contains elements of this set
    it can be used in another set using the same chain.  */
 
-SET_PROC_CLASS set_value_t set_first (struct set *set, int remove)
+SBSET_PROC_CLASS sbset_value_t sbset_first (struct set *set, int remove)
 { 
-  struct set_segment *seg;
-  set_value_t first;
-  set_bits_t b;
+  struct sbset_segment *seg;
+  sbset_value_t first;
+  sbset_bits_t b;
   int o;
 
   CHK_SET(set);
 
   remove_empty(set);
 
-  if (set->first == SET_END_OF_CHAIN) 
-  { return SET_NO_VALUE;
+  if (set->first == SBSET_END_OF_CHAIN) 
+  { return SBSET_NO_VALUE;
   }
 
-  seg = SET_SEGMENT(set->first);
+  seg = SBSET_SEGMENT(set->first);
   CHK_SEGMENT(seg,set->chain);
 
   b = seg->bits[set->chain];
-  o = set_first_bit_pos(b);
-  first = SET_VAL (set->first, o);
+  o = sbset_first_bit_pos(b);
+  first = SBSET_VAL (set->first, o);
 
   if (remove) 
-  { seg->bits[set->chain] &= ~ ((set_bits_t)1 << o);
+  { seg->bits[set->chain] &= ~ ((sbset_bits_t)1 << o);
     set->n_elements -= 1;
     remove_empty(set);
   }
@@ -212,29 +212,29 @@ SET_PROC_CLASS set_value_t set_first (struct set *set, int remove)
    If the linked list has to be followed to a later segment, any
    unused segments that are skipped are deleted from the list, to save
    time in any future searches.  As a consequence, if 'val' is not
-   removed, the value returned (if not SET_NO_VALUE) is either in the
+   removed, the value returned (if not SBSET_NO_VALUE) is either in the
    segment containing 'val' or the following segment.  (But note that
    if 'val' is removed, the segment containing it is not removed from
    the list even if it no longer has any elements.) */
 
-SET_PROC_CLASS set_value_t set_next (struct set *set, 
-                                     set_value_t val, int remove)
+SBSET_PROC_CLASS sbset_value_t sbset_next (struct set *set, 
+                                     sbset_value_t val, int remove)
 {
-  set_index_t index = SET_VAL_INDEX(val);
-  set_offset_t offset = SET_VAL_OFFSET(val);
-  struct set_segment *seg = SET_SEGMENT(index);
+  sbset_index_t index = SBSET_VAL_INDEX(val);
+  sbset_offset_t offset = SBSET_VAL_OFFSET(val);
+  struct sbset_segment *seg = SBSET_SEGMENT(index);
 
   CHK_SET(set);
   CHK_SEGMENT(seg,set->chain);
-  CHK_SET_INDEX(set,index);
+  CHK_SBSET_INDEX(set,index);
 
   /* Get the bits after the one for the element we are looking after.
      Also clear the bit for 'val' if we are removing it. */
 
-  set_bits_t b = seg->bits[set->chain] >> offset;
-  if (SET_DEBUG && (b & 1) == 0) abort();  /* 'val' isn't in 'set' */
+  sbset_bits_t b = seg->bits[set->chain] >> offset;
+  if (SBSET_DEBUG && (b & 1) == 0) abort();  /* 'val' isn't in 'set' */
   if (remove)
-  { seg->bits[set->chain] &= ~ ((set_bits_t) 1 << offset);
+  { seg->bits[set->chain] &= ~ ((sbset_bits_t) 1 << offset);
     set->n_elements -= 1;
   }
   offset += 1;
@@ -242,20 +242,20 @@ SET_PROC_CLASS set_value_t set_next (struct set *set,
 
   /* If no bits are set after the one we are starting at, go to the
      next segment, removing ones that are unused.  We may discover
-     that there is no next element, and return SET_NO_VALUE. */
+     that there is no next element, and return SBSET_NO_VALUE. */
 
   if (b == 0)
-  { set_index_t nindex;
-    struct set_segment *nseg;
+  { sbset_index_t nindex;
+    struct sbset_segment *nseg;
 
     for (;;)
     { 
       nindex = seg->next[set->chain];
-      if (nindex == SET_END_OF_CHAIN) 
-      { return SET_NO_VALUE;
+      if (nindex == SBSET_END_OF_CHAIN) 
+      { return SBSET_NO_VALUE;
       }
 
-      nseg = SET_SEGMENT(nindex);
+      nseg = SBSET_SEGMENT(nindex);
       CHK_SEGMENT(nseg,set->chain);
 
       b = nseg->bits[set->chain];
@@ -264,61 +264,61 @@ SET_PROC_CLASS set_value_t set_next (struct set *set,
       }
 
       seg->next[set->chain] = nseg->next[set->chain];
-      nseg->next[set->chain] = SET_NOT_IN_CHAIN;
+      nseg->next[set->chain] = SBSET_NOT_IN_CHAIN;
     }
 
     index = nindex;
     offset = 0;
   }
 
-  offset += set_first_bit_pos(b);
+  offset += sbset_first_bit_pos(b);
 
   CHK_SET(set);
 
-  return SET_VAL(index,offset);
+  return SBSET_VAL(index,offset);
 }
 
 
 /* RETURN THE BITS INDICATING MEMBERSHIP FOR THE FIRST SEGMENT OF A SET. 
    First removes empty segments at the front. */
 
-SET_PROC_CLASS set_bits_t set_first_bits (struct set *set)
+SBSET_PROC_CLASS sbset_bits_t sbset_first_bits (struct set *set)
 {
   CHK_SET(set);
   remove_empty(set);
 
-  if (set->first == SET_END_OF_CHAIN)
+  if (set->first == SBSET_END_OF_CHAIN)
   { return 0;
   }
 
-  return SET_SEGMENT(set->first) -> bits[set->chain];
+  return SBSET_SEGMENT(set->first) -> bits[set->chain];
 }
 
 
 /* MOVE THE FIRST SEGMENT OF A SET TO ANOTHER SET USING THE SAME CHAIN. */
 
-SET_PROC_CLASS void set_move_first (struct set *src, 
+SBSET_PROC_CLASS void sbset_move_first (struct set *src, 
                                     struct set *dst)
 {
-  struct set_segment *seg;
-  set_index_t index;
-  set_value_t cnt;
+  struct sbset_segment *seg;
+  sbset_index_t index;
+  sbset_value_t cnt;
 
   CHK_SET(src);
   CHK_SET(dst);
 
-  if (SET_DEBUG && src->chain != dst->chain) abort();
-  if (SET_DEBUG && src->first == SET_END_OF_CHAIN) abort();
+  if (SBSET_DEBUG && src->chain != dst->chain) abort();
+  if (SBSET_DEBUG && src->first == SBSET_END_OF_CHAIN) abort();
 
   remove_empty(src);
   remove_empty(dst);
 
   index = src->first;
-  seg = SET_SEGMENT(index);
+  seg = SBSET_SEGMENT(index);
   CHK_SEGMENT(seg,src->chain);
-  if (SET_DEBUG && seg->bits[src->chain] == 0) abort();
+  if (SBSET_DEBUG && seg->bits[src->chain] == 0) abort();
 
-  cnt = set_bit_count(seg->bits[src->chain]);
+  cnt = sbset_bit_count(seg->bits[src->chain]);
   src->n_elements -= cnt;
   dst->n_elements += cnt;
 
@@ -334,29 +334,29 @@ SET_PROC_CLASS void set_move_first (struct set *src,
 
 /* MOVE SEGMENT AFTER THAT CONTAINING AN ELEMENT TO ANOTHER SET IN THE CHAIN. */
 
-SET_PROC_CLASS void set_move_next (struct set *src, set_value_t val, 
+SBSET_PROC_CLASS void sbset_move_next (struct set *src, sbset_value_t val, 
                                    struct set *dst)
 {
-  set_index_t index = SET_VAL_INDEX(val);
-  struct set_segment *seg = SET_SEGMENT(index);
-  set_value_t cnt;
+  sbset_index_t index = SBSET_VAL_INDEX(val);
+  struct sbset_segment *seg = SBSET_SEGMENT(index);
+  sbset_value_t cnt;
 
   CHK_SET(src);
-  CHK_SET_INDEX(src,index);
+  CHK_SBSET_INDEX(src,index);
   CHK_SET(dst);
 
-  if (SET_DEBUG && src->chain != dst->chain) abort();
+  if (SBSET_DEBUG && src->chain != dst->chain) abort();
 
   int chain = src->chain;
-  set_index_t nindex = seg->next[chain];
+  sbset_index_t nindex = seg->next[chain];
 
-  if (SET_DEBUG && nindex == SET_END_OF_CHAIN) abort();
+  if (SBSET_DEBUG && nindex == SBSET_END_OF_CHAIN) abort();
 
-  struct set_segment *nseg = SET_SEGMENT(nindex);
+  struct sbset_segment *nseg = SBSET_SEGMENT(nindex);
   CHK_SEGMENT(nseg,chain);
-  if (SET_DEBUG && nseg->bits[chain] == 0) abort();
+  if (SBSET_DEBUG && nseg->bits[chain] == 0) abort();
 
-  cnt = set_bit_count(nseg->bits[chain]);
+  cnt = sbset_bit_count(nseg->bits[chain]);
   src->n_elements -= cnt;
   dst->n_elements += cnt;
 
@@ -371,26 +371,26 @@ SET_PROC_CLASS void set_move_next (struct set *src, set_value_t val,
 
 /* ADD ELEMENTS IN ANY SET USING SOME CHAIN WITHIN SOME SEGMENT TO SOME SET. */
 
-SET_PROC_CLASS void set_add_segment (struct set *set, 
-                                     set_value_t val, int chain)
+SBSET_PROC_CLASS void sbset_add_segment (struct set *set, 
+                                     sbset_value_t val, int chain)
 {
   CHK_SET(set);
   int dst_chain = set->chain;
 
-  set_index_t index = SET_VAL_INDEX(val);
-  struct set_segment *seg = SET_SEGMENT(index);
+  sbset_index_t index = SBSET_VAL_INDEX(val);
+  struct sbset_segment *seg = SBSET_SEGMENT(index);
 
   CHK_SEGMENT(seg,dst_chain);
   CHK_SEGMENT(seg,chain);
 
-  set_bits_t added_bits = seg->bits[chain] & ~seg->bits[dst_chain];
+  sbset_bits_t added_bits = seg->bits[chain] & ~seg->bits[dst_chain];
 
   if (added_bits != 0)
   { 
     seg->bits[dst_chain] |= added_bits;
-    set->n_elements += set_bit_count(added_bits);
+    set->n_elements += sbset_bit_count(added_bits);
 
-    if (seg->next[dst_chain] == SET_NOT_IN_CHAIN)
+    if (seg->next[dst_chain] == SBSET_NOT_IN_CHAIN)
     { seg->next[dst_chain] = set->first;
       set->first = index;
     }
@@ -402,24 +402,24 @@ SET_PROC_CLASS void set_add_segment (struct set *set,
 
 /* REMOVE ELEMENTS IN A SET WITHIN SOME SEGMENT AND IN ANY SET IN SOME CHAIN. */
 
-SET_PROC_CLASS void set_remove_segment (struct set *set, 
-                                        set_value_t val, int chain)
+SBSET_PROC_CLASS void sbset_remove_segment (struct set *set, 
+                                        sbset_value_t val, int chain)
 {
   CHK_SET(set);
   int dst_chain = set->chain;
 
-  set_index_t index = SET_VAL_INDEX(val);
-  struct set_segment *seg = SET_SEGMENT(index);
+  sbset_index_t index = SBSET_VAL_INDEX(val);
+  struct sbset_segment *seg = SBSET_SEGMENT(index);
 
   CHK_SEGMENT(seg,dst_chain);
   CHK_SEGMENT(seg,chain);
 
-  set_bits_t removed_bits = seg->bits[chain] & seg->bits[dst_chain];
+  sbset_bits_t removed_bits = seg->bits[chain] & seg->bits[dst_chain];
 
   if (removed_bits != 0)
   { 
     seg->bits[dst_chain] &= ~removed_bits;
-    set->n_elements -= set_bit_count(removed_bits);
+    set->n_elements -= sbset_bit_count(removed_bits);
   }
 
   CHK_SET(set);

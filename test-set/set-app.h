@@ -18,18 +18,18 @@
    51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA. */
 
 
-#define SET_OFFSET_BITS 6
-#define SET_CHAINS 2
+#define SBSET_OFFSET_BITS 6
+#define SBSET_CHAINS 2
 
-static struct set_segment *SET_SEGMENT ();
+static struct sbset_segment *SBSET_SEGMENT ();
 
 #include "set.h"
 
 #define N_SEG 10
 
-struct set_segment segment[N_SEG];
+struct sbset_segment segment[N_SEG];
 
-static inline struct set_segment *SET_SEGMENT (set_index_t index)
+static inline struct sbset_segment *SBSET_SEGMENT (sbset_index_t index)
 { return &segment[index];
 }
 

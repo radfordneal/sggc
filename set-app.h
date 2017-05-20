@@ -20,29 +20,29 @@
 
 /* NUMBER OF OFFSET BITS IN A (SEGMENT INDEX, OFFSET) PAIR. */
 
-#define SET_OFFSET_BITS 6  /* Max is 6 for using 64-bit shift/mask operations */
+#define SBSET_OFFSET_BITS 6  /* Max is 6 for using 64-bit shift/mask operations */
 
 
 /* CHAINS FOR LINKING SEGMENTS IN SETS. */
 
-#define SET_CHAINS 5       /* Number of chains that can be used for sets */
+#define SBSET_CHAINS 5       /* Number of chains that can be used for sets */
 
-#  define SET_UNUSED_FREE_NEW 0  /* Unused, free or newly allocated objects */
+#  define SBSET_UNUSED_FREE_NEW 0  /* Unused, free or newly allocated objects */
 
-#  define SET_OLD_GEN1 1         /* Objects that survived one GC */
+#  define SBSET_OLD_GEN1 1         /* Objects that survived one GC */
 
-#  define SET_OLD_GEN2_UNCOL 2   /* Objects that survived more than one GC,
+#  define SBSET_OLD_GEN2_UNCOL 2   /* Objects that survived more than one GC,
                                     and also constant and uncollected objects */
 
-#  define SET_OLD_TO_NEW 3       /* Objects maybe with old-to-new references */
+#  define SBSET_OLD_TO_NEW 3       /* Objects maybe with old-to-new references */
 
-#  define SET_LOOK_AT 4          /* Objects that still need to be looked at
+#  define SBSET_LOOK_AT 4          /* Objects that still need to be looked at
                                     in order to mark objects still in use */
 
 
-/* EXTRA INFORMATION STORED IN A SET_SEGMENT STRUCTURE.  Putting it
+/* EXTRA INFORMATION STORED IN A SBSET_SEGMENT STRUCTURE.  Putting it
    here takes advantage of what might otherwise be 32 bits of unused
-   padding, and makes the set_segment struct be exactly 64 bytes in
+   padding, and makes the sbset_segment struct be exactly 64 bytes in
    size (maybe advantageous for index computation (if needed), and
    perhaps for cache behaviour).
 
@@ -52,7 +52,7 @@
 
 #define SGGC_CHUNK_BITS 31 /* Bits used to record the number of chunks */
 
-#define SET_EXTRA_INFO \
+#define SBSET_EXTRA_INFO \
   union \
   { struct                 /* For big segments... */ \
     { unsigned char kind;     /* The kind of segment (equal to type if big) */ \
@@ -85,16 +85,16 @@
 
 #ifdef SGGC_MAX_SEGMENTS
 #ifdef SGGC_SEG_DIRECT
-#define SET_DO_BEFORE_INLINE \
-  SGGC_EXTERN struct set_segment sggc_segment[SGGC_MAX_SEGMENTS];
+#define SBSET_DO_BEFORE_INLINE \
+  SGGC_EXTERN struct sbset_segment sggc_segment[SGGC_MAX_SEGMENTS];
 #else
-SGGC_EXTERN struct set_segment *sggc_segment[SGGC_MAX_SEGMENTS];
+SGGC_EXTERN struct sbset_segment *sggc_segment[SGGC_MAX_SEGMENTS];
 #endif
 #else
 #ifdef SGGC_SEG_DIRECT
-SGGC_EXTERN struct set_segment *sggc_segment;
+SGGC_EXTERN struct sbset_segment *sggc_segment;
 #else
-SGGC_EXTERN struct set_segment **sggc_segment;
+SGGC_EXTERN struct sbset_segment **sggc_segment;
 #endif
 #endif
 
@@ -102,9 +102,9 @@ SGGC_EXTERN struct set_segment **sggc_segment;
 /* MACRO FOR GETTING SEGMENT POINTER FROM SEGMENT INDEX. */
 
 #ifdef SGGC_SEG_DIRECT
-#define SET_SEGMENT(index) (sggc_segment+index)
+#define SBSET_SEGMENT(index) (sggc_segment+index)
 #else
-#define SET_SEGMENT(index) (sggc_segment[index])
+#define SBSET_SEGMENT(index) (sggc_segment[index])
 #endif
 
 
