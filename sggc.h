@@ -42,7 +42,7 @@
 #define SBSET_NO_FUNCTIONS
 #endif
 
-#include "set-app.h"
+#include "sbset-app.h"
 #include <stdlib.h>
 #ifdef SGGC_USE_MEMSET
 #include <string.h>

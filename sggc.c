@@ -31,7 +31,7 @@
 #include "sggc-app.h"
 
 #if SBSET_STATIC
-# include "set.c"      /* Define set procedures here as static, not linked */
+# include "sbset.c"    /* Define set procedures here as static, not linked */
 #endif
 
 

@@ -110,4 +110,4 @@ SGGC_EXTERN struct sbset_segment **sggc_segment;
 
 /* INCLUDE THE NON-APPLICATION-SPECIFIC HEADER FOR THE SET MODULE. */
 
-#include "set.h"
+#include "sbset.h"
