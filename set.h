@@ -103,7 +103,7 @@ struct sbset_segment
 /* DESCRIPTION OF A SET.  The chain used must not be used by any other set,
    unless the two sets never contain elements from the same segment. */
 
-struct set
+struct sbset
 { int chain;                    /* Number of chain used for this set */
   sbset_index_t first;            /* First segment, or SBSET_END_OF_CHAIN */
   sbset_value_t n_elements;       /* Number of elements in set */
@@ -121,7 +121,7 @@ SBSET_DO_BEFORE_INLINE
 
 /* RETURN THE CHAIN USED BY A SET. */
 
-static inline int sbset_chain (struct set *set)
+static inline int sbset_chain (struct sbset *set)
 { 
   return set->chain;
 }
@@ -158,7 +158,7 @@ static inline int sbset_chain_contains_any_in_segment(int chain, sbset_value_t v
 
 /* CHECK WHETHER A SET, OR ANY SET USING THE SAME CHAIN, CONTAINS A VALUE. */
 
-static inline int sbset_contains (struct set *set, sbset_value_t val)
+static inline int sbset_contains (struct sbset *set, sbset_value_t val)
 {
   return sbset_chain_contains (set->chain, val);
 }
@@ -166,7 +166,7 @@ static inline int sbset_contains (struct set *set, sbset_value_t val)
 
 /* RETURN THE NUMBER OF ELEMENTS IN A SET. */
 
-static inline sbset_value_t sbset_n_elements (struct set *set)
+static inline sbset_value_t sbset_n_elements (struct sbset *set)
 {
   return set->n_elements;
 }
@@ -232,7 +232,7 @@ static inline sbset_bits_t sbset_chain_segment_bits (int chain, sbset_value_t va
 
 /* ASSIGN BITS INDICATING MEMBERSHIP FOR THE SEGMENT CONTAINING AN ELEMENT. */
 
-static inline void sbset_assign_segment_bits (struct set *set, 
+static inline void sbset_assign_segment_bits (struct sbset *set, 
                                             sbset_value_t val, sbset_bits_t b)
 {
   sbset_index_t index = SBSET_VAL_INDEX(val);
@@ -340,7 +340,7 @@ static inline sbset_value_t sbset_chain_next_segment (int chain, sbset_value_t v
    This segment is then added to the linked list of segments for this
    set if it is not there already, and the element count is updated. */
 
-static inline int sbset_add (struct set *set, sbset_value_t val)
+static inline int sbset_add (struct sbset *set, sbset_value_t val)
 {
   sbset_index_t index = SBSET_VAL_INDEX(val);
   struct sbset_segment *seg = SBSET_SEGMENT(index);
@@ -371,7 +371,7 @@ static inline int sbset_add (struct set *set, sbset_value_t val)
    chain, within the segment structure for this value's index, and updating
    the count of elements in the set. */
 
-static inline int sbset_remove (struct set *set, sbset_value_t val)
+static inline int sbset_remove (struct sbset *set, sbset_value_t val)
 {
   sbset_index_t index = SBSET_VAL_INDEX(val);
   struct sbset_segment *seg = SBSET_SEGMENT(index);
@@ -410,15 +410,15 @@ static inline int sbset_remove (struct set *set, sbset_value_t val)
 
 #define SBSET_PROC_CLASS
 
-void sbset_init (struct set *set, int chain);
+void sbset_init (struct sbset *set, int chain);
 void sbset_segment_init (struct sbset_segment *seg);
-sbset_value_t sbset_first (struct set *set, int remove);
-sbset_value_t sbset_next (struct set *set, sbset_value_t val, int remove);
-sbset_bits_t sbset_first_bits (struct set *set);
-void sbset_move_first (struct set *src, struct set *dst);
-void sbset_move_next (struct set *src, sbset_value_t val, struct set *dst);
-void sbset_add_segment (struct set *set, sbset_value_t val, int chain);
-void sbset_remove_segment (struct set *set, sbset_value_t val, int chain);
+sbset_value_t sbset_first (struct sbset *set, int remove);
+sbset_value_t sbset_next (struct sbset *set, sbset_value_t val, int remove);
+sbset_bits_t sbset_first_bits (struct sbset *set);
+void sbset_move_first (struct sbset *src, struct sbset *dst);
+void sbset_move_next (struct sbset *src, sbset_value_t val, struct sbset *dst);
+void sbset_add_segment (struct sbset *set, sbset_value_t val, int chain);
+void sbset_remove_segment (struct sbset *set, sbset_value_t val, int chain);
 
 #endif
 

@@ -19,13 +19,13 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include "set-app.h"
+#include "sbset-app.h"
 #if SBSET_STATIC
-#include "set.c"
+#include "sbset.c"
 #endif
 
 #define N_SET 3
-struct set set[N_SET];
+struct sbset set[N_SET];
 
 int main (void)
 { 

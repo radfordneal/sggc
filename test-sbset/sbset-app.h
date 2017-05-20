@@ -23,7 +23,7 @@
 
 static struct sbset_segment *SBSET_SEGMENT ();
 
-#include "set.h"
+#include "sbset.h"
 
 #define N_SEG 10
 

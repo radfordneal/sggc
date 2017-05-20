@@ -20,10 +20,11 @@ Copyright (c) 2016, 2017 Radford M. Neal.
 
 INTRODUCTION
 
-This set facility is designed to support the SGGC functions, but could
-be used for other purposes, and hence is documented separately here.
+This facility supporting segmental bit-vector sets is designed to
+support the SGGC functions, but could be used for other purposes, and
+hence is documented separately here.
 
-The set facility manages sets of "values", each of which is in a
+The sbset facility manages sets of "values", each of which is in a
 "segment".  The number of possible values in a segment is fixed and in
 the present implementation is limited to a power of two between 8 and
 64 (larger values would require new coding and have a performance
@@ -36,8 +37,8 @@ of segment index and offset within segment, which must fit in 32 bits
 possible).
 
 What segment indexes are permitted is determined by the application,
-via its definition of the SBSET_SEGMENT function/macro, and its calls of
-the sbset_segment_init procedure.  The application must reserve
+via its definition of the SBSET_SEGMENT function/macro, and its calls
+of the sbset_segment_init procedure.  The application must reserve
 SBSET_NO_VALUE as something never used as a real value, but can select
 whether the (index, offset) pair for SBSET_NO_VALUE has both index and
 offset that are all 0 bits, or both index and offset that are all 1
@@ -70,78 +71,78 @@ scanning the elements of a set in order, finding the number of
 elements in a set, and some other operations.
 
 
-USING THE SET FACILITY
+USING THE SBSET FACILITY
 
-To use the set facility, an application should create a set-app.h
+To use the sbset facility, an application should create an sbset-app.h
 file, which must start by defining some constants (see below), then
-include the set.h file, and conclude with some additional declarations
-(see below).
+include the sbset.h file, and conclude with some additional
+declarations (see below).
 
 The following constants should be declared with #define at the start
-of set-app.h:
+of sbset-app.h:
 
-  SBSET_OFFSET_BITS  Number of bits in the "offset" of a value.  Must be
-                   3, 4, 5, or 6, corresponding to 8, 16, 32, or 64
-                   possible values in a segment.
+  SBSET_OFFSET_BITS  Number of bits in the "offset" of a value.  Must
+                     be 3, 4, 5, or 6, corresponding to 8, 16, 32, or
+                     64 possible values in a segment.
 
   SBSET_CHAINS       Number of chains that may be used for sets.  Must
-                   be at least 1.  Larger values will result in 
-                   more memory being used for every segment.
+                     be at least 1.  Larger values will result in 
+                     more memory being used for every segment.
 
   SBSET_EXTRA_INFO   (optional) If desired, a declaration for additional
-                   information that is stored in the structure for a
-                   segment.  This might allow space to be used that 
-                   would otherwise be wasted as padding for alignment.
-                   Should have the form of a structure field, including
-                   the terminating semicolon.
+                     information that is stored in the structure for a
+                     segment.  This might allow space to be used that
+                     would otherwise be wasted as padding for
+                     alignment.  Should have the form of a structure
+                     field, including the terminating semicolon.
 
 The application may also define the following:
 
   SBSET_NO_VALUE_ZERO  If defined (as anything), SBSET_NO_VALUE will 
-                     consist of all 0 bits (rather than all 1 bits).
+                       consist of all 0 bits (rather than all 1 bits).
 
 For convenience, the application might also at this point define
 symbols for the chains, which are identified by integers from 0 to
 SBSET_CHAINS-1, though these symbols would be used only by the
 application itself.  Also, the definition of SBSET_EXTRA_INFO might
-involve various other declarations. 
+involve various other declarations.
 
-The set.h file should then be included in set-app.h.  It will define
-the following types:
+The sbset.h file should then be included in sbset-app.h.  It will
+define the following types:
 
   sbset_offset_t     The type of the offset of a value within a segment.
-                   Currently a generic int.  Not used in structures.
+                     Currently a generic int.  Not used in structures.
 
   sbset_index_t      The type of the index used to identify a segment.
-                   Currently int32_t.
+                     Currently int32_t.
 
   sbset_value_t      The type holding a value - an (index,offset) pair.
-                   Currently uint32_t.
+                     Currently uint32_t.
 
   struct sbset_segment  Structure holding information on a segment.
-                      Fields of this should not be accessed directly.
+                     Fields of this should not be accessed directly.
 
-  struct set          Structure holding information on a set.
-                      Fields of this should not be accessed directly.
+  struct sbset       Structure holding information on a set.
+                     Fields of this should not be accessed directly.
 
-The following constant is also defined in set.h:
+The following constant is also defined in sbset.h:
 
   SBSET_NO_VALUE     A constant of type sbset_value_t that must not be
-                   used as an actual value, and hence can be used to
-                   indicate the absence of a value.  By default, this
-                   value has all 1s for both index and offset, but 
-                   if the applicaton defines SBSET_NO_VALUE_ZERO it is
-                   instead all 0s.
+                     used as an actual value, and hence can be used to
+                     indicate the absence of a value.  By default,
+                     this value has all 1s for both index and offset,
+                     but if the applicaton defines SBSET_NO_VALUE_ZERO
+                     it is instead all 0s.
 
-Finally, the set.h file will declare prototypes (or macros, or static
-inline definitions) for the functions documented below.  If set-app.h
-defines SBSET_DO_BEFORE_INLINE, the code it is defined to will be
-inserted before any inline function definitions in set.h, but after
-all the other declarations.
+Finally, the sbset.h file will declare prototypes (or macros, or
+static inline definitions) for the functions documented below.  If
+sbset-app.h defines SBSET_DO_BEFORE_INLINE, the code it is defined to
+will be inserted before any inline function definitions in sbset.h,
+but after all the other declarations.
 
-Before including set.h in set-app.h, the application should declare a
-function (or macro), which (if a function) should have the following
-prototype:
+Before including sbset.h in sbset-app.h, the application should
+declare a function (or macro), which (if a function) should have the
+following prototype:
 
   struct sbset_segment *SBSET_SEGMENT (sbset_index_t index);
 
@@ -150,12 +151,12 @@ information for the segment with the given index.  It is up to the
 application to decide how memory for segment structures is allocated
 (eg, a static array, or using an array of pointers to structures
 allocated with malloc), and hence how a pointer is found from an
-index.  (Note that the actual definition of SBSET_SEGMENT might need to
-be put after set.h is included, as illustrated in test-set/set-app.h,
-or be put in SBSET_DO_BEFORE_INLINE.)
+index.  (Note that the actual definition of SBSET_SEGMENT might need
+to be put after sbset.h is included, as illustrated in
+test-set/sbset-app.h, or be put in SBSET_DO_BEFORE_INLINE.)
 
-The set-app.h file should be included in application modules that use
-the set facility.  If SBSET_NO_FUNCTIONS is defined before it is
+The sbset-app.h file should be included in application modules that
+use the sbset facility.  If SBSET_NO_FUNCTIONS is defined before it is
 included, non-inline functions declarations will be omitted, with only
 types, macros, and inline functions defined.
 
@@ -163,30 +164,30 @@ There are two options for how an application accesses the procedures
 in set.c.
 
 One method is to separately compile set.c into an object file, and
-then link this with modules that use the set facility (or put it in a
+then link this with modules that use the sbset facility (or put it in a
 library that will be used by such modules).
 
 The other method is to instead include set.c in every source file that
-uses the set facility, after including set-app.h, in which case set.c
-does not need to be compiled into an object file itself.  (It would
-also be possible to include set.c in some modules, while linking
+uses the sbset facility, after including sbset-app.h, in which case
+set.c does not need to be compiled into an object file itself.  (It
+would also be possible to include set.c in some modules, while linking
 others to the result of compiling set.c.)  The preprocessor symbol
-SBSET_STATIC must be defined as something other than 0 before including
-set.c, either by a #define in the source or by a compiler option.
-SBSET_STATIC must be undefined, or defining as 0, when set.c is compiled
-separately.
+SBSET_STATIC must be defined as something other than 0 before
+including set.c, either by a #define in the source or by a compiler
+option.  SBSET_STATIC must be undefined, or defining as 0, when set.c
+is compiled separately.
 
-Note that the set facility does not use any persistent variables, so
+Note that the sbset facility does not use any persistent variables, so
 there is no duplicatation of state from including set.c in more than
 one module.  However, memory may be wasted by duplication of code if
 set.c is included in many modules.  The advantages of including set.c
-rather than linking to it are that the names of the set facility
+rather than linking to it are that the names of the sbset facility
 procedures will be declared "static", avoiding potential name
 conflicts, and that an optimizing compiler may be able to produce
-faster code when it can see the definitions of the set facility's
+faster code when it can see the definitions of the sbset facility's
 procedures (eg, sometimes inlining code).
 
-Whether the set facility tries to use fast builtin functions for
+Whether the sbset facility tries to use fast builtin functions for
 finding and counting 1 bits in a word can be controlled by defining
 the SBSET_USE_BUILTINS pre-processor symbol to be 0 or 1.  If it is not
 defined, the builtin functions are used when the gcc or clang
@@ -223,7 +224,7 @@ value cannot be a member of any other set using the same chain.
 
 FUNCTIONS IMPLEMENTING SET OPERATIONS
 
-The following functions (or macros) are provided by the set facility
+The following functions (or macros) are provided by the sbset facility
 for use in an application, with prototypes (if functions) as shown:
 
   sbset_value_t SBSET_VAL (sbset_index_t index, sbset_offset_t offset)
@@ -242,7 +243,7 @@ for use in an application, with prototypes (if functions) as shown:
     Returns the offset within its segment of a value, as was passed to
     SBSET_VAL.
 
-  void sbset_init (struct set *set, int chain)
+  void sbset_init (struct sbset *set, int chain)
 
     Initializes a set structure, as an empty set that uses the
     indicated chain (which must be between 0 and SBSET_CHAINS-1).  
@@ -256,12 +257,12 @@ for use in an application, with prototypes (if functions) as shown:
     associating segment structures with segment indexes (as is done
     with the SBSET_SEGMENT function it defines).
 
-  int sbset_chain (struct set *set);
+  int sbset_chain (struct sbset *set);
 
     Returns the chain used by a set, as was passed to sbset_init when
     the set was initialized.
 
-  int sbset_add (struct set *set, sbset_value_t val)
+  int sbset_add (struct sbset *set, sbset_value_t val)
 
     Changes 'set' so that it contains 'val' as an element.  Returns 1
     if 'set' had already contained 'val', 0 if not.  Note that 'val'
@@ -270,7 +271,7 @@ for use in an application, with prototypes (if functions) as shown:
     or that previously contained such elements unless they were 
     removed using the 'remove' option of sbset_first.
 
-  int sbset_remove (struct set *set, sbset_value_t val)
+  int sbset_remove (struct sbset *set, sbset_value_t val)
 
     Removes 'val' from 'set', and returns 1 if 'val' was previously in
     'set', and 0 if not.  The caller of remove must ensure that 'val'
@@ -279,7 +280,7 @@ for use in an application, with prototypes (if functions) as shown:
     sbset_remove is not sufficient to permit this segment to be used in
     another set using the same chain.
 
-  int sbset_contains (struct set *set, sbset_value_t val)
+  int sbset_contains (struct sbset *set, sbset_value_t val)
 
     Returns 1 if 'val' is an element of any set using the same chain
     as 'set', and 0 otherwise.  Note that a returned value of 1 is
@@ -296,7 +297,7 @@ for use in an application, with prototypes (if functions) as shown:
     Returns 1 if any set using 'chain' contains any elements in the
     same segment as 'val'.
 
-  sbset_value_t sbset_first (struct set *set, int remove)
+  sbset_value_t sbset_first (struct sbset *set, int remove)
 
     Finds the first element in 'set', returning SBSET_NO_VALUE if the
     set is empty.  If the 'remove' argument is non-zero, the value
@@ -305,7 +306,7 @@ for use in an application, with prototypes (if functions) as shown:
     values in this segment may afterward be added to another set that
     uses the same chain as 'set'.
 
-  sbset_value_t sbset_next (struct set *set, sbset_value_t val, int remove)
+  sbset_value_t sbset_next (struct sbset *set, sbset_value_t val, int remove)
 
     Returns the next element of 'set' after 'val', which must be an
     element of 'set.  Returns SBSET_NO_VALUE if there are no elements
@@ -329,7 +330,7 @@ for use in an application, with prototypes (if functions) as shown:
     an error for 'val' not be be in any set using 'chain'.  Returns
     SBSET_NO_VALUE if there is no such element.
 
-  sbset_bits_t sbset_first_bits (struct set *set)
+  sbset_bits_t sbset_first_bits (struct sbset *set)
 
     Returns the bit vector indicating membership of all values in the
     segment of the first element in 'set', with the low-order bit
@@ -342,7 +343,8 @@ for use in an application, with prototypes (if functions) as shown:
     'chain' of all values in the the segment containing 'val' (which
     must be an element of a set using 'chain').
 
-  void sbset_assign_segment_bits (struct set *set, sbset_value_t val, sbset_bits_t b)
+  void sbset_assign_segment_bits (struct sbset *set, sbset_value_t val, 
+                                                   sbset_bits_t b)
 
     Sets the bit vector indicating membership in 'set' for the segment
     containing 'val' to the bit vector 'b'.  When sbset_assign_segment_bits
@@ -352,7 +354,7 @@ for use in an application, with prototypes (if functions) as shown:
     previous vector of bits.  Removing all elements in the segment by
     using 0 for 'b' is allowed.
 
-  void sbset_move_first (struct set *src, struct set *dst)
+  void sbset_move_first (struct sbset *src, struct sbset *dst)
 
     Moves elements in the first segment of one set to another set that
     uses the same chain.  All elements of 'src' that are in the
@@ -360,27 +362,27 @@ for use in an application, with prototypes (if functions) as shown:
     (becoming its first elements).  It is an error for 'src' to be
     empty, or for 'src' and 'dst' to use different chains.
 
-  void sbset_move_next (struct set *src, sbset_value_t val, struct set *dst)
+  void sbset_move_next (struct sbset *src, sbset_value_t val, struct sbset *dst)
 
     Moves elements of 'src' in the segment after the segment
     containing 'val' to the front of 'dst'.  It is an error for there
     to be no elements of 'src' after 'val' that are in a different
     segment from 'val', or for 'src' and 'dst' to use different chains.
 
-  void sbset_add_segment (struct set *set, sbset_value_t val, int chain)
+  void sbset_add_segment (struct sbset *set, sbset_value_t val, int chain)
 
     Add to 'set' all elements of sets using the given 'chain' that are
     in the same segment as 'val' (which need not be an element of any
     set using 'chain').  The added elements must not be in any other
     set using the same chain as 'set'.
 
-  void sbset_remove_segment (struct set *set, sbset_value_t val, int chain)
+  void sbset_remove_segment (struct sbset *set, sbset_value_t val, int chain)
 
     Removes from 'set' all elements of sets using the given 'chain'
     that are in the same segment as 'val' (which must be an element of
     'set', but need not be an element of any set using 'chain').  
 
-  sbset_value_t sbset_n_elements (struct set *set)
+  sbset_value_t sbset_n_elements (struct sbset *set)
 
     Returns the number of elements in 'set', zero if the set is empty.
     The return type is sbset_value_t because this is guaranteed to be a

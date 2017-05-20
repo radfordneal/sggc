@@ -21,7 +21,7 @@
 #include <stdlib.h>
 
 #if !SBSET_STATIC
-#  include "set-app.h"
+#  include "sbset-app.h"
 #endif
 
 
@@ -38,7 +38,7 @@
    This may be done with a compiler flag, in which case it isn't
    overridden here. */
 
-static void check_n_elements (struct set *set);
+static void check_n_elements (struct sbset *set);
 
 #ifndef SBSET_DEBUG
 #define SBSET_DEBUG 0
@@ -77,7 +77,7 @@ static void check_n_elements (struct set *set);
 
 /* REMOVE ANY EMPTY SEGMENTS AT THE FRONT OF A SET. */
 
-static inline void remove_empty (struct set *set)
+static inline void remove_empty (struct sbset *set)
 {
   struct sbset_segment *seg;
 
@@ -100,7 +100,7 @@ static inline void remove_empty (struct set *set)
 
 /* ABORT IF THE COUNT OF NUMBER OF ELEMENTS IN A SET IS INCORRECT. */
 
-static void check_n_elements (struct set *set)
+static void check_n_elements (struct sbset *set)
 {
   struct sbset_segment *seg;
   sbset_index_t index;
@@ -123,7 +123,7 @@ static void check_n_elements (struct set *set)
 
 /* CHECK WHETHER A SET CONTAINS A SEGMENT WITH GIVEN INDEX. */
 
-static int check_has_seg (struct set *set, sbset_index_t index)
+static int check_has_seg (struct sbset *set, sbset_index_t index)
 {
   sbset_index_t ix = set->first;
   while (ix != SBSET_END_OF_CHAIN)
@@ -141,7 +141,7 @@ static int check_has_seg (struct set *set, sbset_index_t index)
 
 /* INITIALIZE A SET, AS EMPTY. */
 
-SBSET_PROC_CLASS void sbset_init (struct set *set, int chain)
+SBSET_PROC_CLASS void sbset_init (struct sbset *set, int chain)
 {
   CHK_CHAIN(chain);
 
@@ -173,7 +173,7 @@ SBSET_PROC_CLASS void sbset_segment_init (struct sbset_segment *seg)
    ensure that if the segment no longer contains elements of this set
    it can be used in another set using the same chain.  */
 
-SBSET_PROC_CLASS sbset_value_t sbset_first (struct set *set, int remove)
+SBSET_PROC_CLASS sbset_value_t sbset_first (struct sbset *set, int remove)
 { 
   struct sbset_segment *seg;
   sbset_value_t first;
@@ -217,7 +217,7 @@ SBSET_PROC_CLASS sbset_value_t sbset_first (struct set *set, int remove)
    if 'val' is removed, the segment containing it is not removed from
    the list even if it no longer has any elements.) */
 
-SBSET_PROC_CLASS sbset_value_t sbset_next (struct set *set, 
+SBSET_PROC_CLASS sbset_value_t sbset_next (struct sbset *set, 
                                      sbset_value_t val, int remove)
 {
   sbset_index_t index = SBSET_VAL_INDEX(val);
@@ -282,7 +282,7 @@ SBSET_PROC_CLASS sbset_value_t sbset_next (struct set *set,
 /* RETURN THE BITS INDICATING MEMBERSHIP FOR THE FIRST SEGMENT OF A SET. 
    First removes empty segments at the front. */
 
-SBSET_PROC_CLASS sbset_bits_t sbset_first_bits (struct set *set)
+SBSET_PROC_CLASS sbset_bits_t sbset_first_bits (struct sbset *set)
 {
   CHK_SET(set);
   remove_empty(set);
@@ -297,8 +297,8 @@ SBSET_PROC_CLASS sbset_bits_t sbset_first_bits (struct set *set)
 
 /* MOVE THE FIRST SEGMENT OF A SET TO ANOTHER SET USING THE SAME CHAIN. */
 
-SBSET_PROC_CLASS void sbset_move_first (struct set *src, 
-                                    struct set *dst)
+SBSET_PROC_CLASS void sbset_move_first (struct sbset *src, 
+                                    struct sbset *dst)
 {
   struct sbset_segment *seg;
   sbset_index_t index;
@@ -334,8 +334,8 @@ SBSET_PROC_CLASS void sbset_move_first (struct set *src,
 
 /* MOVE SEGMENT AFTER THAT CONTAINING AN ELEMENT TO ANOTHER SET IN THE CHAIN. */
 
-SBSET_PROC_CLASS void sbset_move_next (struct set *src, sbset_value_t val, 
-                                   struct set *dst)
+SBSET_PROC_CLASS void sbset_move_next (struct sbset *src, sbset_value_t val, 
+                                   struct sbset *dst)
 {
   sbset_index_t index = SBSET_VAL_INDEX(val);
   struct sbset_segment *seg = SBSET_SEGMENT(index);
@@ -371,7 +371,7 @@ SBSET_PROC_CLASS void sbset_move_next (struct set *src, sbset_value_t val,
 
 /* ADD ELEMENTS IN ANY SET USING SOME CHAIN WITHIN SOME SEGMENT TO SOME SET. */
 
-SBSET_PROC_CLASS void sbset_add_segment (struct set *set, 
+SBSET_PROC_CLASS void sbset_add_segment (struct sbset *set, 
                                      sbset_value_t val, int chain)
 {
   CHK_SET(set);
@@ -402,7 +402,7 @@ SBSET_PROC_CLASS void sbset_add_segment (struct set *set,
 
 /* REMOVE ELEMENTS IN A SET WITHIN SOME SEGMENT AND IN ANY SET IN SOME CHAIN. */
 
-SBSET_PROC_CLASS void sbset_remove_segment (struct set *set, 
+SBSET_PROC_CLASS void sbset_remove_segment (struct sbset *set, 
                                         sbset_value_t val, int chain)
 {
   CHK_SET(set);

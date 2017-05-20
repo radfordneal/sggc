@@ -391,7 +391,7 @@ static inline sggc_cptr_t sggc_alloc_small_kind_quickly (sggc_kind_t kind)
 
 #ifdef SGGC_KIND_UNCOLLECTED
   extern const int sggc_kind_uncollected[SGGC_N_KINDS];
-  extern struct set sggc_uncollected_sets[SGGC_N_KINDS];
+  extern struct sbset sggc_uncollected_sets[SGGC_N_KINDS];
   if (sggc_kind_uncollected[kind])
   { sbset_add (&sggc_uncollected_sets[kind], nfv);
     sggc_info.uncol_count += 1;
@@ -470,7 +470,7 @@ static inline void sggc_old_to_new_check (sggc_cptr_t from_ptr,
   /* If we get here, we need to record the existence of an old-to-new
      reference in from_ptr. */
 
-  extern struct set sggc_old_to_new_set;
+  extern struct sbset sggc_old_to_new_set;
   sbset_add (&sggc_old_to_new_set, from_ptr);
 }
 

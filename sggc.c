@@ -198,19 +198,19 @@ static sbset_bits_t kind_full[SGGC_N_KINDS];
 
 #define old_to_new sggc_old_to_new_set   /* External for inline use in sggc.h */
 
-static struct set free_or_new[SGGC_N_KINDS];  /* Free or newly allocated */
-static struct set unused;                     /* Big segments not being used */
-static struct set old_gen1[SGGC_N_KINDS];     /* Survived collection once */
-static struct set old_gen1_big;               /*   - for big objects */
-static struct set old_gen2[SGGC_N_KINDS];     /* Survived collection >1 time */
-static struct set old_gen2_big;               /*   - for big objects */
-struct set old_to_new;                        /* May have old->new references */
-static struct set to_look_at;                 /* Not yet looked at in sweep */
-static struct set constants;                  /* Prealloc'd constant segments */
+static struct sbset free_or_new[SGGC_N_KINDS];  /* Free or newly allocated */
+static struct sbset unused;                     /* Big segments not being used */
+static struct sbset old_gen1[SGGC_N_KINDS];     /* Survived collection once */
+static struct sbset old_gen1_big;               /*   - for big objects */
+static struct sbset old_gen2[SGGC_N_KINDS];     /* Survived collection >1 time */
+static struct sbset old_gen2_big;               /*   - for big objects */
+struct sbset old_to_new;                        /* May have old->new references */
+static struct sbset to_look_at;                 /* Not yet looked at in sweep */
+static struct sbset constants;                  /* Prealloc'd constant segments */
 
 #ifdef SGGC_KIND_UNCOLLECTED
 #define uncollected sggc_uncollected_sets /* External for inline use in sggc.h*/
-struct set uncollected[SGGC_N_KINDS];     /* Objects never collected */
+struct sbset uncollected[SGGC_N_KINDS];     /* Objects never collected */
 #endif
 
 
@@ -1205,7 +1205,7 @@ static void collect_debug (void)
 static void put_in_right_old_gen (sggc_cptr_t v)
 {
   const sggc_kind_t k = SGGC_KIND(v);
-  struct set *ogen1 = sggc_kind_chunks[k]==0 ? &old_gen1_big : &old_gen1[k];
+  struct sbset *ogen1 = sggc_kind_chunks[k]==0 ? &old_gen1_big : &old_gen1[k];
 
   if (collect_level > 0)
   { 
