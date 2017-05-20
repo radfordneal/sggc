@@ -93,10 +93,11 @@ typedef uint32_t sbset_value_t;
 
 struct sbset_segment
 { sbset_bits_t bits[SBSET_CHAINS];  /* Bits indicating membership in sets */
-  sbset_index_t next[SBSET_CHAINS]; /* Next / SBSET_NOT_IN_CHAIN / SBSET_END_OF_CHAIN */
+  sbset_index_t next[SBSET_CHAINS]; /* Either next segment, SBSET_NOT_IN_CHAIN,
+                                       or SBSET_END_OF_CHAIN */
 # ifdef SBSET_EXTRA_INFO
-  SBSET_EXTRA_INFO                /* Extra info of use to the application, or  */
-# endif                         /*  padding to make struct size a power of 2 */
+  SBSET_EXTRA_INFO             /* Extra info of use to the application, or   */
+# endif                        /*   padding to make struct size a power of 2 */
 };
 
 
@@ -105,8 +106,8 @@ struct sbset_segment
 
 struct sbset
 { int chain;                    /* Number of chain used for this set */
-  sbset_index_t first;            /* First segment, or SBSET_END_OF_CHAIN */
-  sbset_value_t n_elements;       /* Number of elements in set */
+  sbset_index_t first;          /* First segment, or SBSET_END_OF_CHAIN */
+  sbset_value_t n_elements;     /* Number of elements in set */
 };
 
 
@@ -147,7 +148,8 @@ static inline int sbset_chain_contains (int chain, sbset_value_t val)
    This is implemented by just checking whether any bits for that chain in the
    segment. */
 
-static inline int sbset_chain_contains_any_in_segment(int chain, sbset_value_t val)
+static inline int sbset_chain_contains_any_in_segment(int chain,
+                                                      sbset_value_t val)
 {
   sbset_index_t index = SBSET_VAL_INDEX(val);
   struct sbset_segment *seg = SBSET_SEGMENT(index);
@@ -221,7 +223,8 @@ static inline int sbset_first_bit_pos (sbset_bits_t b)
 
 /* RETURN BITS INDICATING MEMBERSHIP FOR THE SEGMENT CONTAINING AN ELEMENT. */
 
-static inline sbset_bits_t sbset_chain_segment_bits (int chain, sbset_value_t val)
+static inline sbset_bits_t sbset_chain_segment_bits (int chain, 
+                                                     sbset_value_t val)
 {
   sbset_index_t index = SBSET_VAL_INDEX(val);
   struct sbset_segment *seg = SBSET_SEGMENT(index);
@@ -233,7 +236,7 @@ static inline sbset_bits_t sbset_chain_segment_bits (int chain, sbset_value_t va
 /* ASSIGN BITS INDICATING MEMBERSHIP FOR THE SEGMENT CONTAINING AN ELEMENT. */
 
 static inline void sbset_assign_segment_bits (struct sbset *set, 
-                                            sbset_value_t val, sbset_bits_t b)
+                                              sbset_value_t val, sbset_bits_t b)
 {
   sbset_index_t index = SBSET_VAL_INDEX(val);
   struct sbset_segment *seg = SBSET_SEGMENT(index);
@@ -300,7 +303,8 @@ static inline sbset_value_t sbset_chain_next (int chain, sbset_value_t val)
 
 /* FIND THE NEXT ELEMENT IN A SET THAT IS IN A DIFFERENT SEGMENT. */
 
-static inline sbset_value_t sbset_chain_next_segment (int chain, sbset_value_t val)
+static inline sbset_value_t sbset_chain_next_segment (int chain, 
+                                                      sbset_value_t val)
 {
   sbset_index_t index = SBSET_VAL_INDEX(val);
   struct sbset_segment *seg = SBSET_SEGMENT(index);

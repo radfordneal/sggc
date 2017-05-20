@@ -218,7 +218,7 @@ SBSET_PROC_CLASS sbset_value_t sbset_first (struct sbset *set, int remove)
    the list even if it no longer has any elements.) */
 
 SBSET_PROC_CLASS sbset_value_t sbset_next (struct sbset *set, 
-                                     sbset_value_t val, int remove)
+                                           sbset_value_t val, int remove)
 {
   sbset_index_t index = SBSET_VAL_INDEX(val);
   sbset_offset_t offset = SBSET_VAL_OFFSET(val);
@@ -298,7 +298,7 @@ SBSET_PROC_CLASS sbset_bits_t sbset_first_bits (struct sbset *set)
 /* MOVE THE FIRST SEGMENT OF A SET TO ANOTHER SET USING THE SAME CHAIN. */
 
 SBSET_PROC_CLASS void sbset_move_first (struct sbset *src, 
-                                    struct sbset *dst)
+                                        struct sbset *dst)
 {
   struct sbset_segment *seg;
   sbset_index_t index;
@@ -335,7 +335,7 @@ SBSET_PROC_CLASS void sbset_move_first (struct sbset *src,
 /* MOVE SEGMENT AFTER THAT CONTAINING AN ELEMENT TO ANOTHER SET IN THE CHAIN. */
 
 SBSET_PROC_CLASS void sbset_move_next (struct sbset *src, sbset_value_t val, 
-                                   struct sbset *dst)
+                                       struct sbset *dst)
 {
   sbset_index_t index = SBSET_VAL_INDEX(val);
   struct sbset_segment *seg = SBSET_SEGMENT(index);
@@ -372,7 +372,7 @@ SBSET_PROC_CLASS void sbset_move_next (struct sbset *src, sbset_value_t val,
 /* ADD ELEMENTS IN ANY SET USING SOME CHAIN WITHIN SOME SEGMENT TO SOME SET. */
 
 SBSET_PROC_CLASS void sbset_add_segment (struct sbset *set, 
-                                     sbset_value_t val, int chain)
+                                         sbset_value_t val, int chain)
 {
   CHK_SET(set);
   int dst_chain = set->chain;
@@ -403,7 +403,7 @@ SBSET_PROC_CLASS void sbset_add_segment (struct sbset *set,
 /* REMOVE ELEMENTS IN A SET WITHIN SOME SEGMENT AND IN ANY SET IN SOME CHAIN. */
 
 SBSET_PROC_CLASS void sbset_remove_segment (struct sbset *set, 
-                                        sbset_value_t val, int chain)
+                                            sbset_value_t val, int chain)
 {
   CHK_SET(set);
   int dst_chain = set->chain;

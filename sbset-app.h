@@ -20,23 +20,23 @@
 
 /* NUMBER OF OFFSET BITS IN A (SEGMENT INDEX, OFFSET) PAIR. */
 
-#define SBSET_OFFSET_BITS 6  /* Max is 6 for using 64-bit shift/mask operations */
+#define SBSET_OFFSET_BITS 6 /* Max is 6 for using 64-bit shift/mask operations*/
 
 
 /* CHAINS FOR LINKING SEGMENTS IN SETS. */
 
 #define SBSET_CHAINS 5       /* Number of chains that can be used for sets */
 
-#  define SBSET_UNUSED_FREE_NEW 0  /* Unused, free or newly allocated objects */
+#  define SGGC_UNUSED_FREE_NEW 0  /* Unused, free or newly allocated objects */
 
-#  define SBSET_OLD_GEN1 1         /* Objects that survived one GC */
+#  define SGGC_OLD_GEN1 1         /* Objects that survived one GC */
 
-#  define SBSET_OLD_GEN2_UNCOL 2   /* Objects that survived more than one GC,
+#  define SGGC_OLD_GEN2_UNCOL 2   /* Objects that survived more than one GC,
                                     and also constant and uncollected objects */
 
-#  define SBSET_OLD_TO_NEW 3       /* Objects maybe with old-to-new references */
+#  define SGGC_OLD_TO_NEW 3       /* Objects maybe with old-to-new references */
 
-#  define SBSET_LOOK_AT 4          /* Objects that still need to be looked at
+#  define SGGC_LOOK_AT 4          /* Objects that still need to be looked at
                                     in order to mark objects still in use */
 
 
