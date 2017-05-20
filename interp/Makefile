@@ -8,12 +8,12 @@ all:	interp interp-db interp-pg interp-no-offset interp-no-set-static \
 	interp-clear-free interp-clear-free-no-reuse interp-check-valid \
 	interp-no-object-zero interp-seg-blocking interp-data-blocking \
 	interp-find-obj-ret \
-	interp-mod.o
+	interpmod.o
 
 CC=gcc
 
-interp-mod.o:	interp-mod.c sggc.c set.c sggc-app.h sggc.h set-app.h set.h
-	$(CC) -c -Wall interp-mod.c
+interpmod.o:	interpmod.c sggc.c set.c sggc-app.h sggc.h set-app.h set.h
+	$(CC) -c -Wall interpmod.c
 
 interp:	interp.c sggc.c set.c sggc-app.h sggc.h set-app.h set.h
 	$(CC) -g -O3 -march=native -mtune=native \
