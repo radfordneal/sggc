@@ -85,7 +85,9 @@
 
 
 /* ALLOCATE / FREE MACROS.  Defaults to the system calloc/malloc/free
-   if something else is not defined in sggc-app.h. */
+   if something else is not defined in sggc-app.h.  Also defines the
+   appropriate allocation routine for data areas, according to whether
+   SGGC_DATA_ALLOC_ZERO is defined. */
 
 #ifndef sggc_mem_alloc_zero
 #define sggc_mem_alloc_zero(n) calloc(n,1)
@@ -97,6 +99,12 @@
 
 #ifndef sggc_mem_free
 #define sggc_mem_free free
+#endif
+
+#ifdef SGGC_DATA_ALLOC_ZERO
+#define sggc_mem_alloc_data(n) sggc_mem_alloc_zero(n)
+#else
+#define sggc_mem_alloc_data(n) sggc_mem_alloc(n)
 #endif
 
 
@@ -326,18 +334,18 @@ int sggc_init (unsigned max_segments)
 
 #ifndef SGGC_MAX_SEGMENTS
 
-    sggc_segment = sggc_mem_alloc_zero (max_segments * sizeof *sggc_segment);
+    sggc_segment = sggc_mem_alloc (max_segments * sizeof *sggc_segment);
     if (sggc_segment == NULL)
     { return 1;
     }
 
-    sggc_data = sggc_mem_alloc_zero (max_segments * sizeof *sggc_data);
+    sggc_data = sggc_mem_alloc (max_segments * sizeof *sggc_data);
     if (sggc_data == NULL)
     { sggc_mem_free((void*)sggc_segment);
       return 2;
     }
 
-    sggc_type = sggc_mem_alloc_zero (max_segments * sizeof *sggc_type);
+    sggc_type = sggc_mem_alloc (max_segments * sizeof *sggc_type);
     if (sggc_type == NULL)
     { sggc_mem_free((void*)sggc_segment);
       sggc_mem_free((void*)sggc_data);
@@ -345,7 +353,7 @@ int sggc_init (unsigned max_segments)
     }
 
 #   ifdef SGGC_AUX1_SIZE
-      sggc_aux1 = sggc_mem_alloc_zero (max_segments * sizeof *sggc_aux1);
+      sggc_aux1 = sggc_mem_alloc (max_segments * sizeof *sggc_aux1);
       if (sggc_aux1 == NULL)
       { sggc_mem_free((void*)sggc_segment);
         sggc_mem_free((void*)sggc_data);
@@ -355,7 +363,7 @@ int sggc_init (unsigned max_segments)
 #   endif
 
 #   ifdef SGGC_AUX2_SIZE
-      sggc_aux2 = sggc_mem_alloc_zero (max_segments * sizeof *sggc_aux2);
+      sggc_aux2 = sggc_mem_alloc (max_segments * sizeof *sggc_aux2);
       if (sggc_aux2 == NULL)
       { sggc_mem_free((void*)sggc_segment);
         sggc_mem_free((void*)sggc_data);
@@ -664,11 +672,11 @@ static void get_small_data_area (void)
   { 
 #   if SGGC_SMALL_DATA_AREA_ALIGN
       small_data_area_next = 
-       sggc_mem_alloc_zero (SMALL_DATA_AREA_SIZE*SGGC_SMALL_DATA_AREA_BLOCKING
+       sggc_mem_alloc_data (SMALL_DATA_AREA_SIZE*SGGC_SMALL_DATA_AREA_BLOCKING
                             + SGGC_SMALL_DATA_AREA_ALIGN - 1);
 #   else
       small_data_area_next = 
-       sggc_mem_alloc_zero (SMALL_DATA_AREA_SIZE*SGGC_SMALL_DATA_AREA_BLOCKING);
+       sggc_mem_alloc_data (SMALL_DATA_AREA_SIZE*SGGC_SMALL_DATA_AREA_BLOCKING);
 #   endif
     if (small_data_area_next == NULL)
     { return;
@@ -744,10 +752,10 @@ static sggc_cptr_t sggc_alloc_kind_type_length (sggc_kind_t kind,
     }
 
     data_size = (size_t) SGGC_CHUNK_SIZE * nch;
-    data = sggc_mem_alloc_zero (data_size);
+    data = sggc_mem_alloc_data (data_size);
     if (SGGC_DEBUG) 
     { printf (
-       "sggc_alloc: called alloc_zeroed for data (big %d, %d chunks):: %p\n", 
+       "sggc_alloc: called mem_alloc_data for data (big %d, %d chunks):: %p\n", 
         kind, (int)nch, data);
     }
 
@@ -794,7 +802,7 @@ static sggc_cptr_t sggc_alloc_kind_type_length (sggc_kind_t kind,
         NULL;
 #     endif
     if (!read_only_aux1 && kind_aux1_block[kind] == NULL)
-    { kind_aux1_block[kind] = sggc_mem_alloc_zero
+    { kind_aux1_block[kind] = sggc_mem_alloc
                                (SGGC_CHUNKS_IN_SMALL_SEGMENT
                                  * SGGC_AUX1_BLOCK_SIZE * SGGC_AUX1_SIZE);
       if (kind_aux1_block[kind] == NULL) 
@@ -819,7 +827,7 @@ static sggc_cptr_t sggc_alloc_kind_type_length (sggc_kind_t kind,
         NULL;
 #     endif
     if (!read_only_aux2 && kind_aux2_block[kind] == NULL)
-    { kind_aux2_block[kind] = sggc_mem_alloc_zero
+    { kind_aux2_block[kind] = sggc_mem_alloc
                                (SGGC_CHUNKS_IN_SMALL_SEGMENT
                                  * SGGC_AUX2_BLOCK_SIZE * SGGC_AUX2_SIZE);
       if (kind_aux2_block[kind] == NULL) 

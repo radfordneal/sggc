@@ -553,10 +553,11 @@ up some operations.
 
 SGGC_USE_MEMSET may be defined (as anything) to enable use of memset
 rather than a loop (possibly unrolled by the compiler) when clearing
-the data area for an object in a small segment.  Since these objects
-are typically small, it's not obvious which is faster.  It's possible
-that this option is ineffective, with the compiler begin clever enough
-to (not necessarily wisely?) convert a loop to a call of memset.
+the data area for an object in a small segment (which is done only if
+SGGC_ALLOC_DATA_ZERO is defined).  Since these objects are typically
+small, it's not obvious which is faster.  It's possible that this
+option is ineffective, with the compiler begin clever enough to (not
+necessarily wisely?) convert a loop to a call of memset.
 
 SGGC_SEG_DIRECT may be defined (as anything) to enable use of a direct
 array of segments, rather than the default of using an array of
