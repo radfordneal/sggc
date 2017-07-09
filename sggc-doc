@@ -405,15 +405,17 @@ directly refer to an object.
 
 Root pointers would, for example, include compressed pointers stored
 in global variables used by the application.  If the application also
-uses regular pointers (to data areas) as roots, sggc_find_root_ptrs
-must be called with the corresponding compressed pointer, which the
-application must somehow be able to find (eg, by storing a compressed
-pointer to itself at the start of the data area for every object).
+uses regular pointers (to data areas) as roots, sggc_look_at (or
+sggc_mark) must be called with the corresponding compressed pointer,
+which the application must somehow be able to find (eg, by storing a
+compressed pointer to itself at the start of the data area for every
+object).
 
 An application may also store root pointers in the local variables of
 functions.  The application will need to implement some scheme for
-finding all such local variables, and calling sggc_find_root_ptrs for
-each of them, passing the compressed pointer for the reference.
+finding all such local variables, and calling sggc_look_at (or
+sggc_mark) for each of them, passing the compressed pointer for the
+reference.
 
 Secondly, the application must provide an sggc_find_object_ptrs
 procedure, which is passed a compressed pointer to an object, and
