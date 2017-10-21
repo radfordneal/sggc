@@ -212,6 +212,7 @@ alignment may be increased by defining the following symbol:
                         related functions) will have a byte address
                         that is a multiple of SGGC_DATA_ALIGNMENT
                         (unless the data area is smaller than this).
+                        Currently, must be no larger than 32.
 
 The following types must be defined in sggc-app.h:
 
