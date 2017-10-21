@@ -388,9 +388,7 @@ int sggc_init (unsigned max_segments)
   /* Compute numbers of objects in segments of each kind, and
      initialize bit vectors that indicate when segments of different
      kinds are full, and are also used to initialize segments as full.
-     Along the way, check that small segments aren't too big, and 
-     that numbers of chunks are compatible with SGGC_DATA_ALIGNMENT
-     (if defined). */
+     Along the way, check that small segments aren't too big. */
 
   for (k = 0; k < SGGC_N_KINDS; k++)
   { if (sggc_kind_chunks[k] == 0) /* big segment */
@@ -408,14 +406,6 @@ int sggc_init (unsigned max_segments)
       }
       kind_objects[k] = SGGC_CHUNKS_IN_SMALL_SEGMENT / sggc_kind_chunks[k];
       kind_chunk_end[k] = kind_objects[k] * sggc_kind_chunks[k];
-#     ifdef SGGC_DATA_ALIGNMENT
-      { if ((SGGC_DATA_ALIGNMENT >> 3) > 3) abort();
-        if (sggc_kind_chunks[k]*SGGC_CHUNK_SIZE > SGGC_DATA_ALIGNMENT
-         && sggc_kind_chunks[k]*SGGC_CHUNK_SIZE % SGGC_DATA_ALIGNMENT != 0)
-        { abort();
-        }
-      }
-#     endif 
     }
   }
 

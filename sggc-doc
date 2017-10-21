@@ -204,16 +204,6 @@ to zeros:
                         bits.  Otherwise, the contents of the data
                         area for a new object are undefined.
 
-Data areas are allocated with at least 8-byte alignment.  This
-alignment may be increased by defining the following symbol:
-
-  SGGC_DATA_ALIGNMENT   If defined (as a power of two), the data area
-                        of an object allocated with sggc_alloc (or
-                        related functions) will have a byte address
-                        that is a multiple of SGGC_DATA_ALIGNMENT
-                        (unless the data area is smaller than this).
-                        Currently, must be no larger than 32.
-
 The following types must be defined in sggc-app.h:
 
   sggc_length_t         Type for the "length" of an object.  The
@@ -250,6 +240,25 @@ An application may optionally define the following in sggc-app.h:
                         were allocated by sggc_mem_alloc_zero or
                         sggc_mem_alloc.  Defaults to the symbol
                         'free', the C library function.
+
+The alignment requirements above ensure that data areas for objects
+are allocated with at least 8-byte alignment.  This alignment may be
+increased by defining the following symbol:
+
+  SGGC_DATA_ALIGNMENT   If defined (as a power of two, no larger than
+                        32), the data areas of large objects and the
+                        shared data areas for small objects will have
+                        addresses divisible by SGGC_DATA_ALIGNMENT
+                        (unless the data area is smaller than this).
+
+If SGGC_DATA_ALIGNMENT is defined, data areas for all objects will be
+guaranteed to have this alignment, _except_ for objects of small kinds
+for which the number of chunks specified with SGGC_KIND_CHUNKS results
+in a size in bytes that is not divisible by SGGC_DATA_ALIGNMENT.  
+
+Note that an alternative to defining SGGC_DATA_ALIGNMENT is to define
+sggc_mem_alloc and sggc_mem_alloc_zero macros that return data blocks
+aligned more strictly than the 8-byte alignment required above.
 
 The sggc.h file should be included after the above have been defined,
 at the end of sggc-app.h.  It will define the following types:
