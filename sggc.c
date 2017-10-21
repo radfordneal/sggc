@@ -52,10 +52,18 @@
 #endif
 
 
-/* BLOCKING FOR SMALL DATA AREAS. */
+/* BLOCKING/ALIGNMENT FOR DATA AREAS. */
 
 #ifndef SGGC_SMALL_DATA_AREA_BLOCKING
-#define SGGC_SMALL_DATA_AREA_BLOCKING 1
+# define SGGC_SMALL_DATA_AREA_BLOCKING 1
+#endif
+
+#if defined(SGGC_DATA_ALIGNMENT) && SGGC_DATA_ALIGNMENT > 8
+# if !defined(SGGC_SMALL_DATA_AREA_ALIGN) \
+       || SGGC_SMALL_DATA_AREA_ALIGN < SGGC_DATA_ALIGNMENT
+# undef SGGC_SMALL_DATA_AREA_ALIGN
+# define SGGC_SMALL_DATA_AREA_ALIGN SGGC_DATA_ALIGNMENT
+# endif
 #endif
 
 
@@ -380,7 +388,9 @@ int sggc_init (unsigned max_segments)
   /* Compute numbers of objects in segments of each kind, and
      initialize bit vectors that indicate when segments of different
      kinds are full, and are also used to initialize segments as full.
-     Along the way, check that small segments aren't too big. */
+     Along the way, check that small segments aren't too big, and 
+     that numbers of chunks are compatible with SGGC_DATA_ALIGNMENT
+     (if defined). */
 
   for (k = 0; k < SGGC_N_KINDS; k++)
   { if (sggc_kind_chunks[k] == 0) /* big segment */
@@ -398,6 +408,13 @@ int sggc_init (unsigned max_segments)
       }
       kind_objects[k] = SGGC_CHUNKS_IN_SMALL_SEGMENT / sggc_kind_chunks[k];
       kind_chunk_end[k] = kind_objects[k] * sggc_kind_chunks[k];
+#     ifdef SGGC_DATA_ALIGNMENT
+      { if (sggc_kind_chunks[k]*SGGC_CHUNK_SIZE > SGGC_DATA_ALIGNMENT
+         && sggc_kind_chunks[k]*SGGC_CHUNK_SIZE % SGGC_DATA_ALIGNMENT != 0)
+        { abort();
+        }
+      }
+#     endif 
     }
   }
 
@@ -752,7 +769,14 @@ static sggc_cptr_t sggc_alloc_kind_type_length (sggc_kind_t kind,
     }
 
     data_size = (size_t) SGGC_CHUNK_SIZE * nch;
-    data = sggc_mem_alloc_data (data_size);
+#   if SGGC_DATA_ALIGNMENT <= 8
+      data = sggc_mem_alloc_data (data_size);
+#   else
+      data = sggc_mem_alloc_data (data_size + SGGC_DATA_ALIGNMENT - 1);
+      data = (char *) (((uintptr_t)data + SGGC_DATA_ALIGNMENT - 1) 
+                          & ~ ((uintptr_t)SGGC_DATA_ALIGNMENT - 1));
+#   endif
+
     if (SGGC_DEBUG) 
     { printf (
        "sggc_alloc: called mem_alloc_data for data (big %d, %d chunks):: %p\n", 

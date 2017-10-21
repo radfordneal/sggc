@@ -204,6 +204,15 @@ to zeros:
                         bits.  Otherwise, the contents of the data
                         area for a new object are undefined.
 
+Data areas are allocated with at least 8-byte alignment.  This
+alignment may be increased by defining the following symbol:
+
+  SGGC_DATA_ALIGNMENT   If defined (as a power of two), the data area
+                        of an object allocated with sggc_alloc (or
+                        related functions) will have a byte address
+                        that is a multiple of SGGC_DATA_ALIGNMENT
+                        (unless the data area is smaller than this).
+
 The following types must be defined in sggc-app.h:
 
   sggc_length_t         Type for the "length" of an object.  The
@@ -289,7 +298,8 @@ Constants are not included in any of the counts or sizes above, except
 for n_segments.  Shared read-only auxiliary information areas are also
 not counted.  The total memory usage estimate is for physical memory,
 and assumes that virtual memory space that has not been used will not
-have been assigned physical memory.
+have been assigned physical memory.  It will not include overhead for
+malloc or from ensuring alignment according to SGGC_DATA_ALIGNMENT.
 
 The sggc.h file will also declare the array initialized with the
 application's definition of SGGC_KIND_CHUNKS in sggc-app.h, as
@@ -304,6 +314,11 @@ application for use by SGGC.
 
 See sggc-imp for how to control some aspects of the implementation,
 for which the best choice might depend on the system used.
+
+Invalid values for the constants mentioned above may sometimes be
+detected at run-time, in which case the C library "abort" function
+will be called.  (It might also be called due to failure of internal
+checks, indicative of a bug in the SGGC code.)
 
 
 TYPES, LENGTHS, AND KINDS
@@ -334,6 +349,10 @@ small segments, and the number of chunks allocated for objects if they
 are of a small kind, are determined by the value for SGGC_KIND_CHUNKS
 that the application provides, which gives the numbers of chunks for
 each kind, with zero indicating that the kind uses big segments.
+
+If SGGC_DATA_ALIGNMENT is defined, SGGC_KIND_CHUNKS must be such that
+objects with data areas with at least SGGC_DATA_ALIGNMENT bytes have
+data areas whose size in bytes is a multiple of SGGC_DATA_ALIGNMENT.
 
 The application provides a function (or macro) sggc_kind that
 determines the kind of an object from its type and length.  The kind
