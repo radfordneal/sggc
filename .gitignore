@@ -2,7 +2,10 @@
 *.o
 *.dSYM
 test-sggc*/test-sggc?
-test-sggc2/test-sggc2a
+test-sggc*/test-sggc?t
+test-sggc*/test-sggc?ta
+test-sggc*/test-sggc?tf
+test-sggc2/test-sggc?a
 test-sbset/test-sbset
 test-sbset/test-sbset-static
 test-sggc*/o
