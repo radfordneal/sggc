@@ -538,9 +538,9 @@ int sggc_init (unsigned max_segments)
 
   /* Initialize traced cptr count. */
 
-#ifdef SGGC_TRACE_CPTR
-  sggc_trace_cptr_count = 0;
-#endif
+# ifdef SGGC_TRACE_CPTR
+    sggc_trace_cptr_count = 0;
+# endif
 
   return 0;
 }
@@ -1041,14 +1041,14 @@ static sggc_cptr_t sggc_alloc_kind_type_length (sggc_kind_t kind,
 
   sggc_info.allocations += 1;
 
-#ifdef SGGC_TRACE_CPTR
-  if (v == SGGC_TRACE_CPTR)
-  { sggc_trace_cptr_count += 1;
-#ifdef SGGC_TRACE_ALLOC_TRAP
-    if (sggc_trace_cptr_count == SGGC_TRACE_ALLOC_TRAP) abort();
-#endif
-  }
-#endif
+# ifdef SGGC_TRACE_CPTR
+    if (v == SGGC_TRACE_CPTR)
+    { sggc_trace_cptr_count += 1;
+#     ifdef SGGC_TRACE_ALLOC_TRAP
+        if (sggc_trace_cptr_count == SGGC_TRACE_ALLOC_TRAP) abort();
+#     endif
+    }
+# endif
 
   /* Return newly allocated object. */
 
@@ -1607,14 +1607,14 @@ void sggc_collect_remove_free_small (void)
 
           /* Abort if indicated by SGGC_TRACE_FREE_TRAP. */
 
-#ifdef SGGC_TRACE_CPTR
-#ifdef SGGC_TRACE_FREE_TRAP
-          if (ov == SGGC_TRACE_CPTR
-                && sggc_trace_cptr_count == SGGC_TRACE_FREE_TRAP)
-          { abort();
-          }
-#endif
-#endif
+#         ifdef SGGC_TRACE_CPTR
+#         ifdef SGGC_TRACE_FREE_TRAP
+            if (ov == SGGC_TRACE_CPTR
+                  && sggc_trace_cptr_count == SGGC_TRACE_FREE_TRAP)
+            { abort();
+            }
+#         endif
+#         endif
         }
       }
 
@@ -1651,14 +1651,15 @@ void sggc_collect_remove_free_small (void)
                         (unsigned) ov);
               }
 
-#ifdef SGGC_TRACE_CPTR
-#ifdef SGGC_TRACE_FREE_TRAP
-              if (ov == SGGC_TRACE_CPTR
-                    && sggc_trace_cptr_count == SGGC_TRACE_FREE_TRAP)
-              { abort();
-              }
-#endif
-#endif
+#             ifdef SGGC_TRACE_CPTR
+#             ifdef SGGC_TRACE_FREE_TRAP
+                if (ov == SGGC_TRACE_CPTR
+                      && sggc_trace_cptr_count == SGGC_TRACE_FREE_TRAP)
+                { abort();
+                }
+#             endif
+#             endif
+
               sbset_remove (&old_to_new, ov);
               sbset_remove (&old_gen2[k], ov);
             }
@@ -1685,14 +1686,15 @@ void sggc_collect_remove_free_small (void)
                         (unsigned) ov);
               }
 
-#ifdef SGGC_TRACE_CPTR
-#ifdef SGGC_TRACE_FREE_TRAP
-              if (ov == SGGC_TRACE_CPTR
-                    && sggc_trace_cptr_count == SGGC_TRACE_FREE_TRAP)
-              { abort();
-              }
-#endif
-#endif
+#             ifdef SGGC_TRACE_CPTR
+#             ifdef SGGC_TRACE_FREE_TRAP
+                if (ov == SGGC_TRACE_CPTR
+                      && sggc_trace_cptr_count == SGGC_TRACE_FREE_TRAP)
+                { abort();
+                }
+#             endif
+#             endif
+
               sbset_remove (&old_to_new, ov);
               sbset_remove (&old_gen1[k], ov);
             }
@@ -1747,7 +1749,14 @@ void sggc_collect_remove_free_small (void)
              p != SGGC_NO_OBJECT;
              p = sbset_next (&free_or_new[k], p, 0))
         { if (SGGC_DATA(p) != NULL)
-          { memset (SGGC_DATA(p), SGGC_CLEAR_DATA_BYTE, SGGC_CHUNK_SIZE * nch);
+          { char *d = SGGC_DATA(p);
+#           ifdef SGGC_KEEP_CPTR
+              if (* (sggc_cptr_t *) (d + SGGC_KEEP_CPTR) != p) abort();
+#           endif
+            memset (d, SGGC_CLEAR_DATA_BYTE, SGGC_CHUNK_SIZE * nch);
+#           ifdef SGGC_KEEP_CPTR
+              * (sggc_cptr_t *) (d + SGGC_KEEP_CPTR) = p;
+#           endif
           }
 #         ifdef SGGC_AUX1_SIZE
 #         ifdef SGGC_AUX1_READ_ONLY
@@ -1815,14 +1824,14 @@ void sggc_collect_remove_free_big (void)
 
         /* Abort if indicated by SGGC_TRACE_FREE_TRAP. */
 
-#ifdef SGGC_TRACE_CPTR
-#ifdef SGGC_TRACE_FREE_TRAP
-        if (v == SGGC_TRACE_CPTR
-              && sggc_trace_cptr_count == SGGC_TRACE_FREE_TRAP)
-        { abort();
-        }
-#endif
-#endif
+#       ifdef SGGC_TRACE_CPTR
+#       ifdef SGGC_TRACE_FREE_TRAP
+          if (v == SGGC_TRACE_CPTR
+                && sggc_trace_cptr_count == SGGC_TRACE_FREE_TRAP)
+          { abort();
+          }
+#       endif
+#       endif
 
         /* Find the number of chunks used by the object. */
 
@@ -1863,13 +1872,20 @@ void sggc_collect_remove_free_big (void)
 
 #       ifdef SGGC_CLEAR_FREE
         { sggc_nchunks_t nch = sggc_kind_chunks[k];
-          memset (SGGC_DATA(v), SGGC_CLEAR_DATA_BYTE, SGGC_CHUNK_SIZE * nch);
+          char *d = SGGC_DATA(v);
+#         ifdef SGGC_KEEP_CPTR
+            if (* (sggc_cptr_t *) (d + SGGC_KEEP_CPTR) != v) abort();
+#         endif
+          memset (d, SGGC_CLEAR_DATA_BYTE, SGGC_CHUNK_SIZE * nch);
+#         ifdef SGGC_KEEP_CPTR
+            * (sggc_cptr_t *) (d + SGGC_KEEP_CPTR) = v;
+#         endif
 #         ifdef SGGC_AUX1_SIZE
-          { memset (SGGC_AUX1(v), SGGC_CLEAR_AUX1_BYTE, SGGC_AUX1_SIZE * nch);
+          { memset (SGGC_AUX1(v), SGGC_CLEAR_AUX1_BYTE, SGGC_AUX1_SIZE);
           }
 #         endif
 #         ifdef SGGC_AUX2_SIZE
-          { memset (SGGC_AUX2(v), SGGC_CLEAR_AUX2_BYTE, SGGC_AUX2_SIZE * nch);
+          { memset (SGGC_AUX2(v), SGGC_CLEAR_AUX2_BYTE, SGGC_AUX2_SIZE);
           }
 #         endif
         }
