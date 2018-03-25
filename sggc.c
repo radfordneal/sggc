@@ -1636,7 +1636,7 @@ void sggc_collect_remove_free_small (void)
       {
         sggc_cptr_t next_free = sggc_next_free_val[k];
 
-        for (;;)
+        for (;;)  /* loop over objects allocated since last collection */
         { 
           if (v == SGGC_NO_OBJECT)
           { break;
@@ -1644,8 +1644,9 @@ void sggc_collect_remove_free_small (void)
 
           if (v == next_free)
           { if (!sggc_next_segment_not_free[k])
-            { break;
+            { break; /* remaining objects not allocated since last collection */
             }
+            /* remaining objects were allocated since last collection. */
             v = sbset_chain_next_segment (SGGC_UNUSED_FREE_NEW, v);
             if (v == SGGC_NO_OBJECT)
             { break;
@@ -1656,8 +1657,8 @@ void sggc_collect_remove_free_small (void)
 
           v = sbset_chain_next (SGGC_UNUSED_FREE_NEW, v);
 
-          /* Call the function to call for a newly-freed object of this kind.
-             If it returns a non-zero value, don't free the object after all. */
+          /* Handle operations done for a newly-freed object, including
+             perhaps finding out that it shouldn't be freed after all. */
   
           if (!object_now_free(ov,call))
           { (void) sbset_remove (&free_or_new[k], ov);
@@ -1815,9 +1816,8 @@ void sggc_collect_remove_free_big (void)
 
       while ((v = sbset_first (&free_or_new[k], 1)) != SGGC_NO_OBJECT)
       { 
-        /* Call the function to call for a newly-freed object of this
-           kind, if there is one.  If it returns a non-zero value, don't
-           free this object after all. */
+        /* Handle operations done for a newly-freed object, including
+           perhaps finding out that it shouldn't be freed after all. */
 
         if (!object_now_free(v,call))
         { put_in_right_old_gen(v);
