@@ -12,6 +12,8 @@ test-sggc3d:	test-sggc3.c sggc.c sbset.c sggc-app.h sggc.h sbset-app.h sbset.h \
 		test-sggc3.c sggc.c sbset.c test-calloc.c -o test-sggc3d
 
 
+# Below not made by default, need settings of environment vars CPTR and TRAP.
+
 test-sggc3t:	test-sggc3.c sggc.c sbset.c sggc-app.h sbset.h sggc.h sbset-app.h sbset.h \
 		test-common.h test-calloc.c test-calloc.h
 	gcc -std=c99 -g -O0 -DSGGC_DEBUG=1 -DSET_DEBUG=1 \
