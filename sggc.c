@@ -1045,7 +1045,14 @@ static sggc_cptr_t sggc_alloc_kind_type_length (sggc_kind_t kind,
     if (v == SGGC_TRACE_CPTR)
     { sggc_trace_cptr_count += 1;
 #     ifdef SGGC_TRACE_ALLOC_TRAP
-        if (sggc_trace_cptr_count == SGGC_TRACE_ALLOC_TRAP) abort();
+        if (sggc_trace_cptr_count == SGGC_TRACE_ALLOC_TRAP)
+        { if (SGGC_DEBUG) 
+          { printf(
+           "sggc_alloc_kind_type_length: abort on alloc %d of traced cptr %x\n",
+             sggc_trace_cptr_count, SGGC_TRACE_CPTR);
+          }
+          abort();
+        }
 #     endif
     }
 # endif
@@ -1313,6 +1320,80 @@ static void put_in_right_old_gen (sggc_cptr_t v)
    external scope even though only used here, to discourage inlining.) 
  */
 
+  /* Handle what needs to be done for an object that is now free.
+     Returns zero if the object turns out not to be free after all.
+     As arguments, takes the object thought to be free and the
+     call_for_newly_freed procedure for its kind (zero if none). */
+
+static inline int object_now_free (sggc_cptr_t v, int (*call)(sggc_cptr_t))
+{
+  /* Call the application-supplied procedure for a newly-freed object, if
+     there is one. */
+
+  if (call && (*call)(v))
+  { if (SGGC_DEBUG)
+    { printf ("sggc_collect: not freeing %x after all\n", (unsigned)v);
+    }
+    return 0;
+  }
+
+  /* Abort if indicated by SGGC_TRACE_FREE_TRAP. */
+
+# ifdef SGGC_TRACE_CPTR
+# ifdef SGGC_TRACE_FREE_TRAP
+    if (v == SGGC_TRACE_CPTR && sggc_trace_cptr_count == SGGC_TRACE_FREE_TRAP)
+    { if (SGGC_DEBUG)
+      { printf("sggc_collect: abort on free %d of traced cptr %x\n",
+                sggc_trace_cptr_count, SGGC_TRACE_CPTR);
+      }
+      abort();
+    }
+# endif
+#endif
+
+  /* Clear freed data and aux areas if asked to do so. */
+
+# ifdef SGGC_CLEAR_FREE
+  { sggc_kind_t k = SGGC_KIND(v);
+    sggc_nchunks_t nch = sggc_kind_chunks[k];
+
+    if (SGGC_DATA(v) != NULL)
+    { char *d = SGGC_DATA(v);
+#     ifdef SGGC_KEEP_CPTR
+        if (* (sggc_cptr_t *) (d + SGGC_KEEP_CPTR) != v)
+        { printf(
+          "sggc_collect: abort from bad cptr (%x) in freed data of %x (%p)\n",
+           * (sggc_cptr_t *) (d + SGGC_KEEP_CPTR), v, d);
+          abort();
+        }
+#     endif
+      memset (d, SGGC_CLEAR_DATA_BYTE, SGGC_CHUNK_SIZE * nch);
+#     ifdef SGGC_KEEP_CPTR
+        * (sggc_cptr_t *) (d + SGGC_KEEP_CPTR) = v;
+#     endif
+    }
+
+#   ifdef SGGC_AUX1_SIZE
+#   ifdef SGGC_AUX1_READ_ONLY
+    if (!kind_aux1_read_only[k])
+#   endif
+    { memset (SGGC_AUX1(v), SGGC_CLEAR_AUX1_BYTE, SGGC_AUX1_SIZE);
+    }
+#   endif
+
+#   ifdef SGGC_AUX2_SIZE
+#   ifdef SGGC_AUX2_READ_ONLY
+    if (!kind_aux2_read_only[k])
+#   endif
+    { memset (SGGC_AUX2(v), SGGC_CLEAR_AUX2_BYTE, SGGC_AUX2_SIZE);
+    }
+#   endif
+  }
+# endif
+
+  return 1;
+}
+
   /* Put objects in the old generations being collected in the 
      free_or_new set for their kind. */
 
@@ -1578,11 +1659,8 @@ void sggc_collect_remove_free_small (void)
           /* Call the function to call for a newly-freed object of this kind.
              If it returns a non-zero value, don't free the object after all. */
   
-          if (call && (*call)(ov))
-          { if (SGGC_DEBUG) 
-            { printf ("sggc_collect: not freeing %x after all\n", (unsigned)ov);
-            }
-            (void) sbset_remove (&free_or_new[k], ov);
+          if (!object_now_free(ov,call))
+          { (void) sbset_remove (&free_or_new[k], ov);
             put_in_right_old_gen(ov);
             continue;
           }
@@ -1604,17 +1682,6 @@ void sggc_collect_remove_free_small (void)
               (void) sbset_remove (&old_to_new, ov);
             }
           }
-
-          /* Abort if indicated by SGGC_TRACE_FREE_TRAP. */
-
-#         ifdef SGGC_TRACE_CPTR
-#         ifdef SGGC_TRACE_FREE_TRAP
-            if (ov == SGGC_TRACE_CPTR
-                  && sggc_trace_cptr_count == SGGC_TRACE_FREE_TRAP)
-            { abort();
-            }
-#         endif
-#         endif
         }
       }
 
@@ -1623,7 +1690,7 @@ void sggc_collect_remove_free_small (void)
          of objects were allocated but not used for long, and hence
          are in the free sets. */
 
-#ifdef SGGC_TRACE_FREE_TRAP
+#if defined(SGGC_TRACE_FREE_TRAP) || defined(SGGC_CLEAR_FREE)
       if (1)
 #else
       if (!SGGC_SEGMENT_AT_A_TIME || call_for_newly_freed[k])
@@ -1637,12 +1704,8 @@ void sggc_collect_remove_free_small (void)
           { sggc_cptr_t ov = v;
             v = sbset_chain_next (SGGC_OLD_GEN2_UNCOL, v);
             if (sbset_chain_contains (SGGC_UNUSED_FREE_NEW, ov))
-            { if (call && (*call)(ov))
-              { if (SGGC_DEBUG) 
-                { printf ("sggc_collect: not freeing %x after all\n",
-                           (unsigned) ov);
-                }
-                (void) sbset_remove (&free_or_new[k], ov);
+            { if (!object_now_free(ov,call))
+              { (void) sbset_remove (&free_or_new[k], ov);
                 put_in_right_old_gen(ov);
                 continue;
               }
@@ -1650,16 +1713,6 @@ void sggc_collect_remove_free_small (void)
               { printf("sggc_collect: %x in old_gen2 now free\n",
                         (unsigned) ov);
               }
-
-#             ifdef SGGC_TRACE_CPTR
-#             ifdef SGGC_TRACE_FREE_TRAP
-                if (ov == SGGC_TRACE_CPTR
-                      && sggc_trace_cptr_count == SGGC_TRACE_FREE_TRAP)
-                { abort();
-                }
-#             endif
-#             endif
-
               sbset_remove (&old_to_new, ov);
               sbset_remove (&old_gen2[k], ov);
             }
@@ -1672,12 +1725,8 @@ void sggc_collect_remove_free_small (void)
           { sggc_cptr_t ov = v;
             v = sbset_chain_next (SGGC_OLD_GEN1, v);
             if (sbset_chain_contains (SGGC_UNUSED_FREE_NEW, ov))
-            { if (call && (*call)(ov))
-              { if (SGGC_DEBUG) 
-                { printf ("sggc_collect: not freeing %x after all\n",
-                           (unsigned) ov);
-                }
-                (void) sbset_remove (&free_or_new[k], ov);
+            { if (!object_now_free(ov,call))
+              { (void) sbset_remove (&free_or_new[k], ov);
                 put_in_right_old_gen(ov);
                 continue;
               }
@@ -1685,16 +1734,6 @@ void sggc_collect_remove_free_small (void)
               { printf("sggc_collect: %x in old_gen1 now free\n",
                         (unsigned) ov);
               }
-
-#             ifdef SGGC_TRACE_CPTR
-#             ifdef SGGC_TRACE_FREE_TRAP
-                if (ov == SGGC_TRACE_CPTR
-                      && sggc_trace_cptr_count == SGGC_TRACE_FREE_TRAP)
-                { abort();
-                }
-#             endif
-#             endif
-
               sbset_remove (&old_to_new, ov);
               sbset_remove (&old_gen1[k], ov);
             }
@@ -1740,42 +1779,6 @@ void sggc_collect_remove_free_small (void)
         }
       }
 
-      /* Clear freed data and aux areas for small kinds if asked to do so. */
-
-#     ifdef SGGC_CLEAR_FREE
-      { sggc_nchunks_t nch = sggc_kind_chunks[k];
-        sggc_cptr_t p;
-        for (p = sbset_first (&free_or_new[k], 0); 
-             p != SGGC_NO_OBJECT;
-             p = sbset_next (&free_or_new[k], p, 0))
-        { if (SGGC_DATA(p) != NULL)
-          { char *d = SGGC_DATA(p);
-#           ifdef SGGC_KEEP_CPTR
-              if (* (sggc_cptr_t *) (d + SGGC_KEEP_CPTR) != p) abort();
-#           endif
-            memset (d, SGGC_CLEAR_DATA_BYTE, SGGC_CHUNK_SIZE * nch);
-#           ifdef SGGC_KEEP_CPTR
-              * (sggc_cptr_t *) (d + SGGC_KEEP_CPTR) = p;
-#           endif
-          }
-#         ifdef SGGC_AUX1_SIZE
-#         ifdef SGGC_AUX1_READ_ONLY
-          if (!kind_aux1_read_only[k])
-#         endif
-          { memset (SGGC_AUX1(p), SGGC_CLEAR_AUX1_BYTE, SGGC_AUX1_SIZE);
-          }
-#         endif
-#         ifdef SGGC_AUX2_SIZE
-#         ifdef SGGC_AUX2_READ_ONLY
-          if (!kind_aux2_read_only[k])
-#         endif
-          { memset (SGGC_AUX2(p), SGGC_CLEAR_AUX2_BYTE, SGGC_AUX2_SIZE);
-          }
-#         endif
-        }
-      }
-#     endif
-
       /* Remove all objects from the free set if we aren't reusing them. */
 
       if (do_not_reuse_memory)
@@ -1802,6 +1805,8 @@ void sggc_collect_remove_free_big (void)
   { 
     if (sggc_kind_chunks[k] == 0)  /* kind is for big objects */
     { 
+      int (*call)(sggc_cptr_t) = call_for_newly_freed[k];
+
       /* Scan the free_or_new[k] set (which contains only newly-free
          objects), which we have to look at to free their data even if
          they are not in old_gen1_big or old_gen2_big.  Note that since
@@ -1814,24 +1819,10 @@ void sggc_collect_remove_free_big (void)
            kind, if there is one.  If it returns a non-zero value, don't
            free this object after all. */
 
-        if (call_for_newly_freed[k] && (*call_for_newly_freed[k])(v))
-        { if (SGGC_DEBUG) 
-          { printf ("sggc_collect: not freeing %x after all\n", (unsigned)v);
-          }
-          put_in_right_old_gen(v);
+        if (!object_now_free(v,call))
+        { put_in_right_old_gen(v);
           continue;
         }
-
-        /* Abort if indicated by SGGC_TRACE_FREE_TRAP. */
-
-#       ifdef SGGC_TRACE_CPTR
-#       ifdef SGGC_TRACE_FREE_TRAP
-          if (v == SGGC_TRACE_CPTR
-                && sggc_trace_cptr_count == SGGC_TRACE_FREE_TRAP)
-          { abort();
-          }
-#       endif
-#       endif
 
         /* Find the number of chunks used by the object. */
 
@@ -1866,30 +1857,6 @@ void sggc_collect_remove_free_big (void)
           }
           sggc_info.gen1_big_chunks -= nch;
         }
-
-        /* Clear data and auxiliary info areas if asked to do so.  Note that
-           big objects can't have read-only auxiliary information. */
-
-#       ifdef SGGC_CLEAR_FREE
-        { sggc_nchunks_t nch = sggc_kind_chunks[k];
-          char *d = SGGC_DATA(v);
-#         ifdef SGGC_KEEP_CPTR
-            if (* (sggc_cptr_t *) (d + SGGC_KEEP_CPTR) != v) abort();
-#         endif
-          memset (d, SGGC_CLEAR_DATA_BYTE, SGGC_CHUNK_SIZE * nch);
-#         ifdef SGGC_KEEP_CPTR
-            * (sggc_cptr_t *) (d + SGGC_KEEP_CPTR) = v;
-#         endif
-#         ifdef SGGC_AUX1_SIZE
-          { memset (SGGC_AUX1(v), SGGC_CLEAR_AUX1_BYTE, SGGC_AUX1_SIZE);
-          }
-#         endif
-#         ifdef SGGC_AUX2_SIZE
-          { memset (SGGC_AUX2(v), SGGC_CLEAR_AUX2_BYTE, SGGC_AUX2_SIZE);
-          }
-#         endif
-        }
-#       endif
 
         /* Don't free memory or put in 'unused' if we're not reusing memory. */
 
