@@ -1618,10 +1618,10 @@ void sggc_collect_remove_free_small (void)
         }
       }
 
-      /* Scan the old generation sets, not the free sets (unless
-         necessary above), since this is likely faster, if lots of
-         objects were allocated but not used for long, and hence are
-         in the free sets. */
+      /* Scan the old generation sets, not the free sets (though
+         that's necessary above), since this is likely faster, if lots
+         of objects were allocated but not used for long, and hence
+         are in the free sets. */
 
 #ifdef SGGC_TRACE_FREE_TRAP
       if (1)
