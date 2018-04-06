@@ -3,9 +3,8 @@
 *.dSYM
 test-sggc*/test-sggc?
 test-sggc*/test-sggc?t
-test-sggc*/test-sggc?ta
-test-sggc*/test-sggc?tf
-test-sggc2/test-sggc?a
+test-sggc*/test-sggc?a
+test-sggc*/test-sggc?d
 test-sbset/test-sbset
 test-sbset/test-sbset-static
 test-sggc*/o
